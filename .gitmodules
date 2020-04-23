@@ -1,0 +1,3 @@
+[submodule "tgc_analysis"]
+	path = tgc_analysis
+	url = https://gitlab.cern.ch/McGill-sTGC/tgc_analysis.git
