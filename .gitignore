@@ -1,0 +1,7 @@
+# Compiled source #
+*.o
+*.exe
+*.so
+
+# Root files
+*.root
