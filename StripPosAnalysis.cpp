@@ -10,6 +10,9 @@
 #include <TTree.h>
 #include <TSystem.h>
 
+// My includes
+#include "RunAnalysis.h"
+
 using namespace std;
 
 int main(int argc, char* argv[]) {
@@ -37,7 +40,7 @@ int main(int argc, char* argv[]) {
     }
 
     TTree* tracksTree = (TTree*)cosmicsAnalysis.Get("tracks");
-    tracksTree->Print();
+    RunAnalysis(*tracksTree);
 
     cosmicsAnalysis.Close();
     return 0;

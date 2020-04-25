@@ -1,0 +1,6 @@
+all: StripPosAnalysis
+
+StripPosAnalysis: RunAnalysis.o tgc_analysis/CosmicsAnalysis/ContainerLinkDef.o StripPosAnalysis.o
+	g++ `root-config --cflags --glibs`-L$(ROOTSYS)/lib RunAnalysis.o tgc_analysis/CosmicsAnalysis/ContainerLinkDef.o StripPosAnalysis.o -o StripPosAnalysis
+
+StripPosAnalysis.o : StripPosAnalysis.cpp StripPosAnalysis.h RunAnalysis.h
