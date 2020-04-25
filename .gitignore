@@ -3,6 +3,8 @@
 *.exe
 *.so
 *_rdict.pcm
+*LinkDef.cpp
+StripPosAnalysis
 
 # Root files
 *.root
