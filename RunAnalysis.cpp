@@ -4,31 +4,41 @@
 using namespace std;
 
 void RunAnalysis(TTree &trksTree) {
-
     Int_t nEntries;
     Int_t eventnumber;
     map<UShort_t, Double_t> trackX;
-    map<UShort_t, Double_t>* trackXptr;
-    trackXptr = &trackX;
+    map<UShort_t, Double_t>* trackXPtr;
+    trackXPtr = &trackX;
+    map<UShort_t, Double_t> trackYGaussian;
+    map<UShort_t, Double_t>* trackYGaussianPtr;
+    trackYGaussianPtr = &trackYGaussian;
     trksTree.SetBranchAddress("eventnumber", &eventnumber);
-    trksTree.SetBranchAddress("trackX", &trackXptr);
+    trksTree.SetBranchAddress("trackX", &trackXPtr);
+    trksTree.SetBranchAddress("trackYGaussian", &trackYGaussianPtr);
     nEntries = trksTree.GetEntries();
     nEntries += 1;
     nEntries -= 1;
-
-    for (Int_t i=0; i<10; i++) {
+    // Replace i<x nEntries eventually
+    for (Int_t i=0; i<3; i++) {
         trksTree.GetEntry(i);
-        cout << trackX[1] << endl;
-        printf("%f\n",trackX[1]);
-        for (auto& x : trackX) {
-            if (x.first == 1) {
-                cout << x.second << '\n';
+        // for each permutation of two layers
+        // for (Int_t la=1; la<=4; la++) {
+        for (Int_t la=3; la<4; la++) {
+            // for (Int_t lb=1; lb<=4; lb++) {
+            for (Int_t lb=4; lb<5; lb++) {
+                if (la == lb) { continue; } // don't fix the same two layers
+                for (auto itx = trackX.begin(); itx != trackX.end(); itx++) {
+                    cout << itx->first << '\n';
+                }
+                for (auto ity = trackYGaussian.begin(); ity != trackYGaussian.end(); ity++) {
+                    cout << ity->first << '\n';
+                }
+ 
             }
-        }
+        } //end for each permutation of two layers
         cout << '\n';
-    }
+    } // end even loop
 
-    cout << "I feel included and made" << endl;
     return;
 }
 
