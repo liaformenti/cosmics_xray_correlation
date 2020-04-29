@@ -19,7 +19,7 @@ void RunAnalysis(TTree &trksTree) {
     nEntries += 1;
     nEntries -= 1;
     // Replace i<x nEntries eventually
-    for (Int_t i=0; i<3; i++) {
+    for (Int_t i=0; i<1; i++) {
         trksTree.GetEntry(i);
         // for each permutation of two layers
         // for (Int_t la=1; la<=4; la++) {
