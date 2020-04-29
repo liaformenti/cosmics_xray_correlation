@@ -20,25 +20,31 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry &g) {
     nEntries += 1;
     nEntries -= 1;
     // Replace i<x nEntries eventually
-    for (Int_t i=0; i<1; i++) {
+    for (Int_t i=0; i<5; i++) {
         trksTree.GetEntry(i);
+
         // for each permutation of two layers
         // for (Int_t la=1; la<=4; la++) {
         for (Int_t la=3; la<4; la++) {
             // for (Int_t lb=1; lb<=4; lb++) {
             for (Int_t lb=4; lb<5; lb++) {
                 if (la == lb) { continue; } // don't fix the same two layers
+                if (!((trackX.find(la) != trackX.end()) && (trackX.find(lb) != trackX.end()) && (trackYGaussian.find(la) != trackYGaussian.end()) && (trackYGaussian.find(lb) != trackYGaussian.end()))) { continue;}
                 for (auto itx = trackX.begin(); itx != trackX.end(); itx++) {
-                    cout << itx->first << '\n';
+                     cout << itx->first << (trackX.find(itx->first) != trackX.end())<< '\n';
+                     if (trackX.find(itx->first) != trackX.end()) {
+                         cout << "True\n";
+                     }
                 }
                 for (auto ity = trackYGaussian.begin(); ity != trackYGaussian.end(); ity++) {
-                    cout << ity->first << '\n';
+                    cout << ity->first << (trackYGaussian.find(ity->first) != trackYGaussian.end()) << '\n';
                 }
- 
             }
+        cout << endl; 
         } //end for each permutation of two layers
+
         cout << '\n';
-    } // end even loop
+    } // end event loop
 
     return;
 }
