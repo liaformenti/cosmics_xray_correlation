@@ -36,7 +36,6 @@ AnalysisInfo* GetAnalysisInfo(TFile* inROOT) {
     }
     else{
       info = (AnalysisInfo*) gROOT->FindObject(("analysisinfo;"+to_string(pCounter)).c_str());
-      cout << info->detectortype << endl;
       // info->PrintContent();
     }
    

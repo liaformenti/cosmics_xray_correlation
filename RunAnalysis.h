@@ -11,6 +11,10 @@
 #include <TTreeReaderValue.h>
 #include <TTreeReaderArray.h>
 
-void RunAnalysis(TTree &);
+// tgc_analysis includes
+#include "AnalysisInfo.h"
+#include "DetectorGeometry.h"
+
+void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry &g);
 
 #endif

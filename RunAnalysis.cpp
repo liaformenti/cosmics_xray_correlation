@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void RunAnalysis(TTree &trksTree) {
+void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry &g) {
     Int_t nEntries;
     Int_t eventnumber;
     map<UShort_t, Double_t> trackX;
@@ -16,6 +16,7 @@ void RunAnalysis(TTree &trksTree) {
     trksTree.SetBranchAddress("trackX", &trackXPtr);
     trksTree.SetBranchAddress("trackYGaussian", &trackYGaussianPtr);
     nEntries = trksTree.GetEntries();
+    // Prevent warning about unused nEntries while not doing full event loop
     nEntries += 1;
     nEntries -= 1;
     // Replace i<x nEntries eventually

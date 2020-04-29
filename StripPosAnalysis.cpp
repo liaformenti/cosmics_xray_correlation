@@ -45,9 +45,9 @@ int main(int argc, char* argv[]) {
        throw runtime_error("Error getting AnalysisInfo object, in function GetAnalysisInfo"); 
     
     // Get detector geometry
-    // DetectorGeometry *geom = DetectorGeometryTools::GetDetectorGeometry(analysisInfo->detectortype);
-    // cout << geom->yBeginFirstStrip.at("K13")<< endl;
-    RunAnalysis(*tracksTree);
+    DetectorGeometry *geom = DetectorGeometryTools::GetDetectorGeometry(analysisInfo->detectortype);
+    cout << geom->GetZPosition(1) << endl;
+    RunAnalysis(*tracksTree, *analysisInfo, *geom);
 
     cosmicsAnalysis->Close();
     return 0;
