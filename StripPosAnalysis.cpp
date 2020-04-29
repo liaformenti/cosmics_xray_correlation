@@ -10,6 +10,9 @@
 #include <TTree.h>
 #include <TSystem.h>
 
+//tgc_analysis includes
+#include "DetectorGeometryTools.h"
+
 // My includes
 #include "RunAnalysis.h"
 #include "GetAnalysisInfo.h"
@@ -37,8 +40,13 @@ int main(int argc, char* argv[]) {
     TTree* tracksTree = (TTree*)cosmicsAnalysis->Get("tracks");
 
     // Get AnalysisInfo object, error handling done in fcn
-    GetAnalysisInfo(cosmicsAnalysis);
-
+    AnalysisInfo* analysisInfo = GetAnalysisInfo(cosmicsAnalysis);
+    if (analysisInfo == nullptr)
+       throw runtime_error("Error getting AnalysisInfo object, in function GetAnalysisInfo"); 
+    
+    // Get detector geometry
+    // DetectorGeometry *geom = DetectorGeometryTools::GetDetectorGeometry(analysisInfo->detectortype);
+    // cout << geom->yBeginFirstStrip.at("K13")<< endl;
     RunAnalysis(*tracksTree);
 
     cosmicsAnalysis->Close();
