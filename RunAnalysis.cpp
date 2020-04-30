@@ -3,6 +3,14 @@
 
 using namespace std;
 
+Bool_t MissingHitsOnFixedLayers(UShort_t fixed1, UShort_t fixed2, map<UShort_t, Double_t> &xTrack, map<UShort_t, Double_t> &yTrack) {
+    // If one or more of the fixed layers is missing a hit in x or y,
+    // return true, else return false
+    Bool_t missingHit =  ( ! ((xTrack.find(fixed1) != xTrack.end()) && (xTrack.find(fixed2) != xTrack.end()) && (yTrack.find(fixed1) != yTrack.end()) && (yTrack.find(fixed2) != yTrack.end()) ) );
+    cout << missingHit << '\n';
+    return missingHit;
+}
+
 void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry &g) {
     Int_t nEntries;
     Int_t eventnumber;
@@ -29,7 +37,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry &g) {
             // for (Int_t lb=1; lb<=4; lb++) {
             for (Int_t lb=4; lb<5; lb++) {
                 if (la == lb) { continue; } // don't fix the same two layers
-                if (!((trackX.find(la) != trackX.end()) && (trackX.find(lb) != trackX.end()) && (trackYGaussian.find(la) != trackYGaussian.end()) && (trackYGaussian.find(lb) != trackYGaussian.end()))) { continue;}
+                //if (!((trackX.find(la) != trackX.end()) && (trackX.find(lb) != trackX.end()) && (trackYGaussian.find(la) != trackYGaussian.end()) && (trackYGaussian.find(lb) != trackYGaussian.end()))) { continue;}
+                  if (MissingHitsOnFixedLayers(la, lb, trackX, trackYGaussian)) { continue; }
                 for (auto itx = trackX.begin(); itx != trackX.end(); itx++) {
                      cout << itx->first << (trackX.find(itx->first) != trackX.end())<< '\n';
                      if (trackX.find(itx->first) != trackX.end()) {

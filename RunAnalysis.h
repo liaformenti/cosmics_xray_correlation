@@ -17,4 +17,7 @@
 
 void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry &g);
 
+// Helper fcn for RunAnalysis
+Bool_t MissingHitsOnFixedLayers(UShort_t fixed1, UShort_t fixed2, std::map<UShort_t, Double_t> &xTrack, std::map<UShort_t, Double_t> &yTrack); 
+
 #endif
