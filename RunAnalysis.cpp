@@ -14,32 +14,34 @@ Bool_t MissingHitsOnFixedLayers(UShort_t fixed1, UShort_t fixed2, map<UShort_t, 
 }
 
 void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry &g) {
-    TTreeReader reader(**trksTree);
-    TTreeReaderValue<Int_t> eventnumber(reader, "eventnumber");
-    // Int_t nEntries;
-    // Int_t eventnumber;
-    // map<UShort_t, Double_t> trackX;
-    // map<UShort_t, Double_t>* trackXPtr;
-    // trackXPtr = &trackX;
-    // map<UShort_t, Double_t> trackYGaussian;
-    // map<UShort_t, Double_t>* trackYGaussianPtr;
-    // trackYGaussianPtr = &trackYGaussian;
-    // trksTree.SetBranchAddress("eventnumber", &eventnumber);
-    // trksTree.SetBranchAddress("trackX", &trackXPtr);
-    // trksTree.SetBranchAddress("trackYGaussian", &trackYGaussianPtr);
-    // nEntries = trksTree.GetEntries();
+    // TTreeReader reader(&trksTree);
+    // TTreeReaderValue<Int_t> eventnumber(reader, "eventnumber");
+    // TTreeReaderValue< map<UShort_t, Double_t> > trackX(reader, "trackX");
+    Int_t nEntries;
+    Int_t eventnumber;
+    map<UShort_t, Double_t> trackX;
+    map<UShort_t, Double_t>* trackXPtr;
+    trackXPtr = &trackX;
+    map<UShort_t, Double_t> trackYGaussian;
+    map<UShort_t, Double_t>* trackYGaussianPtr;
+    trackYGaussianPtr = &trackYGaussian;
+    trksTree.SetBranchAddress("eventnumber", &eventnumber);
+    trksTree.SetBranchAddress("trackX", &trackXPtr);
+    trksTree.SetBranchAddress("trackYGaussian", &trackYGaussianPtr);
+    nEntries = trksTree.GetEntries();
     // Prevent warning about unused nEntries while not doing full event loop
-    // nEntries += 1;
-    // nEntries -= 1;
+    nEntries += 1;
+    nEntries -= 1;
     // Replace i<x nEntries eventually
-    // for (Int_t i=0; i<5; i++) {
-    Int_t count = 0;
-    while (reader.Next()) {
-        if (count == 5) break;
+    for (Int_t i=0; i<5; i++) {
+    // TTreeReader code:
+    // Int_t count = 0;
+    // while (reader.Next()) {
+    //    if (count == 5) break;
+    //    count++;
         trksTree.GetEntry(i);
-        cout << *eventnumber << '\n';
-        count++;
-        // cout << trackX[1] << '\n';
+        cout << eventnumber << ' ';
+        cout << trackX[1] << '\n';
         // for each permutation of two layers
         // for (Int_t la=1; la<=4; la++) {
         for (Int_t la=3; la<4; la++) {
