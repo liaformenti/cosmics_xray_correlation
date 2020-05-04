@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
     // Get detector geometry
     DetectorGeometry *geom = DetectorGeometryTools::GetDetectorGeometry(analysisInfo->detectortype);
 
-    RunAnalysis(*tracksTree, *analysisInfo, *geom);
+    RunAnalysis(*tracksTree, *analysisInfo, geom);
 
     cosmicsAnalysis->Close();
     return 0;
