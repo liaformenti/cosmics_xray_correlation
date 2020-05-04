@@ -34,14 +34,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry &g) {
     nEntries -= 1;
     // Replace i<x nEntries eventually
     for (Int_t i=0; i<5; i++) {
-    // TTreeReader code:
-    // Int_t count = 0;
-    // while (reader.Next()) {
-    //    if (count == 5) break;
-    //    count++;
+    // Initialize tracking class here  if you want to store tracks in tracking***
         trksTree.GetEntry(i);
-        cout << eventnumber << ' ';
-        cout << trackX[1] << '\n';
         // for each permutation of two layers
         // for (Int_t la=1; la<=4; la++) {
         for (Int_t la=3; la<4; la++) {
@@ -51,16 +45,12 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry &g) {
                     continue; // don't fix the same two layers
                 if (MissingHitsOnFixedLayers(la, lb, trackX, trackYGaussian))
                     continue; 
-
-               /* for (auto itx = trackX.begin(); itx != trackX.end(); itx++) {
-                     cout << itx->first << (trackX.find(itx->first) != trackX.end())<< '\n';
-                     if (trackX.find(itx->first) != trackX.end()) {
-                         cout << "True\n";
-                     }
-                }
-                for (auto ity = trackYGaussian.begin(); ity != trackYGaussian.end(); ity++) {
-                    cout << ity->first << (trackYGaussian.find(ity->first) != trackYGaussian.end()) << '\n';
-                }*/
+                cout << trackX[la] << ' ' << trackX[lb] << '\n';
+                cout << trackYGaussian[la] << ' ' << trackYGaussian[lb] << '\n';
+                cout << g.GetZPosition(la) << ' ' << g.GetZPosition(lb) << '\n';
+                map<UShort_t, Double_t> myTrackMapX;
+                map<UShort_t, Double_t> myTrackMapY;
+                Tracking myTrack(g, trackX, myTrackMapX, trackYGaussian, myTrackMapY, la, lb);
             }
         // cout << '\n'; 
         } //end for each permutation of two layers
@@ -71,6 +61,20 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry &g) {
     return;
 }
 
+               /* for (auto itx = trackX.begin(); itx != trackX.end(); itx++) {
+                     cout << itx->first << (trackX.find(itx->first) != trackX.end())<< '\n';
+                     }
+                }
+                for (auto ity = trackYGaussian.begin(); ity != trackYGaussian.end(); ity++) {
+                    cout << ity->first << (trackYGaussian.find(ity->first) != trackYGaussian.end()) << '\n';
+                }*/
+
+
+    // TTreeReader code:
+    // Int_t count = 0;
+    // while (reader.Next()) {
+    //    if (count == 5) break;
+    //    count++;
 
     /*TTreeReader trksReader(&trksTree);
     TTreeReaderValue<Int_t> eventnumber(trksReader, "eventnumber");

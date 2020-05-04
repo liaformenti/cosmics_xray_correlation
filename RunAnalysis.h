@@ -15,6 +15,9 @@
 #include "AnalysisInfo.h"
 #include "DetectorGeometry.h"
 
+// My includes
+#include "Tracking.h"
+
 void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry &g);
 
 // Helper fcn for RunAnalysis
