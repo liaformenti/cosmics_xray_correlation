@@ -34,26 +34,27 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
     nEntries -= 1;
     // Replace i<x nEntries eventually
     // 3 events ensures you get one that passes cut with testCA.root
-    for (Int_t i=0; i<3; i++) {
+    for (Int_t i=0; i<5; i++) {
     // Initialize tracking class here  if you want to store tracks in tracking***
         trksTree.GetEntry(i);
         // for each permutation of two layers
+        // la < lb and treated first always
         // for (Int_t la=1; la<=4; la++) {
         for (Int_t la=3; la<=3; la++) {
             // for (Int_t lb=(la+1); lb<=4; lb++) {
             for (Int_t lb=(la+1); lb<=4; lb++) {
-                // if (la == lb) 
-                //    continue; // don't fix the same two layers
                 if (MissingHitsOnFixedLayers(la, lb, trackX, trackYGaussian))
                     continue; 
                 cout << "RunAnalysis\n";
                 cout << "  x hits " << trackX[la] << ' ' << trackX[lb] << '\n';
                 cout << "  y hits " << trackYGaussian[la] << ' ' << trackYGaussian[lb] << '\n';
                 cout << "  z pos " << g->GetZPosition(la) << ' ' << g->GetZPosition(lb) << '\n';
-                map<UShort_t, Double_t> myTrackMapX;
-                map<UShort_t, Double_t> myTrackMapY;
+                // map<UShort_t, Double_t> myTrackMapX;
+                // map<UShort_t, Double_t> myTrackMapY;
+                // Tracking myTrack(g, trackX, &myTrackMapX, trackYGaussian, &myTrackMapY, la, lb, true, eventnumber);
                 Tracking myTrack(g, trackX, &myTrackMapX, trackYGaussian, &myTrackMapY, la, lb);
-                myTrack.Fit();
+
+                // myTrack.Fit();
                 // cout << "Back in RunAnalysis: " << myTrackMapX[3] << '\n';
             }
         // cout << '\n'; 
