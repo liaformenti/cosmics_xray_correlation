@@ -3,16 +3,6 @@
 
 using namespace std;
 
-Bool_t MissingHitsOnFixedLayers(UShort_t fixed1, UShort_t fixed2, map<UShort_t, Double_t> &xTrack, map<UShort_t, Double_t> &yTrack) {
-    // If one or more of the fixed layers is missing a hit in x or y,
-    // return true, else return false
-    Bool_t missingHit =  ( ! ( (xTrack.find(fixed1) != xTrack.end()) && 
-                               (xTrack.find(fixed2) != xTrack.end()) && 
-                               (yTrack.find(fixed1) != yTrack.end()) && 
-                               (yTrack.find(fixed2) != yTrack.end()) ) );
-    return missingHit;
-}
-
 void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
     // TTreeReader reader(&trksTree);
     // TTreeReaderValue<Int_t> eventnumber(reader, "eventnumber");
@@ -29,18 +19,18 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
     trksTree.SetBranchAddress("trackX", &trackXPtr);
     trksTree.SetBranchAddress("trackYGaussian", &trackYGaussianPtr);
     nEntries = trksTree.GetEntries();
-    // Prevent warning about unused nEntries while not doing full event loop
-    nEntries += 1;
-    nEntries -= 1;
     // Replace i<x nEntries eventually
     // 3 events ensures you get one that passes cut with testCA.root
-    for (Int_t i=0; i<5; i++) {
+    for (Int_t i=0; i<3; i++) {
     // Initialize tracking class here  if you want to store tracks in tracking***
         trksTree.GetEntry(i);
+        Tracking myTrack(g, trackX, trackYGaussian);
+
+
         // for each permutation of two layers
         // la < lb and treated first always
         // for (Int_t la=1; la<=4; la++) {
-        for (Int_t la=3; la<=3; la++) {
+        /*for (Int_t la=3; la<=3; la++) {
             // for (Int_t lb=(la+1); lb<=4; lb++) {
             for (Int_t lb=(la+1); lb<=4; lb++) {
                 if (MissingHitsOnFixedLayers(la, lb, trackX, trackYGaussian))
@@ -49,8 +39,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
                 cout << "  x hits " << trackX[la] << ' ' << trackX[lb] << '\n';
                 cout << "  y hits " << trackYGaussian[la] << ' ' << trackYGaussian[lb] << '\n';
                 cout << "  z pos " << g->GetZPosition(la) << ' ' << g->GetZPosition(lb) << '\n';
-                // map<UShort_t, Double_t> myTrackMapX;
-                // map<UShort_t, Double_t> myTrackMapY;
+                map<UShort_t, Double_t> myTrackMapX;
+                map<UShort_t, Double_t> myTrackMapY;
                 // Tracking myTrack(g, trackX, &myTrackMapX, trackYGaussian, &myTrackMapY, la, lb, true, eventnumber);
                 Tracking myTrack(g, trackX, &myTrackMapX, trackYGaussian, &myTrackMapY, la, lb);
 
@@ -58,7 +48,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
                 // cout << "Back in RunAnalysis: " << myTrackMapX[3] << '\n';
             }
         // cout << '\n'; 
-        } //end for each permutation of two layers
+        }*/ //end for each permutation of two layers
 
         cout << '\n';
     } // end event loop

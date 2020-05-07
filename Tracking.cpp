@@ -1,5 +1,5 @@
 // Functions to build tracks from hits on 2 layers
-#define RunAnalysis_cxx
+#define Tracking_cxx
 #include "Tracking.h"
 
 using namespace std;
@@ -8,41 +8,56 @@ using namespace std;
 
 Tracking::Tracking(DetectorGeometry* _g, 
                    map<UShort_t, Double_t> hitsMapX,
-                   map<UShort_t, Double_t>* tracksMapX, // remove
-                   map<UShort_t, Double_t> hitsMapY,
-                   map<UShort_t, Double_t>* tracksMapY, // remove
-                   UShort_t fixedLayer1, UShort_t fixedLayer2//r)
+                   map<UShort_t, Double_t> hitsMapY)
                    : g(_g){
+    cout << "called\n";
     // Tracking
     // Declaration
     hitsX = hitsMapX;
-    trackX = tracksMapX;
+    // trackX = tracksMapX;
     hitsY = hitsMapY;
-    trackY = tracksMapY;
-    // Tracks based on hits on two fixed layers 
-    //Fill X track and Y track accordingly
-    trackX->insert( pair<UShort_t, Double_t> (la, hitsX[la]) );
-    trackX->insert( pair<UShort_t, Double_t> (lb, hitsX[lb]) );
-    trackY->insert( pair<UShort_t, Double_t> (la, hitsY[la]) );
-    trackY->insert( pair<UShort_t, Double_t> (lb, hitsY[lb]) );
-
-    // Track
-    // TGraph graphX;
-    TF1* fitX;
-    // TGraph graphY;
-    TF1* fitY;
-    // Set in perm loop
-    la = fixedLayer1;
-    lb = fixedLayer2;
-
-    /*cout << "Tracking\n";
-    cout << "  x hits " << hitsX[la] << ' ' <<  hitsX[lb] << '\n';
-    cout << "  y hits " << hitsY[la] << ' ' << hitsY[lb] << '\n';
-    cout << "  trackX " << trackX->find(la)->second << ' ' << trackX->find(lb)->second << '\n';
-    cout <<  "  trackY " << trackY->find(la)->second << ' ' << trackY->find(lb)->second << '\n';*/
+    Int_t la;
+    Int_t lb;
+    Double_t* fixedHitsX;
+    Double_t* fixedHitsY;
+    Double_t* fixedHitsZ = new Double_t[2];
+    for (la=1; la<=4; la++) {
+        for (lb=(la+1); lb<=4; lb++) {
+            if (MissingHitsOnFixedLayers(la, lb, hitsX, hitsY))
+                continue;
+            cout << la << ' ' << lb << '\n';
+            fixedHitsX = GetHitPoints(la, lb, hitsX);
+            fixedHitsY = GetHitPoints(la, lb, hitsY); 
+            fixedHitsZ[0] = g->GetZPosition(la);
+            fixedHitsZ[1] = g->GetZPosition(lb);
+            cout << "Tracking\n";
+            cout << "  x hits " << fixedHitsX[0] << ' ' <<  fixedHitsX[1] << '\n';
+            cout << "  y hits " << fixedHitsY[0] << ' ' << fixedHitsY[1] << '\n';
+            
+         }
+    } // end perm loop
 } 
 
-void Tracking::Fit() { // Make this a part of Track class
+Bool_t Tracking::MissingHitsOnFixedLayers(UShort_t fixed1, UShort_t fixed2, map<UShort_t, Double_t> &xTrack, map<UShort_t, Double_t> &yTrack) {
+    // If one or more fixed layers are missing a hit in x or y,
+    // return true, else return false
+    Bool_t missingHit =  
+           ( ! ( (xTrack.find(fixed1) != xTrack.end()) && 
+                 (xTrack.find(fixed2) != xTrack.end()) && 
+                 (yTrack.find(fixed1) != yTrack.end()) && 
+                 (yTrack.find(fixed2) != yTrack.end()) ) );
+    return missingHit;
+}
+
+Double_t* Tracking::GetHitPoints(Int_t la, Int_t lb, map<UShort_t, Double_t> hits) {
+
+    Double_t* vals = new Double_t[2];
+    vals[0] = hits[la];
+    vals[1] = hits[lb]; 
+    cout << vals[0] << ' ' << vals[1] << '\n';
+    return vals;
+}
+/*void Track::Fit() { // Make this a part of Track class
     // Put data into arrays to be used with TGraph
     Double_t* z = new Double_t[2];
     z[0] = g->GetZPosition(la);
@@ -76,10 +91,10 @@ void Tracking::Fit() { // Make this a part of Track class
     delete [] z;
     delete [] x;
     delete [] y;
-}
+}*/
 
-// This should be part of Track.
-Double_t* Tracking::MapToArray(map <UShort_t, Double_t>* theMap) {
+// public member of Tracking
+/*Double_t* Tracking::MapToArray(map <UShort_t, Double_t>* theMap) {
     Double_t* vals = new Double_t[2];
     Int_t i = 0;
     for (auto const& it : *theMap) {
@@ -93,4 +108,4 @@ Double_t* Tracking::MapToArray(map <UShort_t, Double_t>* theMap) {
 void WriteOut(Int_t eventNumber) {
        
     return;
-}
+}*/

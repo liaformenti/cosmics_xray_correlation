@@ -19,37 +19,44 @@ class Tracking {
   public:
     // Constructors
     Tracking(){};
-    /*Tracking(DetectorGeometry* _g, 
-             std::map<UShort_t, Double_t> hitsMapX, 
-             std::map<UShort_t, Double_t>* trackMapX, 
-             std::map<UShort_t, Double_t> hitsMapY, 
-             std::map<UShort_t, Double_t>* trackMapY, 
-             UShort_t fixedLayer1, UShort_t fixedLayer2,
-             Bool_t  writeOut, Int_t eventNum);*/
     Tracking(DetectorGeometry* _g, 
              std::map<UShort_t, Double_t> hitsMapX, 
-             std::map<UShort_t, Double_t>* trackMapX, 
-             std::map<UShort_t, Double_t> hitsMapY, 
-             std::map<UShort_t, Double_t>* trackMapY, 
-             UShort_t fixedLayer1, UShort_t fixedLayer2);
+             std::map<UShort_t, Double_t> hitsMapY); 
     ~Tracking(){};
-
    // Members
-   // DetectorGeometry &g; 
    std::map<UShort_t, Double_t> hitsX; 
-   std::map<UShort_t, Double_t>* trackX; 
-   TF1* fitX;
    std::map<UShort_t, Double_t> hitsY; 
-   std::map<UShort_t, Double_t>* trackY; 
-   TF1* fitY;
-   UShort_t la;
-   UShort_t lb;
-   
    // Methods
-   void Fit();
+
   private:
+    // Members
     DetectorGeometry* g=nullptr;
-    Double_t* MapToArray(std::map<UShort_t, Double_t>*);
+    // Methods
+    // Double_t* MapToArray(std::map<UShort_t, Double_t>*);
+    Double_t* GetHitPoints(Int_t la, Int_t lb, std::map<UShort_t, Double_t> hits);
     void WriteOut(Int_t eventNumber);
+    Bool_t MissingHitsOnFixedLayers(UShort_t fixed1, UShort_t fixed2, std::map<UShort_t, Double_t> &xTrack, std::map<UShort_t, Double_t> &yTrack); 
+
+};
+
+class Track {
+  public:
+  // Constructors
+  Track(){};
+  ~Track(){};
+
+
+  // Members
+  Double_t* x;
+  Double_t* y;
+  Double_t* z;
+  TGraph graphX;
+  TF1* fitX;
+  TGraph graphY;
+  TF1* fitY;
+  
+  // Methods
+  void Fit();
+  // void Extrapolate();
 };
 #endif
