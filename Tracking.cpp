@@ -11,7 +11,7 @@ Tracking::Tracking(DetectorGeometry* _g,
                    map<UShort_t, Double_t>* tracksMapX, // remove
                    map<UShort_t, Double_t> hitsMapY,
                    map<UShort_t, Double_t>* tracksMapY, // remove
-                   UShort_t fixedLayer1, UShort_t fixedLayer2//r)
+                   UShort_t fixedLayer1, UShort_t fixedLayer2)
                    : g(_g){
     // Tracking
     // Declaration
@@ -20,6 +20,8 @@ Tracking::Tracking(DetectorGeometry* _g,
     hitsY = hitsMapY;
     trackY = tracksMapY;
     // Tracks based on hits on two fixed layers 
+    la = fixedLayer1;
+    lb = fixedLayer2;
     //Fill X track and Y track accordingly
     trackX->insert( pair<UShort_t, Double_t> (la, hitsX[la]) );
     trackX->insert( pair<UShort_t, Double_t> (lb, hitsX[lb]) );
@@ -32,8 +34,6 @@ Tracking::Tracking(DetectorGeometry* _g,
     // TGraph graphY;
     TF1* fitY;
     // Set in perm loop
-    la = fixedLayer1;
-    lb = fixedLayer2;
 
     /*cout << "Tracking\n";
     cout << "  x hits " << hitsX[la] << ' ' <<  hitsX[lb] << '\n';
@@ -47,9 +47,10 @@ void Tracking::Fit() { // Make this a part of Track class
     Double_t* z = new Double_t[2];
     z[0] = g->GetZPosition(la);
     z[1] = g->GetZPosition(lb);
-    cout << z[0] << ' ' << z[1] << '\n';
     Double_t* x = MapToArray(trackX);
     Double_t* y = MapToArray(trackY);
+    /*for (Int_t j=0; j < 2; j++)
+        cout << x[j] << ' ' << y[j] << ' ' << z[j] << '\n';*/
 
     // Make graph
     // TGraph* graphX = new TGraph(2, x, z);
