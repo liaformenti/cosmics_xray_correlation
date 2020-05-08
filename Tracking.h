@@ -3,6 +3,7 @@
 
 // C++ includes
 #include <map>
+#include <string>
 
 //Root includes
 #include <TGraph.h>
@@ -38,18 +39,21 @@ class Tracking {
    // DetectorGeometry &g; 
    std::map<UShort_t, Double_t> hitsX; 
    std::map<UShort_t, Double_t>* trackX; 
+   TGraph graphX;
    TF1* fitX;
    std::map<UShort_t, Double_t> hitsY; 
    std::map<UShort_t, Double_t>* trackY; 
+   TGraph graphY;
    TF1* fitY;
    UShort_t la;
    UShort_t lb;
+   // void PlotFit(TCanvas* c, std::string name);
+   void PlotFit(std::string name);
    
    // Methods
    void Fit();
   private:
     DetectorGeometry* g=nullptr;
     Double_t* MapToArray(std::map<UShort_t, Double_t>*);
-    void WriteOut(Int_t eventNumber);
 };
 #endif

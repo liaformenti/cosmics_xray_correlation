@@ -1,5 +1,5 @@
 // Functions to build tracks from hits on 2 layers
-#define RunAnalysis_cxx
+#define Tracking_cxx
 #include "Tracking.h"
 
 using namespace std;
@@ -8,9 +8,9 @@ using namespace std;
 
 Tracking::Tracking(DetectorGeometry* _g, 
                    map<UShort_t, Double_t> hitsMapX,
-                   map<UShort_t, Double_t>* tracksMapX, // remove
+                   map<UShort_t, Double_t>* tracksMapX, 
                    map<UShort_t, Double_t> hitsMapY,
-                   map<UShort_t, Double_t>* tracksMapY, // remove
+                   map<UShort_t, Double_t>* tracksMapY, 
                    UShort_t fixedLayer1, UShort_t fixedLayer2)
                    : g(_g){
     // Tracking
@@ -29,9 +29,9 @@ Tracking::Tracking(DetectorGeometry* _g,
     trackY->insert( pair<UShort_t, Double_t> (lb, hitsY[lb]) );
 
     // Track
-    // TGraph graphX;
+    TGraph graphX;
     TF1* fitX;
-    // TGraph graphY;
+    TGraph graphY;
     TF1* fitY;
     // Set in perm loop
 
@@ -42,7 +42,7 @@ Tracking::Tracking(DetectorGeometry* _g,
     cout <<  "  trackY " << trackY->find(la)->second << ' ' << trackY->find(lb)->second << '\n';*/
 } 
 
-void Tracking::Fit() { // Make this a part of Track class
+void Tracking::Fit() {
     // Put data into arrays to be used with TGraph
     Double_t* z = new Double_t[2];
     z[0] = g->GetZPosition(la);
@@ -54,16 +54,18 @@ void Tracking::Fit() { // Make this a part of Track class
 
     // Make graph
     // TGraph* graphX = new TGraph(2, x, z);
-    TGraph graphX = TGraph(2, x, z);
+    // TGraph graphX = TGraph(2, x, z);
+    graphX = TGraph(2, x, z);
     graphX.Fit("1 ++ x");
     fitX = graphX.GetFunction("1 ++ x");
 
-    TGraph graphY = TGraph(2, y, z);
+    ////  TGraph graphY = TGraph(2, y, z);
+    graphY = TGraph(2, y, z);
     graphY.Fit("1 ++ x");
     fitY = graphY.GetFunction("1 ++ x");
 
     // For plotting - make this part of Tracking, public
-    auto c = new TCanvas();
+    /*auto c = new TCanvas();
     string name = "fitx_layer_" + to_string(la) + "_fixed_layer_" +to_string(lb) + "_fixed.pdf";
     string title = "fitx_layer_" + to_string(la) + "_fixed_layer_" +to_string(lb) + "_fixed;" + "x [mm];" + "z [mm]";
     graphX.SetMarkerStyle(kCircle);
@@ -72,14 +74,13 @@ void Tracking::Fit() { // Make this a part of Track class
     graphX.Draw();
     fitX->Draw("Same");
     c->Print(name.c_str());
-    delete c;
+    delete c;*/
 
     delete [] z;
     delete [] x;
     delete [] y;
 }
 
-// This should be part of Track.
 Double_t* Tracking::MapToArray(map <UShort_t, Double_t>* theMap) {
     Double_t* vals = new Double_t[2];
     Int_t i = 0;
@@ -91,7 +92,19 @@ Double_t* Tracking::MapToArray(map <UShort_t, Double_t>* theMap) {
 }
 
 // Generate plots of track fits
-void WriteOut(Int_t eventNumber) {
-       
+// void Tracking::PlotFit(TCanvas* c, string name) {
+void Tracking::PlotFit(string name) {
+    cout << "called\n";
+    TCanvas* can = new TCanvas();
+    string title = "fitx_layer_" + to_string(la) + "_fixed_layer_" +to_string(lb) + "_fixed;" + "x [mm];" + "z [mm]";
+    cout << "objects called \n";
+    graphX.SetMarkerStyle(kCircle);
+    graphX.SetFillColor(0);
+    graphX.SetTitle(title.c_str());
+    graphX.Draw();
+    fitX->Draw("Same");
+    cout << "printing\n";
+    can->Print(name.c_str());
+    delete can;
     return;
 }

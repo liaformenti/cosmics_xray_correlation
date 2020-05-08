@@ -4,12 +4,14 @@
 // C++ includes
 #include <iostream>
 #include <map>
+#include <string>
 
 // Root includes
 #include <TTree.h>
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 #include <TTreeReaderArray.h>
+#include <TCanvas.h>
 
 // tgc_analysis includes
 #include "AnalysisInfo.h"
