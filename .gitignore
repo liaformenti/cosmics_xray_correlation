@@ -8,3 +8,6 @@ StripPosAnalysis
 
 # Root files
 *.root
+
+# Ouput
+*.pdf
