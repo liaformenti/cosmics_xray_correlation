@@ -29,28 +29,20 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
     trksTree.SetBranchAddress("trackX", &trackXPtr);
     trksTree.SetBranchAddress("trackYGaussian", &trackYGaussianPtr);
     nEntries = trksTree.GetEntries();
-    // TCanvas* c1 = new TCanvas();
-    string name1;
     // Replace i<x nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA.root with L3 and L4 fixed
     for (Int_t i=0; i<3; i++) {
         trksTree.GetEntry(i);
-        if (i==0) { // for the first event make a pdf of fit plots
-            name1 = "track_fit_plots_event_" + to_string(eventnumber) + ".pdf";
-            // c1->Print((name1 + "[").c_str());
-        }
         // for each permutation of two layers
         // la < lb and treated first always
-        for (Int_t la=1; la<=4; la++) {
-        // for (Int_t la=3; la<=3; la++) {
-            for (Int_t lb=(la+1); lb<=4; lb++) {
+        // for (Int_t la=1; la<=4; la++) {
+        for (Int_t la=3; la<=3; la++) {
             // for (Int_t lb=(la+1); lb<=4; lb++) {
+            for (Int_t lb=(la+1); lb<=4; lb++) {
                 if (MissingHitsOnFixedLayers(la, lb, 
-                    trackX, trackYGaussian))  {
-                    cout << i << ' ' << la << ' ' << lb <<  " missing\n";
+                    trackX, trackYGaussian))
                     continue;
-                }
                 /*cout << "RunAnalysis\n";
                 cout << "  x hits " << trackX[la] << ' ' << trackX[lb] << '\n';
                 cout << "  y hits " << trackYGaussian[la] << ' ' << trackYGaussian[lb] << '\n';
@@ -60,23 +52,13 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
                 Tracking myTrack(g, trackX, &myTrackMapX, trackYGaussian, &myTrackMapY, la, lb);
 
                 myTrack.Fit();
-                if (i==0) {
-                    cout << i << ' ' << la << ' ' << lb << "printing\n";
-                    myTrack.PlotFit(to_string(la) + '_' + to_string(lb) + ".pdf");
-
-                    // myTrack.PlotFit(c1, to_string(la) + '_' + to_string(lb) + ".pdf");
-                    // myTrack.PlotFit(c1, name1);
-                }
                 // cout << "Back in RunAnalysis: " << myTrackMapX[3] << '\n';
             }
         // cout << '\n'; 
         } //end for each permutation of two layers
-        /*if (i==0) 
-            c1->Print((name1 + "]").c_str());*/
         cout << '\n';
     } // end event loop
 
-    //delete c1;
     return;
 }
 

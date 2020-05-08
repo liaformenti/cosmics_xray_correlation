@@ -47,7 +47,6 @@ class Tracking {
    TF1* fitY;
    UShort_t la;
    UShort_t lb;
-   // void PlotFit(TCanvas* c, std::string name);
    void PlotFit(std::string name);
    
    // Methods

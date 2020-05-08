@@ -92,18 +92,14 @@ Double_t* Tracking::MapToArray(map <UShort_t, Double_t>* theMap) {
 }
 
 // Generate plots of track fits
-// void Tracking::PlotFit(TCanvas* c, string name) {
 void Tracking::PlotFit(string name) {
-    cout << "called\n";
     TCanvas* can = new TCanvas();
     string title = "fitx_layer_" + to_string(la) + "_fixed_layer_" +to_string(lb) + "_fixed;" + "x [mm];" + "z [mm]";
-    cout << "objects called \n";
     graphX.SetMarkerStyle(kCircle);
     graphX.SetFillColor(0);
     graphX.SetTitle(title.c_str());
     graphX.Draw();
     fitX->Draw("Same");
-    cout << "printing\n";
     can->Print(name.c_str());
     delete can;
     return;
