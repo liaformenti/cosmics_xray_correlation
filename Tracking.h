@@ -20,33 +20,35 @@ class Tracking {
   public:
     // Constructors
     Tracking(){};
-    /*Tracking(DetectorGeometry* _g, 
-             std::map<UShort_t, Double_t> hitsMapX, 
-             std::map<UShort_t, Double_t>* trackMapX, 
-             std::map<UShort_t, Double_t> hitsMapY, 
-             std::map<UShort_t, Double_t>* trackMapY, 
-             UShort_t fixedLayer1, UShort_t fixedLayer2,
-             Bool_t  writeOut, Int_t eventNum);*/
     Tracking(DetectorGeometry* _g, 
              std::map<UShort_t, Double_t> hitsMapX, 
-             std::map<UShort_t, Double_t>* trackMapX, 
+             std::map<UShort_t, Double_t> hitsUncertX,
+             std::map<UShort_t, Double_t> trackMapX, 
+             std::map<UShort_t, Double_t> trackUncertsX,
              std::map<UShort_t, Double_t> hitsMapY, 
-             std::map<UShort_t, Double_t>* trackMapY, 
+             std::map<UShort_t, Double_t> hitsUncertY,
+             std::map<UShort_t, Double_t> trackMapY, 
+             std::map<UShort_t, Double_t> trackUncertsY,
              UShort_t fixedLayer1, UShort_t fixedLayer2);
     ~Tracking(){};
 
    // Members
    // DetectorGeometry &g; 
    std::map<UShort_t, Double_t> hitsX; 
-   std::map<UShort_t, Double_t>* trackX; 
+   std::map<UShort_t, Double_t> hUncertsX;
+   std::map<UShort_t, Double_t> trackX; 
+   std::map<UShort_t, Double_t> tUncertsX; 
    TGraph graphX;
    TF1* fitX;
    std::map<UShort_t, Double_t> hitsY; 
-   std::map<UShort_t, Double_t>* trackY; 
+   std::map<UShort_t, Double_t> hUncertsY;
+   std::map<UShort_t, Double_t> trackY; 
+   std::map<UShort_t, Double_t> tUncertsY; 
    TGraph graphY;
    TF1* fitY;
    UShort_t la;
    UShort_t lb;
+
    void PlotFit(std::string name);
    
    // Methods

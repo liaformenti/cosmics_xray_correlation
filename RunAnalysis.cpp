@@ -17,23 +17,47 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
     // TTreeReader reader(&trksTree);
     // TTreeReaderValue<Int_t> eventnumber(reader, "eventnumber");
     // TTreeReaderValue< map<UShort_t, Double_t> > trackX(reader, "trackX");
+    // Declaration and initialization
     Int_t nEntries;
     Int_t eventnumber;
+
     map<UShort_t, Double_t> trackX;
     map<UShort_t, Double_t>* trackXPtr;
     trackXPtr = &trackX;
+    
+    // Temporary uncertainty map in x
+    map<UShort_t, Double_t> uncertX;
+    
     map<UShort_t, Double_t> trackYGaussian;
     map<UShort_t, Double_t>* trackYGaussianPtr;
     trackYGaussianPtr = &trackYGaussian;
+
+    // Uncertainty on y position (sigma of strip cluster gaussian fit)
+    map<UShort_t, Double_t> sigma;
+    map<UShort_t, Double_t>* sigmaPtr;
+    sigmaPtr = &sigma;
+
     trksTree.SetBranchAddress("eventnumber", &eventnumber);
     trksTree.SetBranchAddress("trackX", &trackXPtr);
     trksTree.SetBranchAddress("trackYGaussian", &trackYGaussianPtr);
+    trksTree.SetBranchAddress("sigma", &sigmaPtr);
+
     nEntries = trksTree.GetEntries();
+
     // Replace i<x nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA.root with L3 and L4 fixed
     for (Int_t i=0; i<3; i++) {
         trksTree.GetEntry(i);
+        // Temporary uncertainty in x
+        for (auto itX=trackX.begin(); itX!=trackX.end(); itX++)
+            uncertX[itX->first] = 7.2; // mm, halfwidth of 8 wire group
+        /*for (auto itU=uncertX.begin(); itU!=uncertX.end(); itU++)
+            cout << itU->first << ' ' << itU->second << trackX[itU->first] << '\n';
+        cout << "***********sigma************\n";
+        for (auto itSig = sigma.begin(); itSig != sigma.end(); itSig++)
+            cout << itSig->first << ' ' << itSig->second << '\n';
+        cout << "***********sigma************\n";*/
         // for each permutation of two layers
         // la < lb and treated first always
         // for (Int_t la=1; la<=4; la++) {
@@ -48,8 +72,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
                 cout << "  y hits " << trackYGaussian[la] << ' ' << trackYGaussian[lb] << '\n';
                 cout << "  z pos " << g->GetZPosition(la) << ' ' << g->GetZPosition(lb) << '\n';*/
                 map<UShort_t, Double_t> myTrackMapX;
+                map<UShort_t, Double_t> myTrackUncertsX;
                 map<UShort_t, Double_t> myTrackMapY;
-                Tracking myTrack(g, trackX, &myTrackMapX, trackYGaussian, &myTrackMapY, la, lb);
+                map<UShort_t, Double_t> myTrackUncertsY;
+                Tracking myTrack(g, trackX, uncertX, myTrackMapX, myTrackUncertsX, trackYGaussian, sigma, myTrackMapY, myTrackUncertsY, la, lb);
 
                 myTrack.Fit();
                 // cout << "Back in RunAnalysis: " << myTrackMapX[3] << '\n';
