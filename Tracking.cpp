@@ -58,39 +58,14 @@ void Tracking::Fit() {
         cout << z[i] << ' ' << y[i] << ' ' << ey[i] << '\n';
     }
 
-    // Make graph
-    // TGraph* graphX = new TGraph(2, x, z);
-    // TGraph graphX = TGraph(2, x, z);
-    // graphX = TGraphErrors(2, x, z, ex, ez);
+    // Fit
     graphX = TGraphErrors(2, z, x, ez, ex);
     graphX.Fit("1 ++ x");
     fitX = graphX.GetFunction("1 ++ x");
-    // graphX.Fit("pol1");
-    // fitX = graphX.GetFunction("pol1");
-    // graphX.Fit("[0] + [1]*x");
-    // fitX = graphX.GetFunction("[0] + [1]*x");
 
-    ////  TGraph graphY = TGraph(2, y, z);
-    // graphY = TGraphErrors(2, y, z, ey, ez);
     graphY = TGraphErrors(2, z, y, ez, ey);
     graphY.Fit("1 ++ x");
     fitY = graphY.GetFunction("1 ++ x");
-    // graphY.Fit("pol1");
-    // fitY = graphY.GetFunction("pol1");
-    // graphY.Fit("[0] + [1]*y");
-    // fitY = graphY.GetFunction("[0] + [1]*y");
-
-    // For plotting - make this part of Tracking, public
-    /*auto c = new TCanvas();
-    string name = "fitx_layer_" + to_string(la) + "_fixed_layer_" +to_string(lb) + "_fixed.pdf";
-    string title = "fitx_layer_" + to_string(la) + "_fixed_layer_" +to_string(lb) + "_fixed;" + "x [mm];" + "z [mm]";
-    graphX.SetMarkerStyle(kCircle);
-    graphX.SetFillColor(0);
-    graphX.SetTitle(title.c_str());
-    graphX.Draw();
-    fitX->Draw("Same");
-    c->Print(name.c_str());
-    delete c;*/
 
     delete [] z;
     delete [] x;
