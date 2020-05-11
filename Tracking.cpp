@@ -31,23 +31,15 @@ Tracking::Tracking(DetectorGeometry* _g,
     la = fixedLayer1;
     lb = fixedLayer2;
     //Fill X track and Y track with fixed layer data
-    /*trackX->insert( pair<UShort_t, Double_t> (la, hitsX[la]) );
-    trackX->insert( pair<UShort_t, Double_t> (lb, hitsX[lb]) );
-    tUncertsX->insert( pair<UShort_t, Double_t> (la, hUncertsX[la]) );
-    tUncertsX->insert( pair<UShort_t, Double_t> (lb, hUncertsX[lb]) );
-    trackY->insert( pair<UShort_t, Double_t> (la, hitsY[la]) );
-    trackY->insert( pair<UShort_t, Double_t> (lb, hitsY[lb]) );
-    tUncertsY->insert( pair<UShort_t, Double_t> (la, hUncertsY[la]) );
-    tUncertsY->insert( pair<UShort_t, Double_t> (lb, hUncertsY[lb]) );*/
     trackX[la] = hitsX[la]; trackX[lb] = hitsX[lb];
     tUncertsX[la] = hUncertsX[la]; tUncertsX[lb] = hUncertsX[lb];
     trackY[la] = hitsY[la]; trackY[lb] = hitsY[lb];
     tUncertsY[la] = hUncertsY[la]; tUncertsY[lb] = hUncertsY[lb];
     
     // Track
-    TGraph graphX;
+    TGraphErrors graphX;
     TF1* fitX;
-    TGraph graphY;
+    TGraphErrors graphY;
     TF1* fitY;
 } 
 
@@ -56,22 +48,37 @@ void Tracking::Fit() {
     Double_t* z = new Double_t[2];
     z[0] = g->GetZPosition(la);
     z[1] = g->GetZPosition(lb);
+    // Set errors in z to zero so TGraph defaults errors in z to 0
+    Double_t* ez = NULL;
     Double_t* x = MapToArray(&trackX);
+    Double_t* ex = MapToArray(&tUncertsX);
     Double_t* y = MapToArray(&trackY);
-    /*for (Int_t j=0; j < 2; j++)
-        cout << x[j] << ' ' << y[j] << ' ' << z[j] << '\n';*/
+    Double_t* ey= MapToArray(&tUncertsY);
+    for (Int_t i=0; i<2; i++) {
+        cout << z[i] << ' ' << y[i] << ' ' << ey[i] << '\n';
+    }
 
     // Make graph
     // TGraph* graphX = new TGraph(2, x, z);
     // TGraph graphX = TGraph(2, x, z);
-    graphX = TGraph(2, x, z);
+    // graphX = TGraphErrors(2, x, z, ex, ez);
+    graphX = TGraphErrors(2, z, x, ez, ex);
     graphX.Fit("1 ++ x");
     fitX = graphX.GetFunction("1 ++ x");
+    // graphX.Fit("pol1");
+    // fitX = graphX.GetFunction("pol1");
+    // graphX.Fit("[0] + [1]*x");
+    // fitX = graphX.GetFunction("[0] + [1]*x");
 
     ////  TGraph graphY = TGraph(2, y, z);
-    graphY = TGraph(2, y, z);
+    // graphY = TGraphErrors(2, y, z, ey, ez);
+    graphY = TGraphErrors(2, z, y, ez, ey);
     graphY.Fit("1 ++ x");
     fitY = graphY.GetFunction("1 ++ x");
+    // graphY.Fit("pol1");
+    // fitY = graphY.GetFunction("pol1");
+    // graphY.Fit("[0] + [1]*y");
+    // fitY = graphY.GetFunction("[0] + [1]*y");
 
     // For plotting - make this part of Tracking, public
     /*auto c = new TCanvas();
@@ -87,7 +94,9 @@ void Tracking::Fit() {
 
     delete [] z;
     delete [] x;
+    delete [] ex;
     delete [] y;
+    delete [] ey;
 }
 
 Double_t* Tracking::MapToArray(map <UShort_t, Double_t>* theMap) {
@@ -101,7 +110,7 @@ Double_t* Tracking::MapToArray(map <UShort_t, Double_t>* theMap) {
 }
 
 // Generate plots of track fits
-void Tracking::PlotFit(string name) {
+void Tracking::PlotFit(string outName) {
     TCanvas* can = new TCanvas();
     string title = "fitx_layer_" + to_string(la) + "_fixed_layer_" +to_string(lb) + "_fixed;" + "x [mm];" + "z [mm]";
     graphX.SetMarkerStyle(kCircle);
@@ -109,7 +118,7 @@ void Tracking::PlotFit(string name) {
     graphX.SetTitle(title.c_str());
     graphX.Draw();
     fitX->Draw("Same");
-    can->Print(name.c_str());
+    can->Print(outName.c_str());
     delete can;
     return;
 }

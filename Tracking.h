@@ -6,7 +6,7 @@
 #include <string>
 
 //Root includes
-#include <TGraph.h>
+#include <TGraphErrors.h>
 #include <TF1.h>
 #include <TCanvas.h>
 
@@ -38,18 +38,18 @@ class Tracking {
    std::map<UShort_t, Double_t> hUncertsX;
    std::map<UShort_t, Double_t> trackX; 
    std::map<UShort_t, Double_t> tUncertsX; 
-   TGraph graphX;
+   TGraphErrors graphX;
    TF1* fitX;
    std::map<UShort_t, Double_t> hitsY; 
    std::map<UShort_t, Double_t> hUncertsY;
    std::map<UShort_t, Double_t> trackY; 
    std::map<UShort_t, Double_t> tUncertsY; 
-   TGraph graphY;
+   TGraphErrors graphY;
    TF1* fitY;
    UShort_t la;
    UShort_t lb;
 
-   void PlotFit(std::string name);
+   void PlotFit(std::string outName);
    
    // Methods
    void Fit();

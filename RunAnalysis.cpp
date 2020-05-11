@@ -78,6 +78,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
                 Tracking myTrack(g, trackX, uncertX, myTrackMapX, myTrackUncertsX, trackYGaussian, sigma, myTrackMapY, myTrackUncertsY, la, lb);
 
                 myTrack.Fit();
+                myTrack.PlotFit("xwitherrors.pdf");
                 // cout << "Back in RunAnalysis: " << myTrackMapX[3] << '\n';
             }
         // cout << '\n'; 
