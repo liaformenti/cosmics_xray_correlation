@@ -114,6 +114,16 @@ void Tracking::PlotFit(string outName) {
 }
 
 void Tracking::EvaluateAt(Double_t z) {
-    cout << z << '\n';
+    Double_t xEvalg = graphX.Eval(z);
+    Double_t yEvalg = graphY.Eval(z);
+    Double_t xEval = fitX->GetParameter(0) + fitX->GetParameter(1)*z;
+    Double_t yEval = fitY->GetParameter(0) + fitY->GetParameter(1)*z;
+
+    cout << xEvalg << ' ' << xEval << '\n';
+    cout << yEvalg << ' ' << yEval << '\n';
+
+    // add points to TGraph
+    graphX.SetPoint(graphX.GetN(), z, xEval);
+    graphY.SetPoint(graphY.GetN(), z, yEval);
     return;
 }
