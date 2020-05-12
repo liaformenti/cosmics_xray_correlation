@@ -54,6 +54,7 @@ class Tracking {
    
    // Methods
    void Fit();
+   void Evaluate();
   private:
     DetectorGeometry* g=nullptr;
     Double_t* MapToArray(std::map<UShort_t, Double_t>*);

@@ -86,38 +86,36 @@ Double_t* Tracking::MapToArray(map <UShort_t, Double_t>* theMap) {
 
 // Generate plots of track fits
 void Tracking::PlotFit(string outName) {
-    // TCanvas* can = new TCanvas("can");
     TCanvas can("can");
+    string title = "fit_layer_" + to_string(la) + "_fixed_layer_" +to_string(lb) + "_fixed";
+
     can.Print((outName + "[").c_str());
-    // can.Print("fits.pdf[");
-    string title = "fitx_layer_" + to_string(la) + "_fixed_layer_" +to_string(lb) + "_fixed";
 
     graphX.SetMarkerStyle(kCircle);
     graphX.SetFillColor(0);
     graphX.SetTitle((title + "_x").c_str());
-    graphX.GetYaxis();
     graphX.GetYaxis()->SetTitle("x [mm]");
     graphX.GetXaxis()->SetTitle("z [mm]");
     graphX.Draw();
     fitX->Draw("Same");
     can.Print(outName.c_str());
-    // can.Print(("fits_x_event_" + to_string(eventNum) + ".pdf").c_str());
+
     can.Clear(); // Necessary with Draw("Same")
 
     graphY.SetMarkerStyle(kCircle);
     graphY.SetFillColor(0);
     graphY.SetTitle((title + "_y").c_str());
-    graphY.GetYaxis();
     graphY.GetYaxis()->SetTitle("y [mm]");
     graphY.GetXaxis()->SetTitle("z [mm]");
     graphY.Draw();
     fitY->Draw("Same");
     can.Print(outName.c_str());
-    // can.Print(("fits_y_event_" + to_string(eventNum) + ".pdf").c_str());
 
     can.Print((outName + "]").c_str());
-    // can.Print("fits.pdf]");
 
-    // delete can;
+    return;
+}
+
+void Evaluate() {
     return;
 }

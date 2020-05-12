@@ -13,6 +13,59 @@ Bool_t MissingHitsOnFixedLayers(UShort_t fixed1, UShort_t fixed2, map<UShort_t, 
     return missingHit;
 }
 
+void getOtherLayers(Int_t la, Int_t lb, Int_t* lc, Int_t* ld) {
+    switch(la) {
+        case 1 : switch(lb) {
+                     case 2 : *lc=3; *ld=4;
+                              return;                        
+                     case 3 : *lc=2; *ld=4;
+                              return;
+                     case 4 : *lc=2; *ld=3;
+                              return;
+                     default : throw runtime_error("Invalid layer number.");
+                  }
+        case 2 : switch(lb) {
+                     case 3 : *lc=1; *ld=4;
+                              return;
+                     case 4 : *lc=1; *ld=3;
+                              return;
+                     default : throw runtime_error("Invalid layer number.");
+
+                 }
+        case 3 : switch(lb) {
+                     case 4 : *lc=1; *ld=2;
+                              return;
+                     default : throw runtime_error("Invalid layer number.");
+                 }
+        default : throw runtime_error("Invalid layer number.");
+    }
+    /*if (la==1) {
+        if (lb==2) {
+            *lc = 3; *ld = 4;
+            return;
+        }
+        else if (lb==3) {
+            *lc = 2; *ld = 4;
+            return;
+        }
+        else if (lb==4) {
+            *lc = 2; *ld = 3;
+            return;
+        }
+
+    }*/
+    // *lc = 1; *ld = 2;
+    /*if ( (la==1) && (lb==2) ) {
+        *lc = 3; *ld = 4;
+        return;
+    }
+    else if ( (la==1) && (lb==3) ) {
+        *lc = 2; *ld = 3;
+    }
+//    else if ( (la==1) && (lb==4) {*/
+    return;
+}
+
 void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
     // TTreeReader reader(&trksTree);
     // TTreeReaderValue<Int_t> eventnumber(reader, "eventnumber");
@@ -44,6 +97,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
 
     nEntries = trksTree.GetEntries();
 
+    Int_t lc = 0; Int_t ld = 0;
     // Replace i<x nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA.root with L3 and L4 fixed
@@ -65,8 +119,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
             // for (Int_t lb=(la+1); lb<=4; lb++) {
             for (Int_t lb=(la+1); lb<=4; lb++) {
                 if (MissingHitsOnFixedLayers(la, lb, 
-                    trackX, trackYGaussian))
-                    continue;
+                   trackX, trackYGaussian))
+                   continue;
+                getOtherLayers(la, lb, &lc, &ld);
+                cout << la << ' ' << lb << ' ' << lc << ' ' << ld << '\n';
                 /*cout << "RunAnalysis\n";
                 cout << "  x hits " << trackX[la] << ' ' << trackX[lb] << '\n';
                 cout << "  y hits " << trackYGaussian[la] << ' ' << trackYGaussian[lb] << '\n';
@@ -75,10 +131,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
                 map<UShort_t, Double_t> myTrackUncertsX;
                 map<UShort_t, Double_t> myTrackMapY;
                 map<UShort_t, Double_t> myTrackUncertsY;
-                Tracking myTrack(g, trackX, uncertX, myTrackMapX, myTrackUncertsX, trackYGaussian, sigma, myTrackMapY, myTrackUncertsY, la, lb);
+                // Tracking myTrack(g, trackX, uncertX, myTrackMapX, myTrackUncertsX, trackYGaussian, sigma, myTrackMapY, myTrackUncertsY, la, lb);
 
-                myTrack.Fit();
-                myTrack.PlotFit("fits_event_" + to_string(eventnumber) + ".pdf");
+                // myTrack.Fit();
+                // myTrack.PlotFit("fits_event_" + to_string(eventnumber) + ".pdf");
                 // cout << "Back in RunAnalysis: " << myTrackMapX[3] << '\n';
             }
         // cout << '\n'; 
