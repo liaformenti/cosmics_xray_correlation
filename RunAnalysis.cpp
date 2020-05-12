@@ -68,10 +68,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
                 map<UShort_t, Double_t> myTrackUncertsX;
                 map<UShort_t, Double_t> myTrackMapY;
                 map<UShort_t, Double_t> myTrackUncertsY;
-                // Tracking myTrack(g, trackX, uncertX, myTrackMapX, myTrackUncertsX, trackYGaussian, sigma, myTrackMapY, myTrackUncertsY, la, lb);
+                Tracking myTrack(g, trackX, uncertX, myTrackMapX, myTrackUncertsX, trackYGaussian, sigma, myTrackMapY, myTrackUncertsY, la, lb);
 
-                // myTrack.Fit();
-                // myTrack.PlotFit("fits_event_" + to_string(eventnumber) + ".pdf");
+                myTrack.Fit();
+                myTrack.PlotFit("fits_event_" + to_string(eventnumber) + ".pdf");
                 // cout << "Back in RunAnalysis: " << myTrackMapX[3] << '\n';
             }
         // cout << '\n'; 
