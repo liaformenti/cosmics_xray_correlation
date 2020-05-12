@@ -54,9 +54,6 @@ void Tracking::Fit() {
     Double_t* ex = MapToArray(&tUncertsX);
     Double_t* y = MapToArray(&trackY);
     Double_t* ey= MapToArray(&tUncertsY);
-    for (Int_t i=0; i<2; i++) {
-        cout << z[i] << ' ' << y[i] << ' ' << ey[i] << '\n';
-    }
 
     // Fit
     graphX = TGraphErrors(2, z, x, ez, ex);
@@ -116,6 +113,7 @@ void Tracking::PlotFit(string outName) {
     return;
 }
 
-void Evaluate() {
+void Tracking::EvaluateAt(Double_t z) {
+    cout << z << '\n';
     return;
 }

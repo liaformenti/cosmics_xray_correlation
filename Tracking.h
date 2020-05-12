@@ -34,7 +34,7 @@ class Tracking {
     ~Tracking(){};
 
    // Members
-   // DetectorGeometry &g; 
+   // Tracks from tracks ttree become hits for this round of tracking
    std::map<UShort_t, Double_t> hitsX; 
    std::map<UShort_t, Double_t> hUncertsX;
    std::map<UShort_t, Double_t> trackX; 
@@ -54,7 +54,8 @@ class Tracking {
    
    // Methods
    void Fit();
-   void Evaluate();
+   // For interpolation / extrapolation
+   void EvaluateAt(Double_t z);
   private:
     DetectorGeometry* g=nullptr;
     Double_t* MapToArray(std::map<UShort_t, Double_t>*);
