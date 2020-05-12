@@ -3,69 +3,6 @@
 
 using namespace std;
 
-Bool_t MissingHitsOnFixedLayers(UShort_t fixed1, UShort_t fixed2, map<UShort_t, Double_t> &xTrack, map<UShort_t, Double_t> &yTrack) {
-    // If one or more of the fixed layers is missing a hit in x or y,
-    // return true, else return false
-    Bool_t missingHit =  ( ! ( (xTrack.find(fixed1) != xTrack.end()) && 
-                               (xTrack.find(fixed2) != xTrack.end()) && 
-                               (yTrack.find(fixed1) != yTrack.end()) && 
-                               (yTrack.find(fixed2) != yTrack.end()) ) );
-    return missingHit;
-}
-
-void getOtherLayers(Int_t la, Int_t lb, Int_t* lc, Int_t* ld) {
-    switch(la) {
-        case 1 : switch(lb) {
-                     case 2 : *lc=3; *ld=4;
-                              return;                        
-                     case 3 : *lc=2; *ld=4;
-                              return;
-                     case 4 : *lc=2; *ld=3;
-                              return;
-                     default : throw runtime_error("Invalid layer number.");
-                  }
-        case 2 : switch(lb) {
-                     case 3 : *lc=1; *ld=4;
-                              return;
-                     case 4 : *lc=1; *ld=3;
-                              return;
-                     default : throw runtime_error("Invalid layer number.");
-
-                 }
-        case 3 : switch(lb) {
-                     case 4 : *lc=1; *ld=2;
-                              return;
-                     default : throw runtime_error("Invalid layer number.");
-                 }
-        default : throw runtime_error("Invalid layer number.");
-    }
-    /*if (la==1) {
-        if (lb==2) {
-            *lc = 3; *ld = 4;
-            return;
-        }
-        else if (lb==3) {
-            *lc = 2; *ld = 4;
-            return;
-        }
-        else if (lb==4) {
-            *lc = 2; *ld = 3;
-            return;
-        }
-
-    }*/
-    // *lc = 1; *ld = 2;
-    /*if ( (la==1) && (lb==2) ) {
-        *lc = 3; *ld = 4;
-        return;
-    }
-    else if ( (la==1) && (lb==3) ) {
-        *lc = 2; *ld = 3;
-    }
-//    else if ( (la==1) && (lb==4) {*/
-    return;
-}
-
 void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
     // TTreeReader reader(&trksTree);
     // TTreeReaderValue<Int_t> eventnumber(reader, "eventnumber");
@@ -142,6 +79,45 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
         cout << '\n';
     } // end event loop
 
+    return;
+}
+
+Bool_t MissingHitsOnFixedLayers(UShort_t fixed1, UShort_t fixed2, map<UShort_t, Double_t> &xTrack, map<UShort_t, Double_t> &yTrack) {
+    // If one or more of the fixed layers is missing a hit in x or y,
+    // return true, else return false
+    Bool_t missingHit =  ( ! ( (xTrack.find(fixed1) != xTrack.end()) && 
+                               (xTrack.find(fixed2) != xTrack.end()) && 
+                               (yTrack.find(fixed1) != yTrack.end()) && 
+                               (yTrack.find(fixed2) != yTrack.end()) ) );
+    return missingHit;
+}
+
+void getOtherLayers(Int_t la, Int_t lb, Int_t* lc, Int_t* ld) {
+    switch(la) {
+        case 1 : switch(lb) {
+                     case 2 : *lc=3; *ld=4;
+                              return;                        
+                     case 3 : *lc=2; *ld=4;
+                              return;
+                     case 4 : *lc=2; *ld=3;
+                              return;
+                     default : throw runtime_error("Invalid layer number.");
+                  }
+        case 2 : switch(lb) {
+                     case 3 : *lc=1; *ld=4;
+                              return;
+                     case 4 : *lc=1; *ld=3;
+                              return;
+                     default : throw runtime_error("Invalid layer number.");
+
+                 }
+        case 3 : switch(lb) {
+                     case 4 : *lc=1; *ld=2;
+                              return;
+                     default : throw runtime_error("Invalid layer number.");
+                 }
+        default : throw runtime_error("Invalid layer number.");
+    }
     return;
 }
 
