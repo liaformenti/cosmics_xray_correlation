@@ -39,8 +39,10 @@ Tracking::Tracking(DetectorGeometry* _g,
     // Track
     TGraphErrors graphX;
     TF1* fitX;
+    TFitResultPtr resultX;
     TGraphErrors graphY;
     TF1* fitY;
+    TFitResultPtr resultY;
 } 
 
 void Tracking::Fit() {
@@ -54,14 +56,15 @@ void Tracking::Fit() {
     Double_t* ex = MapToArray(&tUncertsX);
     Double_t* y = MapToArray(&trackY);
     Double_t* ey= MapToArray(&tUncertsY);
-
+    cout << x[0] << ' ' << x[1] << ' ' << z[0] << ' ' << z[1] << '\n';
     // Fit
     graphX = TGraphErrors(2, z, x, ez, ex);
-    graphX.Fit("1 ++ x");
+    cout << graphX.GetCovariance() << '\n';
+    resultX = graphX.Fit("1 ++ x", "S");
     fitX = graphX.GetFunction("1 ++ x");
 
     graphY = TGraphErrors(2, z, y, ez, ey);
-    graphY.Fit("1 ++ x");
+    resultY = graphY.Fit("1 ++ x", "S");
     fitY = graphY.GetFunction("1 ++ x");
 
     delete [] z;
@@ -114,14 +117,11 @@ void Tracking::PlotFit(string outName) {
 }
 
 void Tracking::EvaluateAt(Double_t z) {
-    Double_t xEvalg = graphX.Eval(z);
-    Double_t yEvalg = graphY.Eval(z);
     Double_t xEval = fitX->GetParameter(0) + fitX->GetParameter(1)*z;
     Double_t yEval = fitY->GetParameter(0) + fitY->GetParameter(1)*z;
 
-    cout << xEvalg << ' ' << xEval << '\n';
-    cout << yEvalg << ' ' << yEval << '\n';
-
+    TMatrixD covX = resultX->GetCovarianceMatrix();
+    covX.Print();
     // add points to TGraph
     graphX.SetPoint(graphX.GetN(), z, xEval);
     graphY.SetPoint(graphY.GetN(), z, yEval);

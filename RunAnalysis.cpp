@@ -72,7 +72,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
 
                 myTrack.Fit();
                 myTrack.EvaluateAt(g->GetZPosition(lc));
-                myTrack.EvaluateAt(g->GetZPosition(ld));
+                // myTrack.EvaluateAt(g->GetZPosition(ld));
                 myTrack.PlotFit("fits_event_" + to_string(eventnumber) + ".pdf");
             
                 // cout << "Back in RunAnalysis: " << myTrackMapX[3] << '\n';

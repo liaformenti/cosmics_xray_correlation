@@ -10,6 +10,9 @@
 #include <TAxis.h>
 #include <TF1.h>
 #include <TCanvas.h>
+#include <TFitResult.h>
+#include <TFitResultPtr.h>
+#include <TMatrixD.h>
 
 // tgc_analysis includes
 #include "DetectorGeometry.h"
@@ -41,12 +44,14 @@ class Tracking {
    std::map<UShort_t, Double_t> tUncertsX; 
    TGraphErrors graphX;
    TF1* fitX;
+   TFitResultPtr resultX;
    std::map<UShort_t, Double_t> hitsY; 
    std::map<UShort_t, Double_t> hUncertsY;
    std::map<UShort_t, Double_t> trackY; 
    std::map<UShort_t, Double_t> tUncertsY; 
    TGraphErrors graphY;
    TF1* fitY;
+   TFitResultPtr resultY;
    UShort_t la;
    UShort_t lb;
 
