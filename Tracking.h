@@ -33,7 +33,8 @@ class Tracking {
              std::map<UShort_t, Double_t> hitsUncertY,
              std::map<UShort_t, Double_t> trackMapY, 
              std::map<UShort_t, Double_t> trackUncertsY,
-             UShort_t fixedLayer1, UShort_t fixedLayer2);
+             UShort_t fixedLayer1, UShort_t fixedLayer2,
+             UShort_t evalLayer1, UShort_t evalLayer2);
     ~Tracking(){};
 
    // Members
@@ -54,6 +55,8 @@ class Tracking {
    TFitResultPtr resultY;
    UShort_t la;
    UShort_t lb;
+   UShort_t lc;
+   UShort_t ld;
 
    void PlotFit(std::string outName);
    

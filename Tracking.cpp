@@ -15,7 +15,8 @@ Tracking::Tracking(DetectorGeometry* _g,
                    map<UShort_t, Double_t> hitsUncertY,
                    map<UShort_t, Double_t> tracksMapY, 
                    map<UShort_t, Double_t> trackUncertsY, 
-                   UShort_t fixedLayer1, UShort_t fixedLayer2)
+                   UShort_t fixedLayer1, UShort_t fixedLayer2,
+                   UShort_t evalLayer1, UShort_t evalLayer2)
                    : g(_g){
     // Tracking
     // Declaration
@@ -30,6 +31,8 @@ Tracking::Tracking(DetectorGeometry* _g,
     // Tracks based on hits on two fixed layers 
     la = fixedLayer1;
     lb = fixedLayer2;
+    lc = evalLayer1;
+    ld = evalLayer2;
     //Fill X track and Y track with fixed layer data
     trackX[la] = hitsX[la]; trackX[lb] = hitsX[lb];
     tUncertsX[la] = hUncertsX[la]; tUncertsX[lb] = hUncertsX[lb];
@@ -125,5 +128,6 @@ void Tracking::EvaluateAt(Double_t z) {
     // add points to TGraph
     graphX.SetPoint(graphX.GetN(), z, xEval);
     graphY.SetPoint(graphY.GetN(), z, yEval);
+    cout << lc << ' ' << ld << '\n';
     return;
 }

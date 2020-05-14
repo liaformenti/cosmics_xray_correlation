@@ -68,7 +68,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
                 map<UShort_t, Double_t> myTrackUncertsX;
                 map<UShort_t, Double_t> myTrackMapY;
                 map<UShort_t, Double_t> myTrackUncertsY;
-                Tracking myTrack(g, trackX, uncertX, myTrackMapX, myTrackUncertsX, trackYGaussian, sigma, myTrackMapY, myTrackUncertsY, la, lb);
+                Tracking myTrack(g, trackX, uncertX, myTrackMapX, myTrackUncertsX, trackYGaussian, sigma, myTrackMapY, myTrackUncertsY, la, lb, lc, ld);
 
                 myTrack.Fit();
                 myTrack.EvaluateAt(g->GetZPosition(lc));
