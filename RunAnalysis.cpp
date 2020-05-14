@@ -64,11 +64,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
                 cout << "  x hits " << trackX[la] << ' ' << trackX[lb] << '\n';
                 cout << "  y hits " << trackYGaussian[la] << ' ' << trackYGaussian[lb] << '\n';
                 cout << "  z pos " << g->GetZPosition(la) << ' ' << g->GetZPosition(lb) << '\n';*/
-                map<UShort_t, Double_t> myTrackMapX;
-                map<UShort_t, Double_t> myTrackUncertsX;
-                map<UShort_t, Double_t> myTrackMapY;
-                map<UShort_t, Double_t> myTrackUncertsY;
-                Tracking myTrack(g, trackX, uncertX, myTrackMapX, myTrackUncertsX, trackYGaussian, sigma, myTrackMapY, myTrackUncertsY, la, lb, lc, ld);
+                Tracking myTrack(g, trackX, uncertX, trackYGaussian, sigma, la, lb, lc, ld);
+
 
                 myTrack.Fit();
                 myTrack.EvaluateAt(g->GetZPosition(lc));

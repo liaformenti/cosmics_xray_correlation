@@ -9,12 +9,12 @@ using namespace std;
 Tracking::Tracking(DetectorGeometry* _g, 
                    map<UShort_t, Double_t> hitsMapX,
                    map<UShort_t, Double_t> hitsUncertX,
-                   map<UShort_t, Double_t> tracksMapX, 
-                   map<UShort_t, Double_t> trackUncertsX, 
+                   // map<UShort_t, Double_t> tracksMapX, 
+                   // map<UShort_t, Double_t> trackUncertsX, 
                    map<UShort_t, Double_t> hitsMapY,
                    map<UShort_t, Double_t> hitsUncertY,
-                   map<UShort_t, Double_t> tracksMapY, 
-                   map<UShort_t, Double_t> trackUncertsY, 
+                   // map<UShort_t, Double_t> tracksMapY, 
+                   // map<UShort_t, Double_t> trackUncertsY, 
                    UShort_t fixedLayer1, UShort_t fixedLayer2,
                    UShort_t evalLayer1, UShort_t evalLayer2)
                    : g(_g){
@@ -22,12 +22,12 @@ Tracking::Tracking(DetectorGeometry* _g,
     // Declaration
     hitsX = hitsMapX;
     hUncertsX = hitsUncertX;
-    trackX = tracksMapX;
-    tUncertsX = trackUncertsX;
+    // trackX = tracksMapX;
+    // tUncertsX = trackUncertsX;
     hitsY = hitsMapY;
     hUncertsY = hitsUncertY;
-    trackY = tracksMapY;
-    tUncertsY = trackUncertsY;
+    // trackY = tracksMapY;
+    // tUncertsY = trackUncertsY;
     // Tracks based on hits on two fixed layers 
     la = fixedLayer1;
     lb = fixedLayer2;

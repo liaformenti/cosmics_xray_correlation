@@ -27,12 +27,12 @@ class Tracking {
     Tracking(DetectorGeometry* _g, 
              std::map<UShort_t, Double_t> hitsMapX, 
              std::map<UShort_t, Double_t> hitsUncertX,
-             std::map<UShort_t, Double_t> trackMapX, 
-             std::map<UShort_t, Double_t> trackUncertsX,
+             // std::map<UShort_t, Double_t> trackMapX, 
+             // std::map<UShort_t, Double_t> trackUncertsX,
              std::map<UShort_t, Double_t> hitsMapY, 
              std::map<UShort_t, Double_t> hitsUncertY,
-             std::map<UShort_t, Double_t> trackMapY, 
-             std::map<UShort_t, Double_t> trackUncertsY,
+             // std::map<UShort_t, Double_t> trackMapY, 
+             // std::map<UShort_t, Double_t> trackUncertsY,
              UShort_t fixedLayer1, UShort_t fixedLayer2,
              UShort_t evalLayer1, UShort_t evalLayer2);
     ~Tracking(){};
