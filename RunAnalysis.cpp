@@ -40,9 +40,11 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
     // with testCA.root with L3 and L4 fixed
     for (Int_t i=0; i<3; i++) {
         trksTree.GetEntry(i);
-        // Temporary uncertainty in x
+        // Uncertainty in x is width of wire group / sqrt(12)
+        // Assumes uniform position distribution of hit across group
+        // Some edge wires groups have less wires - later correction
         for (auto itX=trackX.begin(); itX!=trackX.end(); itX++)
-            uncertX[itX->first] = 7.2; // mm, halfwidth of 8 wire group
+            uncertX[itX->first] = 10.39; 
         /*for (auto itU=uncertX.begin(); itU!=uncertX.end(); itU++)
             cout << itU->first << ' ' << itU->second << trackX[itU->first] << '\n';
         cout << "***********sigma************\n";

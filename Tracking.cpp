@@ -62,6 +62,7 @@ void Tracking::Fit() {
     cout << x[0] << ' ' << x[1] << ' ' << z[0] << ' ' << z[1] << '\n';
     // Fit
     graphX = TGraphErrors(2, z, x, ez, ex);
+
     cout << graphX.GetCovariance() << '\n';
     resultX = graphX.Fit("1 ++ x", "S");
     fitX = graphX.GetFunction("1 ++ x");
