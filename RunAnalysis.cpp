@@ -66,12 +66,12 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
                 cout << "  x hits " << trackX[la] << ' ' << trackX[lb] << '\n';
                 cout << "  y hits " << trackYGaussian[la] << ' ' << trackYGaussian[lb] << '\n';
                 cout << "  z pos " << g->GetZPosition(la) << ' ' << g->GetZPosition(lb) << '\n';*/
-                Tracking myTrack(g, trackX, uncertX, trackYGaussian, sigma, la, lb, lc, ld);
+                Tracking myTrack(g, trackX, uncertX, trackYGaussian, sigma, la, lb);
 
 
                 myTrack.Fit();
-                myTrack.EvaluateAt(g->GetZPosition(lc));
-                // myTrack.EvaluateAt(g->GetZPosition(ld));
+                myTrack.EvaluateAt(lc);
+                myTrack.EvaluateAt(ld);
                 myTrack.PlotFit("fits_event_" + to_string(eventnumber) + ".pdf");
             
                 // cout << "Back in RunAnalysis: " << myTrackMapX[3] << '\n';

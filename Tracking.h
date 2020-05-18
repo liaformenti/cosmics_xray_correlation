@@ -33,8 +33,7 @@ class Tracking {
              std::map<UShort_t, Double_t> hitsUncertY,
              // std::map<UShort_t, Double_t> trackMapY, 
              // std::map<UShort_t, Double_t> trackUncertsY,
-             UShort_t fixedLayer1, UShort_t fixedLayer2,
-             UShort_t evalLayer1, UShort_t evalLayer2);
+             UShort_t fixedLayer1, UShort_t fixedLayer2);
     ~Tracking(){};
 
    // Members
@@ -55,15 +54,13 @@ class Tracking {
    TFitResultPtr resultY;
    UShort_t la;
    UShort_t lb;
-   UShort_t lc;
-   UShort_t ld;
 
    void PlotFit(std::string outName);
    
    // Methods
    void Fit();
    // For interpolation / extrapolation
-   void EvaluateAt(Double_t z);
+   void EvaluateAt(UShort_t layer);
   private:
     DetectorGeometry* g=nullptr;
     Double_t* MapToArray(std::map<UShort_t, Double_t>*);

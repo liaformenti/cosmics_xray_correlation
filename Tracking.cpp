@@ -15,8 +15,7 @@ Tracking::Tracking(DetectorGeometry* _g,
                    map<UShort_t, Double_t> hitsUncertY,
                    // map<UShort_t, Double_t> tracksMapY, 
                    // map<UShort_t, Double_t> trackUncertsY, 
-                   UShort_t fixedLayer1, UShort_t fixedLayer2,
-                   UShort_t evalLayer1, UShort_t evalLayer2)
+                   UShort_t fixedLayer1, UShort_t fixedLayer2)
                    : g(_g){
     // Tracking
     // Declaration
@@ -31,8 +30,6 @@ Tracking::Tracking(DetectorGeometry* _g,
     // Tracks based on hits on two fixed layers 
     la = fixedLayer1;
     lb = fixedLayer2;
-    lc = evalLayer1;
-    ld = evalLayer2;
     //Fill X track and Y track with fixed layer data
     trackX[la] = hitsX[la]; trackX[lb] = hitsX[lb];
     tUncertsX[la] = hUncertsX[la]; tUncertsX[lb] = hUncertsX[lb];
@@ -120,15 +117,34 @@ void Tracking::PlotFit(string outName) {
     return;
 }
 
-void Tracking::EvaluateAt(Double_t z) {
-    Double_t xEval = fitX->GetParameter(0) + fitX->GetParameter(1)*z;
-    Double_t yEval = fitY->GetParameter(0) + fitY->GetParameter(1)*z;
-
+void Tracking::EvaluateAt(UShort_t layer) {
+    Double_t z = g->GetZPosition(layer);
+    // Evaluate x position
+    Double_t bx = resultX->Value(0); 
+    Double_t sigbx = resultX->ParError(0); 
+    Double_t mx = resultX->Value(1);
+    Double_t sigmx = resultX->ParError(1);
     TMatrixD covX = resultX->GetCovarianceMatrix();
-    covX.Print();
+    // Evaluate x at z
+    Double_t xEval = mx*z + bx;
+    Double_t sigXEval = sqrt(pow(sigmx*z,2) + pow(sigbx,2) + 2*z*covX[0][1]);
+    // Evaluate y position
+    Double_t by = resultY->Value(0);
+    Double_t sigby = resultY->ParError(0);
+    Double_t my = resultY->Value(1);
+    Double_t sigmy = resultY->ParError(1);
+    TMatrixD covY = resultY->GetCovarianceMatrix();
+    // Evaluate y at z
+    Double_t yEval = my*z + by;
+    Double_t sigYEval = sqrt(pow(sigmy*z,2) + pow(sigby,2) + 2*z*covY[0][1]);
+
     // add points to TGraph
+    cout << graphX.GetN() << ' ' << graphY.GetN() << '\n';
     graphX.SetPoint(graphX.GetN(), z, xEval);
+    graphX.SetPointError(graphX.GetN()-1, 0, sigXEval);
+
     graphY.SetPoint(graphY.GetN(), z, yEval);
-    cout << lc << ' ' << ld << '\n';
+    graphY.SetPointError(graphY.GetN()-1, 0, sigYEval);
+    cout << graphX.GetN() << ' ' << graphY.GetN() << '\n';
     return;
 }
