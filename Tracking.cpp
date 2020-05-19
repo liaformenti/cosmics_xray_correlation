@@ -21,12 +21,8 @@ Tracking::Tracking(DetectorGeometry* _g,
     // Declaration
     hitsX = hitsMapX;
     hUncertsX = hitsUncertX;
-    // trackX = tracksMapX;
-    // tUncertsX = trackUncertsX;
     hitsY = hitsMapY;
     hUncertsY = hitsUncertY;
-    // trackY = tracksMapY;
-    // tUncertsY = trackUncertsY;
     // Tracks based on hits on two fixed layers 
     la = fixedLayer1;
     lb = fixedLayer2;
@@ -50,27 +46,27 @@ void Tracking::Fit() {
     Double_t* z = new Double_t[2];
     z[0] = g->GetZPosition(la);
     z[1] = g->GetZPosition(lb);
-    cout << "Z " << z[0] << ' ' << z[1] << '\n';
+    // cout << "Z " << z[0] << ' ' << z[1] << '\n';
     // Set errors in z to zero so TGraph defaults errors in z to 0
     Double_t* ez = NULL;
     Double_t* x = MapToArray(&trackX);
     Double_t* ex = MapToArray(&tUncertsX);
     Double_t* y = MapToArray(&trackY);
     Double_t* ey= MapToArray(&tUncertsY);
-    cout << "x " << x[0] << ' ' << x[1] << '\n';
-    cout << "y " << y[0] << ' ' << y[1] << '\n';
-    cout << "x uncert " << ex[0] << ' ' << ex[1] << '\n';
-    cout << "y uncert " << ey[0] << ' ' << ey[1] << '\n';
+    // cout << "x " << x[0] << ' ' << x[1] << '\n';
+    // cout << "y " << y[0] << ' ' << y[1] << '\n';
+    // cout << "x uncert " << ex[0] << ' ' << ex[1] << '\n';
+    // cout << "y uncert " << ey[0] << ' ' << ey[1] << '\n';
 
     // Fit
     graphX = TGraphErrors(2, z, x, ez, ex);
     resultX = graphX.Fit("1 ++ x", "S");
-    cout << "CovX " << resultX->GetCovarianceMatrix()[0][1] << '\n';
+    // cout << "CovX " << resultX->GetCovarianceMatrix()[0][1] << '\n';
     fitX = graphX.GetFunction("1 ++ x");
 
     graphY = TGraphErrors(2, z, y, ez, ey);
     resultY = graphY.Fit("1 ++ x", "S");
-    cout << "CovY " << resultY->GetCovarianceMatrix()[0][1] << '\n';
+    // cout << "CovY " << resultY->GetCovarianceMatrix()[0][1] << '\n';
     fitY = graphY.GetFunction("1 ++ x");
 
     delete [] z;
@@ -143,7 +139,7 @@ void Tracking::EvaluateAt(UShort_t layer) {
     Double_t yEval = my*z + by;
     Double_t sigYEval = sqrt(pow(sigmy*z,2) + pow(sigby,2) + 2*z*covY[0][1]);
 
-    cout << "Eval Uncertainties: " << sigXEval << ' ' << sigYEval << '\n';
+    // cout << "Eval Uncertainties: " << sigXEval << ' ' << sigYEval << '\n';
     // add points to TGraph
     graphX.SetPoint(graphX.GetN(), z, xEval);
     graphX.SetPointError(graphX.GetN()-1, 0, sigXEval);

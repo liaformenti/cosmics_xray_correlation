@@ -61,7 +61,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
                    trackX, trackYGaussian))
                    continue;
                 getOtherLayers(la, lb, &lc, &ld);
-                cout << la << ' ' << lb << ' ' << lc << ' ' << ld << '\n';
+                // cout << la << ' ' << lb << ' ' << lc << ' ' << ld << '\n';
                 /*cout << "RunAnalysis\n";
                 cout << "  x hits " << trackX[la] << ' ' << trackX[lb] << '\n';
                 cout << "  y hits " << trackYGaussian[la] << ' ' << trackYGaussian[lb] << '\n';
@@ -70,13 +70,18 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
 
 
                 myTrack.Fit();
-                myTrack.EvaluateAt(lc);
-                myTrack.EvaluateAt(ld);
-                for (Int_t i=1; i<=4; i++){
+                // Check if hit exists on unfixed layers
+                // If so evaluate.
+                if (myTrack.trackY.find(lc) != myTrack.trackY.end())
+                    myTrack.EvaluateAt(lc);
+                if (myTrack.trackY.find(ld) != myTrack.trackY.end())
+                    myTrack.EvaluateAt(ld);
+
+                /*for (Int_t i=1; i<=4; i++){
                     cout << "Layer " << i << '\n';
                     cout << "X " << myTrack.trackX[i] << ' ' << myTrack.tUncertsX[i] << '\n';
                     cout << "Y " << myTrack.trackY[i] << ' ' << myTrack.tUncertsY[i] << '\n';
-                }
+                }*/
                 // myTrack.PlotFit("fits_event_" + to_string(eventnumber) + "fixed_layers_" + to_string(la) + "_" + to_string(lb) + ".pdf");
             
                 // cout << "Back in RunAnalysis: " << myTrackMapX[3] << '\n';
