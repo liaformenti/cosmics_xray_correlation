@@ -60,12 +60,12 @@ void Tracking::Fit() {
 
     // Fit
     graphX = TGraphErrors(2, z, x, ez, ex);
-    resultX = graphX.Fit("1 ++ x", "S");
+    resultX = graphX.Fit("1 ++ x", "SQ");
     // cout << "CovX " << resultX->GetCovarianceMatrix()[0][1] << '\n';
     fitX = graphX.GetFunction("1 ++ x");
 
     graphY = TGraphErrors(2, z, y, ez, ey);
-    resultY = graphY.Fit("1 ++ x", "S");
+    resultY = graphY.Fit("1 ++ x", "SQ");
     // cout << "CovY " << resultY->GetCovarianceMatrix()[0][1] << '\n';
     fitY = graphY.GetFunction("1 ++ x");
 
