@@ -9,12 +9,8 @@ using namespace std;
 Tracking::Tracking(DetectorGeometry* _g, 
                    map<UShort_t, Double_t> hitsMapX,
                    map<UShort_t, Double_t> hitsUncertX,
-                   // map<UShort_t, Double_t> tracksMapX, 
-                   // map<UShort_t, Double_t> trackUncertsX, 
                    map<UShort_t, Double_t> hitsMapY,
                    map<UShort_t, Double_t> hitsUncertY,
-                   // map<UShort_t, Double_t> tracksMapY, 
-                   // map<UShort_t, Double_t> trackUncertsY, 
                    UShort_t fixedLayer1, UShort_t fixedLayer2)
                    : g(_g){
     // Tracking
@@ -27,10 +23,10 @@ Tracking::Tracking(DetectorGeometry* _g,
     la = fixedLayer1;
     lb = fixedLayer2;
     //Fill X track and Y track with fixed layer data
-    trackX[la] = hitsX[la]; trackX[lb] = hitsX[lb];
-    tUncertsX[la] = hUncertsX[la]; tUncertsX[lb] = hUncertsX[lb];
-    trackY[la] = hitsY[la]; trackY[lb] = hitsY[lb];
-    tUncertsY[la] = hUncertsY[la]; tUncertsY[lb] = hUncertsY[lb];
+    fitXPos[la] = hitsX[la]; fitXPos[lb] = hitsX[lb];
+    fitXUncerts[la] = hUncertsX[la]; fitXUncerts[lb] = hUncertsX[lb];
+    fitYPos[la] = hitsY[la]; fitYPos[lb] = hitsY[lb];
+    fitYUncerts[la] = hUncertsY[la]; fitYUncerts[lb] = hUncertsY[lb];
     
     // Track
     TGraphErrors graphX;
@@ -49,10 +45,10 @@ void Tracking::Fit() {
     // cout << "Z " << z[0] << ' ' << z[1] << '\n';
     // Set errors in z to zero so TGraph defaults errors in z to 0
     Double_t* ez = NULL;
-    Double_t* x = MapToArray(&trackX);
-    Double_t* ex = MapToArray(&tUncertsX);
-    Double_t* y = MapToArray(&trackY);
-    Double_t* ey= MapToArray(&tUncertsY);
+    Double_t* x = MapToArray(&fitXPos);
+    Double_t* ex = MapToArray(&fitXUncerts);
+    Double_t* y = MapToArray(&fitYPos);
+    Double_t* ey= MapToArray(&fitYUncerts);
     // cout << "x " << x[0] << ' ' << x[1] << '\n';
     // cout << "y " << y[0] << ' ' << y[1] << '\n';
     // cout << "x uncert " << ex[0] << ' ' << ex[1] << '\n';
@@ -62,12 +58,12 @@ void Tracking::Fit() {
     graphX = TGraphErrors(2, z, x, ez, ex);
     resultX = graphX.Fit("1 ++ x", "SQ");
     // cout << "CovX " << resultX->GetCovarianceMatrix()[0][1] << '\n';
-    fitX = graphX.GetFunction("1 ++ x");
+    fitXFcn = graphX.GetFunction("1 ++ x");
 
     graphY = TGraphErrors(2, z, y, ez, ey);
     resultY = graphY.Fit("1 ++ x", "SQ");
     // cout << "CovY " << resultY->GetCovarianceMatrix()[0][1] << '\n';
-    fitY = graphY.GetFunction("1 ++ x");
+    fitYFcn = graphY.GetFunction("1 ++ x");
 
     delete [] z;
     delete [] x;
@@ -99,7 +95,7 @@ void Tracking::PlotFit(string outName) {
     graphX.GetYaxis()->SetTitle("x [mm]");
     graphX.GetXaxis()->SetTitle("z [mm]");
     graphX.Draw();
-    fitX->Draw("Same");
+    fitXFcn->Draw("Same");
     can.Print(outName.c_str());
 
     can.Clear(); // Necessary with Draw("Same")
@@ -110,7 +106,7 @@ void Tracking::PlotFit(string outName) {
     graphY.GetYaxis()->SetTitle("y [mm]");
     graphY.GetXaxis()->SetTitle("z [mm]");
     graphY.Draw();
-    fitY->Draw("Same");
+    fitYFcn->Draw("Same");
     can.Print(outName.c_str());
 
     can.Print((outName + "]").c_str());
@@ -148,9 +144,9 @@ void Tracking::EvaluateAt(UShort_t layer) {
     graphY.SetPointError(graphY.GetN()-1, 0, sigYEval);
 
     // add points to maps
-    trackX[layer] = xEval;
-    tUncertsX[layer] = sigXEval;
-    trackY[layer] = yEval;
-    tUncertsY[layer] = sigYEval;
+    fitXPos[layer] = xEval;
+    fitXUncerts[layer] = sigXEval;
+    fitYPos[layer] = yEval;
+    fitYUncerts[layer] = sigYEval;
     return;
 }

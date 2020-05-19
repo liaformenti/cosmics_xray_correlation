@@ -36,17 +36,17 @@ class Tracking {
    // Tracks from tracks ttree become hits for this round of tracking
    std::map<UShort_t, Double_t> hitsX; 
    std::map<UShort_t, Double_t> hUncertsX;
-   std::map<UShort_t, Double_t> trackX; 
-   std::map<UShort_t, Double_t> tUncertsX; 
+   std::map<UShort_t, Double_t> fitXPos; 
+   std::map<UShort_t, Double_t> fitXUncerts; 
    TGraphErrors graphX;
-   TF1* fitX;
+   TF1* fitXFcn;
    TFitResultPtr resultX;
    std::map<UShort_t, Double_t> hitsY; 
    std::map<UShort_t, Double_t> hUncertsY;
-   std::map<UShort_t, Double_t> trackY; 
-   std::map<UShort_t, Double_t> tUncertsY; 
+   std::map<UShort_t, Double_t> fitYPos; 
+   std::map<UShort_t, Double_t> fitYUncerts; 
    TGraphErrors graphY;
-   TF1* fitY;
+   TF1* fitYFcn;
    TFitResultPtr resultY;
    UShort_t la;
    UShort_t lb;
