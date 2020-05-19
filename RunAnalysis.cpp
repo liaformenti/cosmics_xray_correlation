@@ -44,7 +44,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
         // Assumes uniform position distribution of hit across group
         // Some edge wires groups have less wires - later correction
         for (auto itX=trackX.begin(); itX!=trackX.end(); itX++)
-            uncertX[itX->first] = 10.39; 
+            uncertX[itX->first] = 1.8*20/sqrt(12.0); 
         /*for (auto itU=uncertX.begin(); itU!=uncertX.end(); itU++)
             cout << itU->first << ' ' << itU->second << trackX[itU->first] << '\n';
         cout << "***********sigma************\n";
@@ -53,8 +53,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
         cout << "***********sigma************\n";*/
         // for each permutation of two layers
         // la < lb and treated first always
-        // for (Int_t la=1; la<=4; la++) {
-        for (Int_t la=3; la<=3; la++) {
+        for (Int_t la=1; la<=4; la++) {
+        // for (Int_t la=3; la<=3; la++) {
             // for (Int_t lb=(la+1); lb<=4; lb++) {
             for (Int_t lb=(la+1); lb<=4; lb++) {
                 if (MissingHitsOnFixedLayers(la, lb, 
@@ -72,7 +72,12 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
                 myTrack.Fit();
                 myTrack.EvaluateAt(lc);
                 myTrack.EvaluateAt(ld);
-                myTrack.PlotFit("fits_event_" + to_string(eventnumber) + ".pdf");
+                for (Int_t i=1; i<=4; i++){
+                    cout << "Layer " << i << '\n';
+                    cout << "X " << myTrack.trackX[i] << ' ' << myTrack.tUncertsX[i] << '\n';
+                    cout << "Y " << myTrack.trackY[i] << ' ' << myTrack.tUncertsY[i] << '\n';
+                }
+                // myTrack.PlotFit("fits_event_" + to_string(eventnumber) + "fixed_layers_" + to_string(la) + "_" + to_string(lb) + ".pdf");
             
                 // cout << "Back in RunAnalysis: " << myTrackMapX[3] << '\n';
             }
