@@ -14,7 +14,7 @@ Tracking::Tracking(DetectorGeometry* _g,
                    UShort_t fixedLayer1, UShort_t fixedLayer2)
                    : g(_g){
     // Tracking
-    // Declaration
+    // Initialize members
     hitsX = hitsMapX;
     hitsXUncerts = hitsUncertX;
     hitsY = hitsMapY;
@@ -29,14 +29,6 @@ Tracking::Tracking(DetectorGeometry* _g,
     fitYPos[la] = hitsY[la]; fitYPos[lb] = hitsY[lb];
     fitYUncerts[la] = hitsYUncerts[la]; 
     fitYUncerts[lb] = hitsYUncerts[lb];
-    
-    // Track
-    TGraphErrors graphX;
-    TF1* fitX;
-    TFitResultPtr resultX;
-    TGraphErrors graphY;
-    TF1* fitY;
-    TFitResultPtr resultY;
 } 
 
 void Tracking::Fit() {

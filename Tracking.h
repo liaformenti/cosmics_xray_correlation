@@ -5,7 +5,7 @@
 #include <map>
 #include <string>
 
-//Root includes
+// Root includes
 #include <TGraphErrors.h>
 #include <TAxis.h>
 #include <TF1.h>
