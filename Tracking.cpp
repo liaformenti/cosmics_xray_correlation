@@ -16,17 +16,19 @@ Tracking::Tracking(DetectorGeometry* _g,
     // Tracking
     // Declaration
     hitsX = hitsMapX;
-    hUncertsX = hitsUncertX;
+    hitsXUncerts = hitsUncertX;
     hitsY = hitsMapY;
-    hUncertsY = hitsUncertY;
+    hitsYUncerts = hitsUncertY;
     // Tracks based on hits on two fixed layers 
     la = fixedLayer1;
     lb = fixedLayer2;
     //Fill X track and Y track with fixed layer data
     fitXPos[la] = hitsX[la]; fitXPos[lb] = hitsX[lb];
-    fitXUncerts[la] = hUncertsX[la]; fitXUncerts[lb] = hUncertsX[lb];
+    fitXUncerts[la] = hitsXUncerts[la]; 
+    fitXUncerts[lb] = hitsXUncerts[lb];
     fitYPos[la] = hitsY[la]; fitYPos[lb] = hitsY[lb];
-    fitYUncerts[la] = hUncertsY[la]; fitYUncerts[lb] = hUncertsY[lb];
+    fitYUncerts[la] = hitsYUncerts[la]; 
+    fitYUncerts[lb] = hitsYUncerts[lb];
     
     // Track
     TGraphErrors graphX;
