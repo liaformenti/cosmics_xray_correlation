@@ -53,8 +53,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
         cout << "***********sigma************\n";*/
         // for each permutation of two layers
         // la < lb and treated first always
-        for (Int_t la=1; la<=4; la++) {
-        // for (Int_t la=3; la<=3; la++) {
+        // for (Int_t la=1; la<=4; la++) {
+        for (Int_t la=3; la<=3; la++) {
             // for (Int_t lb=(la+1); lb<=4; lb++) {
             for (Int_t lb=(la+1); lb<=4; lb++) {
                 if (MissingHitsOnFixedLayers(la, lb, 
@@ -77,7 +77,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
                 if (myTrack.hitsY.find(ld) != myTrack.hitsY.end())
                     myTrack.EvaluateAt(ld);
 
-                myTrack.PlotFit("fits_event_" + to_string(eventnumber) + "_fixed_layers_" + to_string(la) + "_" + to_string(lb) + ".pdf");
+                // myTrack.PlotFit("fits_event_" + to_string(eventnumber) + "_fixed_layers_" + to_string(la) + "_" + to_string(lb) + ".pdf");
+                Residual(3.14, 1, 2.7, 0.007, 2, 3);
                 /*for (Int_t i=1; i<=4; i++){
                     cout << "Layer " << i << '\n';
                     cout << "X " << myTrack.trackX[i] << ' ' << myTrack.tUncertsX[i] << '\n';

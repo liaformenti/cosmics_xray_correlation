@@ -19,6 +19,7 @@
 
 // My includes
 #include "Tracking.h"
+#include "Residual.h"
 
 void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* _g);
 
