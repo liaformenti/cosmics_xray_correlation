@@ -14,5 +14,5 @@ Residual::Residual(Double_t residual, UShort_t layer,
     y = ypos;
     la = fixedLayer1;
     lb = fixedLayer2;
-    std::cout << res << ' ' << l << ' ' << x << ' ' << y << ' ' << la << ' ' << lb << '\n';
+    cout << res << ' ' << l << ' ' << x << ' ' << y << ' ' << la << ' ' << lb << '\n';
 }

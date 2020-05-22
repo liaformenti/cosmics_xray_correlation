@@ -72,13 +72,23 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
                 myTrack.Fit();
                 // Check if hit exists on unfixed layers
                 // If so evaluate.
-                if (myTrack.hitsY.find(lc) != myTrack.hitsY.end())
+                if (myTrack.hitsY.find(lc) != myTrack.hitsY.end()) {
                     myTrack.EvaluateAt(lc);
-                if (myTrack.hitsY.find(ld) != myTrack.hitsY.end())
+                    Residual res1 = Residual(
+                        myTrack.fitYPos[lc] - myTrack.hitsY[lc],
+                        lc, myTrack.fitXPos[lc], myTrack.fitYPos[lc],
+                        la, lb);
+                }
+                if (myTrack.hitsY.find(ld) != myTrack.hitsY.end()) {
                     myTrack.EvaluateAt(ld);
+                    Residual res1 = Residual(
+                        myTrack.fitYPos[ld] - myTrack.hitsY[ld],
+                        ld, myTrack.fitXPos[ld], myTrack.fitYPos[ld],
+                        la, lb);
+                 }
+
 
                 // myTrack.PlotFit("fits_event_" + to_string(eventnumber) + "_fixed_layers_" + to_string(la) + "_" + to_string(lb) + ".pdf");
-                Residual(3.14, 1, 2.7, 0.007, 2, 3);
                 /*for (Int_t i=1; i<=4; i++){
                     cout << "Layer " << i << '\n';
                     cout << "X " << myTrack.trackX[i] << ' ' << myTrack.tUncertsX[i] << '\n';

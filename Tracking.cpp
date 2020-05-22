@@ -142,5 +142,8 @@ void Tracking::EvaluateAt(UShort_t layer) {
     fitXUncerts[layer] = sigXEval;
     fitYPos[layer] = yEval;
     fitYUncerts[layer] = sigYEval;
+
+    // cout << "Tracking " << fitYPos[layer] - hitsY[layer] << ' ' << layer << ' ' << fitXPos[layer] << ' ' << fitYPos[layer] << ' ' << la << ' ' << lb << '\n';
+
     return;
 }
