@@ -7,7 +7,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
     // TTreeReader reader(&trksTree);
     // TTreeReaderValue<Int_t> eventnumber(reader, "eventnumber");
     // TTreeReaderValue< map<UShort_t, Double_t> > trackX(reader, "trackX");
-    // Declaration and initialization
+    // Declaration 
     Int_t nEntries;
     Int_t eventnumber;
 
@@ -27,6 +27,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
     map<UShort_t, Double_t>* sigmaPtr;
     sigmaPtr = &sigma;
 
+    // Vector to store calculated residuals
+    vector<Residual> residuals;
+
+    //Initialization
     trksTree.SetBranchAddress("eventnumber", &eventnumber);
     trksTree.SetBranchAddress("trackX", &trackXPtr);
     trksTree.SetBranchAddress("trackYGaussian", &trackYGaussianPtr);
