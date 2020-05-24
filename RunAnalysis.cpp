@@ -42,7 +42,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
     // Replace i<x nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA.root with L3 and L4 fixed
-    for (Int_t i=0; i<3; i++) {
+    for (Int_t i=0; i<10; i++) {
         trksTree.GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
         // Assumes uniform position distribution of hit across group
@@ -80,13 +80,14 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
                 if (myTrack.hitsY.find(lc) != myTrack.hitsY.end()) {
                     myTrack.EvaluateAt(lc);
                     res = Residual(myTrack, lc);
+                    residuals.push_back(res);
+
                 }
                 if (myTrack.hitsY.find(ld) != myTrack.hitsY.end()) {
                     myTrack.EvaluateAt(ld);
                     res = Residual(myTrack, ld);
-                    cout << res.res << '\n';
+                    residuals.push_back(res);
                  }
-
 
                 // myTrack.PlotFit("fits_event_" + to_string(eventnumber) + "_fixed_layers_" + to_string(la) + "_" + to_string(lb) + ".pdf");
                 /*for (Int_t i=1; i<=4; i++){
@@ -101,6 +102,12 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
         } //end for each permutation of two layers
         cout << '\n';
     } // end event loop
+
+    /*// Printing residuals vector
+    cout << "After loop\n";
+    for (auto itr=residuals.begin(); itr!=residuals.end(); itr++) {
+        cout << itr->res << '\n';
+    }*/
 
     return;
 }
