@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* g) {
+void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorGeometry* g) {
     // TTreeReader reader(&trksTree);
     // TTreeReaderValue<Int_t> eventnumber(reader, "eventnumber");
     // TTreeReaderValue< map<UShort_t, Double_t> > trackX(reader, "trackX");

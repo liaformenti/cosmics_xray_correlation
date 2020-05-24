@@ -12,6 +12,7 @@
 
 //tgc_analysis includes
 #include "DetectorGeometryTools.h"
+#include "PlotManager.h"
 
 // My includes
 #include "RunAnalysis.h"
@@ -43,12 +44,13 @@ int main(int argc, char* argv[]) {
     AnalysisInfo* analysisInfo = GetAnalysisInfo(cosmicsAnalysis);
     if (analysisInfo == nullptr)
        throw runtime_error("Error getting AnalysisInfo object, in function GetAnalysisInfo"); 
-    
+    PlotManager* plotManager = new PlotManager();    
     // Get detector geometry
     DetectorGeometry *geom = DetectorGeometryTools::GetDetectorGeometry(analysisInfo->detectortype);
 
-    RunAnalysis(*tracksTree, *analysisInfo, geom);
+    RunAnalysis(*tracksTree, *analysisInfo, plotManager, geom);
 
+    delete plotManager;
     cosmicsAnalysis->Close();
     return 0;
 }

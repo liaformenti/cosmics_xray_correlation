@@ -17,12 +17,13 @@
 // tgc_analysis includes
 #include "AnalysisInfo.h"
 #include "DetectorGeometry.h"
+#include "PlotManager.h"
 
 // My includes
 #include "Tracking.h"
 #include "Residual.h"
 
-void RunAnalysis(TTree &trksTree, AnalysisInfo &info, DetectorGeometry* _g);
+void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorGeometry* _g);
 
 // Helper fcn for RunAnalysis
 Bool_t MissingHitsOnFixedLayers(UShort_t fixed1, UShort_t fixed2, std::map<UShort_t, Double_t> &xTrack, std::map<UShort_t, Double_t> &yTrack); 
