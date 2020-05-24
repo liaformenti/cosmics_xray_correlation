@@ -108,7 +108,18 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
     for (auto itr=residuals.begin(); itr!=residuals.end(); itr++) {
         cout << itr->res << '\n';
     }*/
-
+    /* // Checking out plot manager
+    pm->Add("first_plot", "title", 100, -0.5, 15.5, myTH1F);
+    TRandom3 rndgen;
+    for (Int_t i=0; i<400; i++) {
+       pm->Fill("first_plot", rndgen.Poisson(3.6));
+    }
+    // pm->Fill("first_plot", 3.0);
+    TH1F* myPlot = pm->GetTH1F("first_plot");
+    TCanvas* c = new TCanvas();
+    myPlot->Draw();
+    c->Print("plot.pdf");
+    delete c;*/
     return;
 }
 
