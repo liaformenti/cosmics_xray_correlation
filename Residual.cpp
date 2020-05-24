@@ -14,5 +14,15 @@ Residual::Residual(Double_t residual, UShort_t layer,
     y = ypos;
     la = fixedLayer1;
     lb = fixedLayer2;
-    cout << res << ' ' << l << ' ' << x << ' ' << y << ' ' << la << ' ' << lb << '\n';
+    // cout << "Constr.1 " << res << ' ' << l << ' ' << x << ' ' << y << ' ' << la << ' ' << lb << '\n';
 }
+Residual::Residual(Tracking &trackInfo, UShort_t layer) {
+    l = layer;
+    x = trackInfo.fitXPos[l];
+    y = trackInfo.fitYPos[l];
+    la = trackInfo.la;
+    lb = trackInfo.lb;
+    res = trackInfo.fitYPos[l] - trackInfo.hitsY[l];
+    // cout << "Constr.2 " << res << ' ' << l << ' ' << x << ' ' << y << ' ' << la << ' ' << lb << '\n';
+}
+    
