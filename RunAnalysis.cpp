@@ -87,7 +87,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
                     myTrack.EvaluateAt(ld);
                     res = Residual(myTrack, ld);
                     residuals.push_back(res);
-                 }
+                }
 
                 // myTrack.PlotFit("fits_event_" + to_string(eventnumber) + "_fixed_layers_" + to_string(la) + "_" + to_string(lb) + ".pdf");
                 /*for (Int_t i=1; i<=4; i++){
@@ -102,7 +102,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
         } //end for each permutation of two layers
         cout << '\n';
     } // end event loop
-
+    StatsStudy statsStudy(&residuals, g, pm); 
     /*// Printing residuals vector
     cout << "After loop\n";
     for (auto itr=residuals.begin(); itr!=residuals.end(); itr++) {
