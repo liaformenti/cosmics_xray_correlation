@@ -81,7 +81,9 @@ void StatsStudy::InitializeSquareBinHistograms(Int_t width) {
 void StatsStudy::FillSquareBinHistograms() {
     string plotName;
     for (auto r=residuals->begin(); r!=residuals->end(); r++) {
-        plotName = "Residual_layer" + to_string(r->l) + "_fixedlayers" + to_string(r->la) + to_string(r->lb) + "_width_" + "mm"; 
+        plotName = "Residual_layer" + to_string(r->l) + 
+                   "_fixedlayers" + to_string(r->la) + 
+                   to_string(r->lb) + "_width_" +                                         to_string(binWidth) + "mm"; 
         cout << plotName << '\n';
     }
     return;
