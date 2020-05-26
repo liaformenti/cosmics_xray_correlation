@@ -28,6 +28,7 @@ class StatsStudy {
 
   // Members
   void InitializeSquareBinHistograms(Int_t width);
+  void FillSquareBinHistograms();
 
   private:
     std::vector<Residual>* residuals = nullptr;
