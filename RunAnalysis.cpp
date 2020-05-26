@@ -103,6 +103,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
         cout << '\n';
     } // end event loop
     StatsStudy statsStudy(&residuals, g, pm); 
+    statsStudy.InitializeSquareBinHistograms(30); // mm
     /*// Printing residuals vector
     cout << "After loop\n";
     for (auto itr=residuals.begin(); itr!=residuals.end(); itr++) {
