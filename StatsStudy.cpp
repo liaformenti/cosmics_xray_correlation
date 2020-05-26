@@ -20,6 +20,7 @@ StatsStudy::StatsStudy(std::vector<Residual>* _residuals,
 // fixed-layer / residual permutation.
 // *** Width in mm *** 
 void StatsStudy::InitializeSquareBinHistograms(Int_t width) {
+   binWidth = width;
    pair<Double_t, Double_t> xlims = g->GetModuleLimitsX();
    pair<Double_t, Double_t> ylims = g->GetModuleLimitsY();
    Int_t nbinsx = floor((xlims.second - xlims.first)/width);
@@ -73,11 +74,10 @@ void StatsStudy::InitializeSquareBinHistograms(Int_t width) {
           to_string(width) + "mm";
    pm->Add(name, name, nbinsx, xlims.first, xlims.second,
                        nbinsy, ylims.first, ylims.second, myTH2F); 
-   pm->PrintAll();
    return;
 }
 
-// 
+// Loops through residuals and puts them in appropriate bins and hists
 void StatsStudy::FillSquareBinHistograms() {
     string plotName;
     for (auto r=residuals->begin(); r!=residuals->end(); r++) {

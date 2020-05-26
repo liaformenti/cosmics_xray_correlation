@@ -27,6 +27,8 @@ class StatsStudy {
     ~StatsStudy(){};
 
   // Members
+  Int_t binWidth; // square bin width in mm
+  // Methods
   void InitializeSquareBinHistograms(Int_t width);
   void FillSquareBinHistograms();
 
