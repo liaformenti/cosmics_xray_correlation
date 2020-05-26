@@ -5,7 +5,7 @@
 // C++ includes
 #include <iostream>
 #include<vector>
-// #include <pair>
+#include <math.h>
 
 // Root includes
 #include <TCanvas.h>
@@ -27,7 +27,7 @@ class StatsStudy {
     ~StatsStudy(){};
 
   // Members
-  void InitializeSquareBinHistograms(Double_t width);
+  void InitializeSquareBinHistograms(Int_t width);
 
   private:
     std::vector<Residual>* residuals = nullptr;

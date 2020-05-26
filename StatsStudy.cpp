@@ -19,15 +19,61 @@ StatsStudy::StatsStudy(std::vector<Residual>* _residuals,
 // Initializes histograms over layer area for each
 // fixed-layer / residual permutation.
 // *** Width in mm *** 
-void StatsStudy::InitializeSquareBinHistograms(Double_t width) {
+void StatsStudy::InitializeSquareBinHistograms(Int_t width) {
    pair<Double_t, Double_t> xlims = g->GetModuleLimitsX();
    pair<Double_t, Double_t> ylims = g->GetModuleLimitsY();
-   Int_t nbinsx = (xlims.second - xlims.first)/width;
-   Int_t nbinsy = (ylims.second - ylims.first)/width;
+   Int_t nbinsx = floor((xlims.second - xlims.first)/width);
+   Int_t nbinsy = floor((ylims.second - ylims.first)/width);
    string name;
    name = "Residual_layer3_fixedlayers12_width_" + 
           to_string(width) + "mm";
-   // pm->Add(name, name,  
+   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
+                       nbinsy, ylims.first, ylims.second, myTH2F); 
+   name = "Residual_layer4_fixedlayers12_width_" + 
+          to_string(width) + "mm";
+   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
+                       nbinsy, ylims.first, ylims.second, myTH2F); 
+   name = "Residual_layer2_fixedlayers13_width_" + 
+          to_string(width) + "mm";
+   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
+                       nbinsy, ylims.first, ylims.second, myTH2F); 
+   name = "Residual_layer4_fixedlayers13_width_" + 
+          to_string(width) + "mm";
+   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
+                       nbinsy, ylims.first, ylims.second, myTH2F); 
+   name = "Residual_layer2_fixedlayers14_width_" + 
+          to_string(width) + "mm";
+   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
+                       nbinsy, ylims.first, ylims.second, myTH2F); 
+   name = "Residual_layer3_fixedlayers14_width_" + 
+          to_string(width) + "mm";
+   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
+                       nbinsy, ylims.first, ylims.second, myTH2F); 
+   name = "Residual_layer1_fixedlayers23_width_" + 
+          to_string(width) + "mm";
+   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
+                       nbinsy, ylims.first, ylims.second, myTH2F); 
+   name = "Residual_layer4_fixedlayers23_width_" + 
+          to_string(width) + "mm";
+   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
+                       nbinsy, ylims.first, ylims.second, myTH2F); 
+   name = "Residual_layer1_fixedlayers24_width_" + 
+          to_string(width) + "mm";
+   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
+                       nbinsy, ylims.first, ylims.second, myTH2F); 
+   name = "Residual_layer3_fixedlayers24_width_" + 
+          to_string(width) + "mm";
+   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
+                       nbinsy, ylims.first, ylims.second, myTH2F); 
+   name = "Residual_layer1_fixedlayers34_width_" + 
+          to_string(width) + "mm";
+   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
+                       nbinsy, ylims.first, ylims.second, myTH2F); 
+   name = "Residual_layer2_fixedlayers34_width_" + 
+          to_string(width) + "mm";
+   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
+                       nbinsy, ylims.first, ylims.second, myTH2F); 
+   pm->PrintAll();
    return;
 }
 
