@@ -81,23 +81,23 @@ void StatsStudy::InitializeSquareBinHistograms(Int_t width) {
 void StatsStudy::FillSquareBinHistograms() {
     string plotName;
     for (auto r=residuals->begin(); r!=residuals->end(); r++) {
-        plotName = "Residual_layer" + to_string(r->l) + 
-                   "_fixedlayers" + to_string(r->la) + 
-                   to_string(r->lb) + "_width_" +                                         to_string(binWidth) + "mm"; 
+        plotName = GetSquareBinHistName(r->l, r->la, r->lb);
         pm->Fill(plotName, r->x, r->y);
     }
-    TH2F* l1Hist = (TH2F*) pm->Get("Residual_layer1_fixedlayers34_width_" + 
-          to_string(binWidth) + "mm");
-    TH2F* l2Hist = (TH2F*) pm->Get("Residual_layer2_fixedlayers34_width_" + 
-          to_string(binWidth) + "mm");
+
     TCanvas* c = new TCanvas("canvas", "canvas");
+    TH2F* l1Hist = (TH2F*) pm->Get(GetSquareBinHistName(1, 3, 4));
     l1Hist->Draw("Colz");
-    c->Print(("Residual_layer1_fixedlayers34_width_" + 
-          to_string(binWidth) + "mm" + ".pdf").c_str());
+    c->Print((GetSquareBinHistName(1, 3, 4) + ".pdf").c_str());
+    c->Clear();
+    TH2F* l2Hist = (TH2F*) pm->Get(GetSquareBinHistName(2, 3, 4));
+    l2Hist->Draw("Colz");
+    c->Print((GetSquareBinHistName(2, 3, 4) + ".pdf").c_str());
+
     delete c;
-    cout << GetSquareBinHistName(1, 3, 4);
     return;
 }
+
 string StatsStudy::GetSquareBinHistName(UShort_t layer, 
              UShort_t fixedLayer1, UShort_t fixedLayer2) {
     string name = "Residual_layer" + to_string(layer) +
