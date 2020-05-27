@@ -33,7 +33,7 @@ class StatsStudy {
     // Methods
     void InitializeSquareBinHistograms(Int_t width);
     void FillSquareBinHistograms();
-  
+    void PrintSquareBinHistograms(std::string filename);   
   private:
     // Members
     std::vector<Residual>* residuals = nullptr;

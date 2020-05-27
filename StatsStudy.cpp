@@ -85,7 +85,7 @@ void StatsStudy::FillSquareBinHistograms() {
         pm->Fill(plotName, r->x, r->y);
     }
 
-    TCanvas* c = new TCanvas("canvas", "canvas");
+    /*TCanvas* c = new TCanvas("canvas", "canvas");
     TH2F* l1Hist = (TH2F*) pm->Get(GetSquareBinHistName(1, 3, 4));
     l1Hist->Draw("Colz");
     c->Print((GetSquareBinHistName(1, 3, 4) + ".pdf").c_str());
@@ -93,7 +93,7 @@ void StatsStudy::FillSquareBinHistograms() {
     TH2F* l2Hist = (TH2F*) pm->Get(GetSquareBinHistName(2, 3, 4));
     l2Hist->Draw("Colz");
     c->Print((GetSquareBinHistName(2, 3, 4) + ".pdf").c_str());
-    delete c;
+    delete c;*/
     return;
 }
 
@@ -106,3 +106,6 @@ string StatsStudy::GetSquareBinHistName(UShort_t layer,
     return name; 
 }
 
+void PrintSquareBinHistograms(string filename) {
+    return;
+} 
