@@ -18,6 +18,7 @@
 
 // My includes
 #include "Residual.h"
+#include "Helper.h"
 
 class StatsStudy {
   public:

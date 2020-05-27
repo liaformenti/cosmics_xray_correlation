@@ -93,7 +93,6 @@ void StatsStudy::FillSquareBinHistograms() {
     TH2F* l2Hist = (TH2F*) pm->Get(GetSquareBinHistName(2, 3, 4));
     l2Hist->Draw("Colz");
     c->Print((GetSquareBinHistName(2, 3, 4) + ".pdf").c_str());
-
     delete c;
     return;
 }

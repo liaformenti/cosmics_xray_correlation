@@ -38,11 +38,11 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
 
     nEntries = trksTree.GetEntries();
 
-    Int_t lc = 0; Int_t ld = 0;
+    UShort_t lc = 0; UShort_t ld = 0;
     // Replace i<x nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA.root with L3 and L4 fixed
-    for (Int_t i=0; i<100; i++) {
+    for (Int_t i=0; i<10; i++) {
         trksTree.GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
         // Assumes uniform position distribution of hit across group
@@ -58,14 +58,13 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
         // for each permutation of two layers
         // la < lb and treated first always
         // for (Int_t la=1; la<=4; la++) {
-        for (Int_t la=3; la<=3; la++) {
+        for (UShort_t la=3; la<=3; la++) {
             // for (Int_t lb=(la+1); lb<=4; lb++) {
-            for (Int_t lb=(la+1); lb<=4; lb++) {
+            for (UShort_t lb=(la+1); lb<=4; lb++) {
                 if (MissingHitsOnFixedLayers(la, lb, 
                    trackX, trackYGaussian))
                    continue;
                 getOtherLayers(la, lb, &lc, &ld);
-                // cout << la << ' ' << lb << ' ' << lc << ' ' << ld << '\n';
                 /*cout << "RunAnalysis\n";
                 cout << "  x hits " << trackX[la] << ' ' << trackX[lb] << '\n';
                 cout << "  y hits " << trackYGaussian[la] << ' ' << trackYGaussian[lb] << '\n';
@@ -132,35 +131,6 @@ Bool_t MissingHitsOnFixedLayers(UShort_t fixed1, UShort_t fixed2, map<UShort_t, 
                                (yTrack.find(fixed1) != yTrack.end()) && 
                                (yTrack.find(fixed2) != yTrack.end()) ) );
     return missingHit;
-}
-
-void getOtherLayers(Int_t la, Int_t lb, Int_t* lc, Int_t* ld) {
-    switch(la) {
-        case 1 : switch(lb) {
-                     case 2 : *lc=3; *ld=4;
-                              return;                        
-                     case 3 : *lc=2; *ld=4;
-                              return;
-                     case 4 : *lc=2; *ld=3;
-                              return;
-                     default : throw runtime_error("Invalid layer number.");
-                  }
-        case 2 : switch(lb) {
-                     case 3 : *lc=1; *ld=4;
-                              return;
-                     case 4 : *lc=1; *ld=3;
-                              return;
-                     default : throw runtime_error("Invalid layer number.");
-
-                 }
-        case 3 : switch(lb) {
-                     case 4 : *lc=1; *ld=2;
-                              return;
-                     default : throw runtime_error("Invalid layer number.");
-                 }
-        default : throw runtime_error("Invalid layer number.");
-    }
-    return;
 }
 
                /* for (auto itx = trackX.begin(); itx != trackX.end(); itx++) {
