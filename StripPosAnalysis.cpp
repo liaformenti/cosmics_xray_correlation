@@ -6,6 +6,8 @@
 #include <iostream>
 
 // Root includes
+#include <TROOT.h>
+#include <TStyle.h>
 #include <TFile.h>
 #include <TTree.h>
 #include <TSystem.h>
@@ -21,7 +23,8 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    
+    gStyle->SetOptStat(0);    
+
     // Check file
     if (argc < 2)
         throw runtime_error("Please specify the file to analyse.");
