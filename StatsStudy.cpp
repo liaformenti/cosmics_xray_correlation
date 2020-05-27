@@ -107,11 +107,29 @@ string StatsStudy::GetSquareBinHistName(UShort_t layer,
 }
 
 void StatsStudy::PrintSquareBinHistograms(string filename) {
+    TCanvas* c = new TCanvas();
+    c->Print((filename + "[").c_str());
+    UShort_t lc; UShort_t ld;
+    TH2F* hist; // temp var
     for (UShort_t la=1; la<=4; la++) {
         for (UShort_t lb=(la+1); lb<=4; lb++) {
-            cout << la << ' ' << lb << '\n';
+            getOtherLayers(la, lb, &lc, &ld);
+            hist = (TH2F*)pm->Get(GetSquareBinHistName(lc, la, lb));
+            if (hist->GetEntries() != 0) {
+                hist->Draw("Colz");
+                c->Print(filename.c_str());
+                c->Clear();
+            }
+            hist = (TH2F*)pm->Get(GetSquareBinHistName(ld, la, lb));
+            if (hist->GetEntries() != 0) {
+                hist->Draw("Colz");
+                c->Print(filename.c_str()); 
+                c->Clear();
+            }
         }
 
     }
+    c->Print((filename + "]").c_str());
+    delete c;
     return;
 } 
