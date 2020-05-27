@@ -106,6 +106,12 @@ string StatsStudy::GetSquareBinHistName(UShort_t layer,
     return name; 
 }
 
-void PrintSquareBinHistograms(string filename) {
+void StatsStudy::PrintSquareBinHistograms(string filename) {
+    for (UShort_t la=1; la<=4; la++) {
+        for (UShort_t lb=(la+1); lb<=4; lb++) {
+            cout << la << ' ' << lb << '\n';
+        }
+
+    }
     return;
 } 
