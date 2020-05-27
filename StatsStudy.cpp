@@ -8,7 +8,7 @@ using namespace std;
 StatsStudy::StatsStudy(std::vector<Residual>* _residuals,
                DetectorGeometry* _g,
                PlotManager* _pm) : 
-               residuals(_residuals), pm(_pm), g(_g) {
+               residuals(_residuals), g(_g), pm(_pm) {
     /*cout << "constructed\n";
     cout << g->GetZPosition(4) << '\n';
     pm->PrintAll();
@@ -86,5 +86,24 @@ void StatsStudy::FillSquareBinHistograms() {
                    to_string(r->lb) + "_width_" +                                         to_string(binWidth) + "mm"; 
         pm->Fill(plotName, r->x, r->y);
     }
+    TH2F* l1Hist = (TH2F*) pm->Get("Residual_layer1_fixedlayers34_width_" + 
+          to_string(binWidth) + "mm");
+    TH2F* l2Hist = (TH2F*) pm->Get("Residual_layer2_fixedlayers34_width_" + 
+          to_string(binWidth) + "mm");
+    TCanvas* c = new TCanvas("canvas", "canvas");
+    l1Hist->Draw("Colz");
+    c->Print(("Residual_layer1_fixedlayers34_width_" + 
+          to_string(binWidth) + "mm" + ".pdf").c_str());
+    delete c;
+    cout << GetSquareBinHistName(1, 3, 4);
     return;
 }
+string StatsStudy::GetSquareBinHistName(UShort_t layer, 
+             UShort_t fixedLayer1, UShort_t fixedLayer2) {
+    string name = "Residual_layer" + to_string(layer) +
+                  "_fixedlayers" + to_string(fixedLayer1) +
+                  to_string(fixedLayer2) + "_width_" +
+                  to_string(binWidth) + "mm";
+    return name; 
+}
+

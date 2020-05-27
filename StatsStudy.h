@@ -6,6 +6,7 @@
 #include <iostream>
 #include<vector>
 #include <math.h>
+#include <string.h>
 
 // Root includes
 #include <TCanvas.h>
@@ -26,15 +27,19 @@ class StatsStudy {
                PlotManager* _pm);
     ~StatsStudy(){};
 
-  // Members
-  Int_t binWidth; // square bin width in mm
-  // Methods
-  void InitializeSquareBinHistograms(Int_t width);
-  void FillSquareBinHistograms();
-
+    // Members
+    Int_t binWidth; // square bin width in mm
+    // Methods
+    void InitializeSquareBinHistograms(Int_t width);
+    void FillSquareBinHistograms();
+  
   private:
+    // Members
     std::vector<Residual>* residuals = nullptr;
     DetectorGeometry* g=nullptr;
     PlotManager* pm=nullptr;
+    // Methods
+    std::string GetSquareBinHistName(UShort_t layer, UShort_t fixedLayer1, UShort_t fixedLayer2);
+    
 };
 #endif
