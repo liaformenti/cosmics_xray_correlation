@@ -84,7 +84,7 @@ void StatsStudy::FillSquareBinHistograms() {
         plotName = "Residual_layer" + to_string(r->l) + 
                    "_fixedlayers" + to_string(r->la) + 
                    to_string(r->lb) + "_width_" +                                         to_string(binWidth) + "mm"; 
-        cout << plotName << '\n';
+        pm->Fill(plotName, r->x, r->y);
     }
     return;
 }
