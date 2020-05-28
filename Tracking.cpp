@@ -7,12 +7,13 @@ using namespace std;
 // Make tracks per event
 
 Tracking::Tracking(DetectorGeometry* _g, 
+                   PlotManager* _pm,
                    map<UShort_t, Double_t> hitsMapX,
                    map<UShort_t, Double_t> hitsUncertX,
                    map<UShort_t, Double_t> hitsMapY,
                    map<UShort_t, Double_t> hitsUncertY,
                    UShort_t fixedLayer1, UShort_t fixedLayer2)
-                   : g(_g){
+                   : g(_g), pm(_pm) {
     // Tracking
     // Initialize members
     hitsX = hitsMapX;
@@ -146,4 +147,7 @@ void Tracking::EvaluateAt(UShort_t layer) {
     // cout << "Tracking " << fitYPos[layer] - hitsY[layer] << ' ' << layer << ' ' << fitXPos[layer] << ' ' << fitYPos[layer] << ' ' << la << ' ' << lb << '\n';
 
     return;
+}
+void Tracking::InitializeUncertaintyHistograms() {
+    cout << "Init\n";
 }

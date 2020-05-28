@@ -39,10 +39,12 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
     nEntries = trksTree.GetEntries();
 
     UShort_t lc = 0; UShort_t ld = 0;
+    Tracking fake = Tracking();
+    fake.InitializeUncertaintyHistograms();
     // Replace i<x nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA.root with L3 and L4 fixed
-    for (Int_t i=0; i<5; i++) {
+    for (Int_t i=0; i<3; i++) {
         trksTree.GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
         // Assumes uniform position distribution of hit across group
@@ -69,7 +71,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
                 cout << "  x hits " << trackX[la] << ' ' << trackX[lb] << '\n';
                 cout << "  y hits " << trackYGaussian[la] << ' ' << trackYGaussian[lb] << '\n';
                 cout << "  z pos " << g->GetZPosition(la) << ' ' << g->GetZPosition(lb) << '\n';*/
-                Tracking myTrack(g, trackX, uncertX, trackYGaussian, sigma, la, lb);
+                Tracking myTrack(g, pm, trackX, uncertX, trackYGaussian, sigma, la, lb);
 
 
                 myTrack.Fit();
@@ -99,9 +101,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
             }
         // cout << '\n'; 
         } //end for each permutation of two layers
+        cout << "Iteration " << i << "of " <<  nEntries << '\n';
     } // end event loop
     StatsStudy statsStudy(&residuals, g, pm); 
-    statsStudy.InitializeSquareBinHistograms(500); // mm
+    statsStudy.InitializeSquareBinHistograms(40); // mm
     statsStudy.FillSquareBinHistograms();
     statsStudy.PrintSquareBinHistograms("residuals_square_bins_width_" + to_string(statsStudy.binWidth) + "mm.pdf");
     /*// Printing residuals vector

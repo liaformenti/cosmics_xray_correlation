@@ -17,14 +17,17 @@
 // tgc_analysis includes
 #include "DetectorGeometry.h"
 #include "DetectorGeometryTools.h"
+#include "PlotManager.h"
 
 // My includes
+#include "Helper.h"
 
 class Tracking {
   public:
     // Constructors
     Tracking(){};
     Tracking(DetectorGeometry* _g, 
+             PlotManager* _pm,
              std::map<UShort_t, Double_t> hitsMapX, 
              std::map<UShort_t, Double_t> hitsUncertX,
              std::map<UShort_t, Double_t> hitsMapY, 
@@ -51,14 +54,18 @@ class Tracking {
    UShort_t la;
    UShort_t lb;
 
-   void PlotFit(std::string outName);
+   // Should make this add to plot manager
+   void PlotFit(std::string outName); 
    
    // Methods
    void Fit();
    // For interpolation / extrapolation
    void EvaluateAt(UShort_t layer);
+   // To makes plots of uncertainties in evaluated positions
+   void InitializeUncertaintyHistograms();
   private:
     DetectorGeometry* g=nullptr;
+    PlotManager* pm=nullptr;
     Double_t* MapToArray(std::map<UShort_t, Double_t>*);
 };
 #endif
