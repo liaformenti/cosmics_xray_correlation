@@ -44,7 +44,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
     // Replace i<x nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA.root with L3 and L4 fixed
-    for (Int_t i=0; i<3; i++) {
+    for (Int_t i=0; i<100; i++) {
         trksTree.GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
         // Assumes uniform position distribution of hit across group
@@ -60,9 +60,9 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
         // for each permutation of two layers
         // la < lb and treated first always
         // for (Int_t la=1; la<=4; la++) {
-        for (UShort_t la=3; la<=3; la++) {
+        for (UShort_t la=2; la<=2; la++) {
             // for (Int_t lb=(la+1); lb<=4; lb++) {
-            for (UShort_t lb=(la+1); lb<=4; lb++) {
+            for (UShort_t lb=(la+1); lb<=3; lb++) {
                 if (MissingHitsOnFixedLayers(la, lb, 
                    trackX, trackYGaussian))
                    continue;
@@ -80,16 +80,20 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
                 Residual res;
                 if (myTrack.hitsY.find(lc) != myTrack.hitsY.end()) {
                     myTrack.EvaluateAt(lc);
+                    pm->Fill("uncertainty_x_evaluations_" + Combination(lc, la, lb).String(), myTrack.fitXUncerts.at(lc));
+                    pm->Fill("uncertainty_y_evaluations_" + Combination(lc, la, lb).String(), myTrack.fitYUncerts.at(lc));
                     res = Residual(myTrack, lc);
                     residuals.push_back(res);
-
+                    cout << lc << ' ' << myTrack.fitXUncerts[lc] << ' ' << myTrack.fitYUncerts[lc] << '\n';
                 }
                 if (myTrack.hitsY.find(ld) != myTrack.hitsY.end()) {
                     myTrack.EvaluateAt(ld);
+                    pm->Fill("uncertainty_x_evaluations_" + Combination(ld, la, lb).String(), myTrack.fitXUncerts.at(ld));
+                    pm->Fill("uncertainty_y_evaluations_" + Combination(ld, la, lb).String(), myTrack.fitYUncerts.at(ld));
                     res = Residual(myTrack, ld);
                     residuals.push_back(res);
+                    cout << ld << ' ' << myTrack.fitXUncerts[ld] << ' ' << myTrack.fitYUncerts[ld] << '\n';
                 }
-
                 // myTrack.PlotFit("fits_event_" + to_string(eventnumber) + "_fixed_layers_" + to_string(la) + "_" + to_string(lb) + ".pdf");
                 /*for (Int_t i=1; i<=4; i++){
                     cout << "Layer " << i << '\n';
@@ -101,12 +105,26 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
             }
         // cout << '\n'; 
         } //end for each permutation of two layers
-        cout << "Iteration " << i << " of " <<  nEntries << '\n';
+        // cout << "Iteration " << i << " of " <<  nEntries << '\n';
     } // end event loop
+    TCanvas *c = new TCanvas();
+    c->Print("Uncertainties.pdf[");
+    for (Int_t i=1; i<=2; i++) {
+        TH1F* uxhist = (TH1F*)pm->GetTH1F("uncertainty_x_evaluations_" + Combination(i, 3, 4).String());
+        TH1F* uyhist = (TH1F*)pm->GetTH1F("uncertainty_y_evaluations_" + Combination(i, 3, 4).String());
+        uxhist->Draw();
+        c->Print("Uncertainties.pdf");
+        c->Clear();
+        uyhist->Draw();
+        c->Print("Uncertainties.pdf");
+    }
+    c->Print("Uncertainties.pdf]");
+    delete c;
+
     StatsStudy statsStudy(&residuals, g, pm); 
     statsStudy.InitializeSquareBinHistograms(40); // mm
-    statsStudy.FillSquareBinHistograms();
-    statsStudy.PrintSquareBinHistograms("residuals_square_bins_width_" + to_string(statsStudy.binWidth) + "mm.pdf");
+    // statsStudy.FillSquareBinHistograms();
+    // statsStudy.PrintSquareBinHistograms("residuals_square_bins_width_" + to_string(statsStudy.binWidth) + "mm.pdf");
     /*// Printing residuals vector
     cout << "After loop\n";
     for (auto itr=residuals.begin(); itr!=residuals.end(); itr++) {
@@ -144,9 +162,9 @@ void initializeUncertaintyHistograms(PlotManager* pm) {
     for (auto v=combVec.begin(); v!=combVec.end(); v++) {
         // Just try the bin number and limits for now
         pm->Add(headerX + v->String(), headerX + v->String(),
-                50, 0, 50, myTH1F);
+                160, 10, 50, myTH1F);
         pm->Add(headerY + v->String(), headerY + v->String(),
-                20, 0, 20, myTH1F);
+                40, 0, 20, myTH1F);
     }
 }
                /* for (auto itx = trackX.begin(); itx != trackX.end(); itx++) {
