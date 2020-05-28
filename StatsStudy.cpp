@@ -116,13 +116,13 @@ void StatsStudy::PrintSquareBinHistograms(string filename) {
             getOtherLayers(la, lb, &lc, &ld);
             hist = (TH2F*)pm->Get(GetSquareBinHistName(lc, la, lb));
             if (hist->GetEntries() != 0) {
-                hist->Draw("Colz");
+                hist->Draw("ColzTEXT");
                 c->Print(filename.c_str());
                 c->Clear();
             }
             hist = (TH2F*)pm->Get(GetSquareBinHistName(ld, la, lb));
             if (hist->GetEntries() != 0) {
-                hist->Draw("Colz");
+                hist->Draw("ColzTEXT");
                 c->Print(filename.c_str()); 
                 c->Clear();
             }
