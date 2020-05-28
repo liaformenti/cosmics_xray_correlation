@@ -3,6 +3,10 @@
 
 using namespace std;
 
+string Combination::String() const {
+    string s = "layer" + to_string(layer) + "_fixedlayers" + to_string(fixed1) + to_string(fixed2);
+    return s;
+}
 void getOtherLayers(UShort_t la, UShort_t lb, UShort_t* lc, UShort_t* ld) {
     switch(la) {
         case 1 : switch(lb) {
@@ -31,4 +35,4 @@ void getOtherLayers(UShort_t la, UShort_t lb, UShort_t* lc, UShort_t* ld) {
     }
     return;
 }
-
+// string getCombinationPlotName(string header, string footer, UShort_t layer, UShort_t
