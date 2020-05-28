@@ -18,6 +18,8 @@ struct Combination {
   std::string String() const;
 };
 
+std::vector<Combination> combinationVector(); 
+
 void getOtherLayers(UShort_t la, UShort_t lb, UShort_t* lc, UShort_t* ld);
 // for creating strings of the form:
 // header_layerC_fixedLayersAB_footer

@@ -7,6 +7,23 @@ string Combination::String() const {
     string s = "layer" + to_string(layer) + "_fixedlayers" + to_string(fixed1) + to_string(fixed2);
     return s;
 }
+
+vector<Combination> combinationVector() {
+    vector<Combination> vComb;
+    vComb.push_back(Combination(3, 1, 2));
+    vComb.push_back(Combination(4, 1, 2));
+    vComb.push_back(Combination(2, 1, 3));
+    vComb.push_back(Combination(4, 1, 3));
+    vComb.push_back(Combination(2, 1, 4));
+    vComb.push_back(Combination(3, 1, 4));
+    vComb.push_back(Combination(1, 2, 3));
+    vComb.push_back(Combination(4, 2, 3));   
+    vComb.push_back(Combination(1, 2, 4));
+    vComb.push_back(Combination(3, 2, 4));
+    vComb.push_back(Combination(1, 3, 4));
+    vComb.push_back(Combination(2, 3, 4));
+    return vComb;
+}
 void getOtherLayers(UShort_t la, UShort_t lb, UShort_t* lc, UShort_t* ld) {
     switch(la) {
         case 1 : switch(lb) {
