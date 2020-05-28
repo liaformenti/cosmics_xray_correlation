@@ -61,8 +61,6 @@ class Tracking {
    void Fit();
    // For interpolation / extrapolation
    void EvaluateAt(UShort_t layer);
-   // To makes plots of uncertainties in evaluated positions
-   void InitializeUncertaintyHistograms();
   private:
     DetectorGeometry* g=nullptr;
     PlotManager* pm=nullptr;

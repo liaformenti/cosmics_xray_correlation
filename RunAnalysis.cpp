@@ -39,8 +39,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
     nEntries = trksTree.GetEntries();
 
     UShort_t lc = 0; UShort_t ld = 0;
-    Tracking fake = Tracking();
-    fake.InitializeUncertaintyHistograms();
+
+    initializeUncertaintyHistograms(pm);
     // Replace i<x nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA.root with L3 and L4 fixed
@@ -101,7 +101,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
             }
         // cout << '\n'; 
         } //end for each permutation of two layers
-        cout << "Iteration " << i << "of " <<  nEntries << '\n';
+        cout << "Iteration " << i << " of " <<  nEntries << '\n';
     } // end event loop
     StatsStudy statsStudy(&residuals, g, pm); 
     statsStudy.InitializeSquareBinHistograms(40); // mm
@@ -137,6 +137,18 @@ Bool_t MissingHitsOnFixedLayers(UShort_t fixed1, UShort_t fixed2, map<UShort_t, 
     return missingHit;
 }
 
+void initializeUncertaintyHistograms(PlotManager* pm) {
+    vector<Combination> combVec = combinationVector();
+    string headerX = "uncertainty_x_evaluations_";
+    string headerY = "uncertainty_y_evaluations_";
+    for (auto v=combVec.begin(); v!=combVec.end(); v++) {
+        // Just try the bin number and limits for now
+        pm->Add(headerX + v->String(), headerX + v->String(),
+                50, 0, 50, myTH1F);
+        pm->Add(headerY + v->String(), headerY + v->String(),
+                20, 0, 20, myTH1F);
+    }
+}
                /* for (auto itx = trackX.begin(); itx != trackX.end(); itx++) {
                      cout << itx->first << (trackX.find(itx->first) != trackX.end())<< '\n';
                      }

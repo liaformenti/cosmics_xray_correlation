@@ -148,6 +148,3 @@ void Tracking::EvaluateAt(UShort_t layer) {
 
     return;
 }
-void Tracking::InitializeUncertaintyHistograms() {
-    cout << "Init\n";
-}
