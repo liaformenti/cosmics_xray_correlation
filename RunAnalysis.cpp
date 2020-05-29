@@ -39,7 +39,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
     // Vector to store calculated residuals
     vector<Residual> residuals;
 
-    initializeUncertaintyHistograms(pm);
+    // initializeUncertaintyHistograms(pm);
     // Replace i<x=nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA_qs3p7.root with L3 and L4 fixed
@@ -71,13 +71,13 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
                 Residual res;
                 if (myTrack.hitsY.find(lc) != myTrack.hitsY.end()) {
                     myTrack.EvaluateAt(lc);
-                    pm->Fill("uncertainty_y_evaluations_" + Combination(lc, la, lb).String(), myTrack.fitYUncerts.at(lc));
+                    // pm->Fill("uncertainty_y_evaluations_" + Combination(lc, la, lb).String(), myTrack.fitYUncerts.at(lc));
                     res = Residual(myTrack, lc);
                     residuals.push_back(res);
                 }
                 if (myTrack.hitsY.find(ld) != myTrack.hitsY.end()) {
                     myTrack.EvaluateAt(ld);
-                    pm->Fill("uncertainty_y_evaluations_" + Combination(ld, la, lb).String(), myTrack.fitYUncerts.at(ld));
+                    // pm->Fill("uncertainty_y_evaluations_" + Combination(ld, la, lb).String(), myTrack.fitYUncerts.at(ld));
                     res = Residual(myTrack, ld);
                     residuals.push_back(res);
                 }
@@ -88,7 +88,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
         } // end lc loop
         // cout << "Iteration " << i << " of " <<  nEntries << '\n';
     } // end event loop
-    printUncertaintyHistograms(pm);
+    // printUncertaintyHistograms(pm);
     
     // Create square bin plots
     StatsStudy statsStudy(&residuals, g, pm); 
