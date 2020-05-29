@@ -23,9 +23,28 @@ void StatsStudy::InitializeSquareBinHistograms(Int_t width) {
    binWidth = width;
    pair<Double_t, Double_t> xlims = g->GetModuleLimitsX();
    pair<Double_t, Double_t> ylims = g->GetModuleLimitsY();
+   // Tradiational binning method
    Int_t nbinsx = floor((xlims.second - xlims.first)/width);
    Int_t nbinsy = floor((ylims.second - ylims.first)/width);
+   // Variable binning method
+   /*Int_t nbinsx = ceil((xlims.second - xlims.first)/width);
+   Int_t nbinsy = ceil((ylims.second - xlims.first)/width);
+   Double_t xBins[nbinsx + 1];
+   Double_t yBins[nbinsy + 1]; 
+   for (Int_t i=0; i<nbinsx; i++) 
+       xBins[i] = xlims.first + i*width;
+   xBins[nbinsx] = xlims.second;
+   for (Int_t i=0; i<nbinsy; i++)
+       yBins[i] = ylims.first + i*width;
+   yBins[nbinsy] = ylims.second;*/
    string name;
+   vector<Combination> combVec = combinationVector();
+   for (auto combo=combVec.begin(); combo!=combVec.end(); combo++) {
+       name = "Residual_" + combo->String() + "_width_" + to_string(binWidth) + "mm";
+        pm->Add(name, name, nbinsx, xlims.first, xlims.second,
+                nbinsy, ylims.first, ylims.second, myTH2F); 
+   }
+   /*string name;
    name = "Residual_layer3_fixedlayers12_width_" + 
           to_string(width) + "mm";
    pm->Add(name, name, nbinsx, xlims.first, xlims.second,
@@ -73,7 +92,7 @@ void StatsStudy::InitializeSquareBinHistograms(Int_t width) {
    name = "Residual_layer2_fixedlayers34_width_" + 
           to_string(width) + "mm";
    pm->Add(name, name, nbinsx, xlims.first, xlims.second,
-                       nbinsy, ylims.first, ylims.second, myTH2F); 
+                       nbinsy, ylims.first, ylims.second, myTH2F);*/
    return;
 }
 

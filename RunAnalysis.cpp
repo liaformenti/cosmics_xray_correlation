@@ -81,9 +81,9 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
                     res = Residual(myTrack, ld);
                     residuals.push_back(res);
                 }
-                if (i==0) {
+                /*if (i==0) {
                     myTrack.PlotFit("fits_event_" + to_string(eventnumber) + "_fixed_layers_" + to_string(la) + "_" + to_string(lb) + ".pdf");
-                } 
+                }*/ 
             } // end ld loop
         } // end lc loop
         // cout << "Iteration " << i << " of " <<  nEntries << '\n';
@@ -92,9 +92,9 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
     
     // Create square bin plots
     StatsStudy statsStudy(&residuals, g, pm); 
-    statsStudy.InitializeSquareBinHistograms(40); // mm
-    // statsStudy.FillSquareBinHistograms();
-    // statsStudy.PrintSquareBinHistograms("residuals_square_bins_width_" + to_string(statsStudy.binWidth) + "mm.pdf");
+    statsStudy.InitializeSquareBinHistograms(50); // mm
+    statsStudy.FillSquareBinHistograms();
+    statsStudy.PrintSquareBinHistograms("residuals_square_bins_width_" + to_string(statsStudy.binWidth) + "mm.pdf");
     return;
 }
 
