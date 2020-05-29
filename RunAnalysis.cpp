@@ -59,10 +59,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
         cout << "***********sigma************\n";*/
         // for each permutation of two layers
         // la < lb and treated first always
-        // for (Int_t la=1; la<=4; la++) {
-        for (UShort_t la=2; la<=2; la++) {
-            // for (Int_t lb=(la+1); lb<=4; lb++) {
-            for (UShort_t lb=(la+1); lb<=3; lb++) {
+        for (Int_t la=1; la<=4; la++) {
+        // for (UShort_t la=3; la<=3; la++) {
+            for (Int_t lb=(la+1); lb<=4; lb++) {
+            // for (UShort_t lb=(la+1); lb<=4; lb++) {
                 if (MissingHitsOnFixedLayers(la, lb, 
                    trackX, trackYGaussian))
                    continue;
@@ -80,19 +80,15 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
                 Residual res;
                 if (myTrack.hitsY.find(lc) != myTrack.hitsY.end()) {
                     myTrack.EvaluateAt(lc);
-                    pm->Fill("uncertainty_x_evaluations_" + Combination(lc, la, lb).String(), myTrack.fitXUncerts.at(lc));
                     pm->Fill("uncertainty_y_evaluations_" + Combination(lc, la, lb).String(), myTrack.fitYUncerts.at(lc));
                     res = Residual(myTrack, lc);
                     residuals.push_back(res);
-                    cout << lc << ' ' << myTrack.fitXUncerts[lc] << ' ' << myTrack.fitYUncerts[lc] << '\n';
                 }
                 if (myTrack.hitsY.find(ld) != myTrack.hitsY.end()) {
                     myTrack.EvaluateAt(ld);
-                    pm->Fill("uncertainty_x_evaluations_" + Combination(ld, la, lb).String(), myTrack.fitXUncerts.at(ld));
                     pm->Fill("uncertainty_y_evaluations_" + Combination(ld, la, lb).String(), myTrack.fitYUncerts.at(ld));
                     res = Residual(myTrack, ld);
                     residuals.push_back(res);
-                    cout << ld << ' ' << myTrack.fitXUncerts[ld] << ' ' << myTrack.fitYUncerts[ld] << '\n';
                 }
                 // myTrack.PlotFit("fits_event_" + to_string(eventnumber) + "_fixed_layers_" + to_string(la) + "_" + to_string(lb) + ".pdf");
                 /*for (Int_t i=1; i<=4; i++){
@@ -107,19 +103,17 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
         } //end for each permutation of two layers
         // cout << "Iteration " << i << " of " <<  nEntries << '\n';
     } // end event loop
-    TCanvas *c = new TCanvas();
-    c->Print("Uncertainties.pdf[");
-    for (Int_t i=1; i<=2; i++) {
-        TH1F* uxhist = (TH1F*)pm->GetTH1F("uncertainty_x_evaluations_" + Combination(i, 3, 4).String());
-        TH1F* uyhist = (TH1F*)pm->GetTH1F("uncertainty_y_evaluations_" + Combination(i, 3, 4).String());
-        uxhist->Draw();
-        c->Print("Uncertainties.pdf");
-        c->Clear();
+    printUncertaintyHistograms(pm);
+    /*TCanvas *c = new TCanvas();
+    c->Print("y_evaluation_uncertainties.pdf[");
+    vector<Combination> combVec = combinationVector();
+    for (auto comb=combVec.begin(); comb!=combVec.end(); comb++) {
+        TH1F* uyhist = (TH1F*)pm->GetTH1F("uncertainty_y_evaluations_" + comb->String());
         uyhist->Draw();
-        c->Print("Uncertainties.pdf");
+        c->Print("y_evaluation_uncertainties.pdf");
     }
-    c->Print("Uncertainties.pdf]");
-    delete c;
+    c->Print("y_evaluation_uncertainties.pdf]");
+    delete c;*/
 
     StatsStudy statsStudy(&residuals, g, pm); 
     statsStudy.InitializeSquareBinHistograms(40); // mm
@@ -157,15 +151,25 @@ Bool_t MissingHitsOnFixedLayers(UShort_t fixed1, UShort_t fixed2, map<UShort_t, 
 
 void initializeUncertaintyHistograms(PlotManager* pm) {
     vector<Combination> combVec = combinationVector();
-    string headerX = "uncertainty_x_evaluations_";
     string headerY = "uncertainty_y_evaluations_";
     for (auto v=combVec.begin(); v!=combVec.end(); v++) {
         // Just try the bin number and limits for now
-        pm->Add(headerX + v->String(), headerX + v->String(),
-                160, 10, 50, myTH1F);
         pm->Add(headerY + v->String(), headerY + v->String(),
-                40, 0, 20, myTH1F);
+                60, 0, 20, myTH1F);
     }
+}
+
+void printUncertaintyHistograms(PlotManager* pm) {
+    TCanvas *c = new TCanvas();
+    c->Print("y_evaluation_uncertainties.pdf[");
+    vector<Combination> combVec = combinationVector();
+    for (auto comb=combVec.begin(); comb!=combVec.end(); comb++) {
+        TH1F* uyhist = (TH1F*)pm->GetTH1F("uncertainty_y_evaluations_" + comb->String());
+        uyhist->Draw();
+        c->Print("y_evaluation_uncertainties.pdf");
+    }
+    c->Print("y_evaluation_uncertainties.pdf]");
+    delete c;
 }
                /* for (auto itx = trackX.begin(); itx != trackX.end(); itx++) {
                      cout << itx->first << (trackX.find(itx->first) != trackX.end())<< '\n';
