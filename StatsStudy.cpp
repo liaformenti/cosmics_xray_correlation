@@ -9,12 +9,6 @@ StatsStudy::StatsStudy(std::vector<Residual>* _residuals,
                DetectorGeometry* _g,
                PlotManager* _pm) : 
                residuals(_residuals), g(_g), pm(_pm) {
-    /*cout << "constructed\n";
-    cout << g->GetZPosition(4) << '\n';
-    pm->PrintAll();
-    for (auto r=residuals->begin(); r!=residuals->end(); r++) {
-        cout << r->res << ' ';
-    }*/
 }
 // Initializes histograms over layer area for each
 // fixed-layer / residual permutation.
@@ -24,75 +18,35 @@ void StatsStudy::InitializeSquareBinHistograms(Int_t width) {
    pair<Double_t, Double_t> xlims = g->GetModuleLimitsX();
    pair<Double_t, Double_t> ylims = g->GetModuleLimitsY();
    // Tradiational binning method
-   Int_t nbinsx = floor((xlims.second - xlims.first)/width);
-   Int_t nbinsy = floor((ylims.second - ylims.first)/width);
+   // Int_t nbinsx = floor((xlims.second - xlims.first)/width);
+   // Int_t nbinsy = floor((ylims.second - ylims.first)/width);
    // Variable binning method
-   /*Int_t nbinsx = ceil((xlims.second - xlims.first)/width);
-   Int_t nbinsy = ceil((ylims.second - xlims.first)/width);
+   Int_t nbinsx = ceil((xlims.second - xlims.first)/binWidth);
+   Int_t nbinsy = ceil((ylims.second - ylims.first)/binWidth);
    Double_t xBins[nbinsx + 1];
    Double_t yBins[nbinsy + 1]; 
-   for (Int_t i=0; i<nbinsx; i++) 
-       xBins[i] = xlims.first + i*width;
+   // cout << xlims.first << ' ' << xlims.second << ' ' << nbinsx << '\n';
+   for (Int_t i=0; i<nbinsx; i++) {
+       xBins[i] = xlims.first + i*binWidth;
+       // cout << xBins[i] << ' ';
+   }
    xBins[nbinsx] = xlims.second;
-   for (Int_t i=0; i<nbinsy; i++)
-       yBins[i] = ylims.first + i*width;
-   yBins[nbinsy] = ylims.second;*/
+   // cout << xBins[nbinsx] << '\n';
+   // cout << ylims.first << ' ' << ylims.second << ' ' << nbinsy << '\n';
+   for (Int_t i=0; i<nbinsy; i++) {
+       yBins[i] = ylims.first + i*binWidth;
+       // cout << yBins[i] << ' ';
+   }
+   yBins[nbinsy] = ylims.second;
+   // cout << yBins[nbinsy] << '\n';
    string name;
    vector<Combination> combVec = combinationVector();
    for (auto combo=combVec.begin(); combo!=combVec.end(); combo++) {
        name = "Residual_" + combo->String() + "_width_" + to_string(binWidth) + "mm";
-        pm->Add(name, name, nbinsx, xlims.first, xlims.second,
-                nbinsy, ylims.first, ylims.second, myTH2F); 
+        // pm->Add(name, name, nbinsx, xlims.first, xlims.second,
+        //        nbinsy, ylims.first, ylims.second, myTH2F); 
+        pm->Add(name, name, nbinsx, xBins, nbinsy, yBins, myTH2F);
    }
-   /*string name;
-   name = "Residual_layer3_fixedlayers12_width_" + 
-          to_string(width) + "mm";
-   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
-                       nbinsy, ylims.first, ylims.second, myTH2F); 
-   name = "Residual_layer4_fixedlayers12_width_" + 
-          to_string(width) + "mm";
-   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
-                       nbinsy, ylims.first, ylims.second, myTH2F); 
-   name = "Residual_layer2_fixedlayers13_width_" + 
-          to_string(width) + "mm";
-   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
-                       nbinsy, ylims.first, ylims.second, myTH2F); 
-   name = "Residual_layer4_fixedlayers13_width_" + 
-          to_string(width) + "mm";
-   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
-                       nbinsy, ylims.first, ylims.second, myTH2F); 
-   name = "Residual_layer2_fixedlayers14_width_" + 
-          to_string(width) + "mm";
-   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
-                       nbinsy, ylims.first, ylims.second, myTH2F); 
-   name = "Residual_layer3_fixedlayers14_width_" + 
-          to_string(width) + "mm";
-   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
-                       nbinsy, ylims.first, ylims.second, myTH2F); 
-   name = "Residual_layer1_fixedlayers23_width_" + 
-          to_string(width) + "mm";
-   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
-                       nbinsy, ylims.first, ylims.second, myTH2F); 
-   name = "Residual_layer4_fixedlayers23_width_" + 
-          to_string(width) + "mm";
-   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
-                       nbinsy, ylims.first, ylims.second, myTH2F); 
-   name = "Residual_layer1_fixedlayers24_width_" + 
-          to_string(width) + "mm";
-   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
-                       nbinsy, ylims.first, ylims.second, myTH2F); 
-   name = "Residual_layer3_fixedlayers24_width_" + 
-          to_string(width) + "mm";
-   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
-                       nbinsy, ylims.first, ylims.second, myTH2F); 
-   name = "Residual_layer1_fixedlayers34_width_" + 
-          to_string(width) + "mm";
-   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
-                       nbinsy, ylims.first, ylims.second, myTH2F); 
-   name = "Residual_layer2_fixedlayers34_width_" + 
-          to_string(width) + "mm";
-   pm->Add(name, name, nbinsx, xlims.first, xlims.second,
-                       nbinsy, ylims.first, ylims.second, myTH2F);*/
    return;
 }
 
