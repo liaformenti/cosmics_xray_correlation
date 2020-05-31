@@ -43,7 +43,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
     // Replace i<x=nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA_qs3p7.root with L3 and L4 fixed
-    for (Int_t i=0; i<100; i++) {
+    for (Int_t i=0; i<nEntries; i++) {
         trksTree.GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
         // Assumes uniform position distribution of hit across group
@@ -86,13 +86,15 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
                 }*/ 
             } // end ld loop
         } // end lc loop
-        // cout << "Iteration " << i << " of " <<  nEntries << '\n';
+        if (i%100==0) {
+            cout << "Iteration " << i << " of " <<  nEntries << '\n';
+        }
     } // end event loop
     // printUncertaintyHistograms(pm);
     
     // Create square bin plots
     StatsStudy statsStudy(&residuals, g, pm); 
-    statsStudy.InitializeSquareBinHistograms(50); // mm
+    statsStudy.InitializeSquareBinHistograms(30); // mm
     statsStudy.FillSquareBinHistograms();
     statsStudy.PrintSquareBinHistograms("residuals_square_bins_width_" + to_string(statsStudy.binWidth) + "mm.pdf");
     return;

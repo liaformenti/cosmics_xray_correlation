@@ -26,19 +26,28 @@ void StatsStudy::InitializeSquareBinHistograms(Int_t width) {
    Double_t xBins[nbinsx + 1];
    Double_t yBins[nbinsy + 1]; 
    // cout << xlims.first << ' ' << xlims.second << ' ' << nbinsx << '\n';
+   // highest x bin width not controlled
    for (Int_t i=0; i<nbinsx; i++) {
        xBins[i] = xlims.first + i*binWidth;
        // cout << xBins[i] << ' ';
    }
    xBins[nbinsx] = xlims.second;
    // cout << xBins[nbinsx] << '\n';
-   // cout << ylims.first << ' ' << ylims.second << ' ' << nbinsy << '\n';
-   for (Int_t i=0; i<nbinsy; i++) {
+   // cout << ylims.first << ' ' << ylims.second << ' ' << nbinsy << ' ' << nbinsy*binWidth << '\n';
+   // highest y bin width not controlled
+   /*for (Int_t i=0; i<nbinsy; i++) {
        yBins[i] = ylims.first + i*binWidth;
        // cout << yBins[i] << ' ';
    }
-   yBins[nbinsy] = ylims.second;
+   yBins[nbinsy] = ylims.second;*/
+   // lowest y bin width not controlled
    // cout << yBins[nbinsy] << '\n';
+   for (Int_t i=0; i<nbinsy; i++) {
+       yBins[nbinsy - i] = ylims.second - i*binWidth;
+       // cout << yBins[nbinsy - i] << ' ';
+   }
+   yBins[0] = ylims.first;
+   // cout << yBins[0] << '\n';
    string name;
    vector<Combination> combVec = combinationVector();
    for (auto combo=combVec.begin(); combo!=combVec.end(); combo++) {
