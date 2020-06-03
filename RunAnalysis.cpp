@@ -86,9 +86,9 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
                 }*/ 
             } // end ld loop
         } // end lc loop
-        if (i%100==0) {
+        /*if (i%100==0) {
             cout << "Iteration " << i << " of " <<  nEntries << '\n';
-        }
+        }*/
     } // end event loop
     // printUncertaintyHistograms(pm);
     
