@@ -83,10 +83,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
                 }
                 /*if (i==0) {
                     myTrack.PlotFit("fits_event_" + to_string(eventnumber) + "_fixed_layers_" + to_string(la) + "_" + to_string(lb) + ".pdf");
-                }*/ 
+                }*/
             } // end ld loop
         } // end lc loop
-        /*if (i%100==0) {
+        /*if (i%1000==0) {
             cout << "Iteration " << i << " of " <<  nEntries << '\n';
         }*/
     } // end event loop
@@ -94,7 +94,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
     
     // Create square bin plots
     StatsStudy statsStudy(&residuals, g, pm); 
-    statsStudy.InitializeSquareBinHistograms(30); // mm
+    statsStudy.InitializeSquareBinHistograms(20); // mm
     statsStudy.FillSquareBinHistograms();
     statsStudy.PrintSquareBinHistograms("residuals_square_bins_width_" + to_string(statsStudy.binWidth) + "mm.pdf");
     return;

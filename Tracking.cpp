@@ -51,14 +51,14 @@ void Tracking::Fit() {
 
     // Fit
     graphX = TGraphErrors(2, z, x, ez, ex);
-    resultX = graphX.Fit("1 ++ x", "SQ");
+    resultX = graphX.Fit("pol1", "SQF");
     // cout << "CovX " << resultX->GetCovarianceMatrix()[0][1] << '\n';
-    fitXFcn = graphX.GetFunction("1 ++ x");
+    fitXFcn = graphX.GetFunction("pol1");
 
     graphY = TGraphErrors(2, z, y, ez, ey);
-    resultY = graphY.Fit("1 ++ x", "SQ");
+    resultY = graphY.Fit("pol1", "SQF");
     // cout << "CovY " << resultY->GetCovarianceMatrix()[0][1] << '\n';
-    fitYFcn = graphY.GetFunction("1 ++ x");
+    fitYFcn = graphY.GetFunction("pol1");
 
     delete [] z;
     delete [] x;
