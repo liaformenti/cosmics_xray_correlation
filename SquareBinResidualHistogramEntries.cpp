@@ -1,11 +1,11 @@
-#define StatsStudy_cxx
-#include "StatsStudy.h"
+#define SquareBinResidualHistogramEntries_cxx
+#include "SquareBinResidualHistogramEntries.h"
 
 using namespace std;
 
 // To study bin sizes regardless of x-ray position
 
-StatsStudy::StatsStudy(std::vector<Residual>* _residuals,
+SquareBinResidualHistogramEntries::SquareBinResidualHistogramEntries(std::vector<Residual>* _residuals,
                DetectorGeometry* _g,
                PlotManager* _pm) : 
                residuals(_residuals), g(_g), pm(_pm) {
@@ -13,7 +13,7 @@ StatsStudy::StatsStudy(std::vector<Residual>* _residuals,
 // Initializes histograms over layer area for each
 // fixed-layer / residual permutation.
 // *** Width in mm *** 
-void StatsStudy::InitializeSquareBinHistograms(Int_t width) {
+void SquareBinResidualHistogramEntries::InitializeSquareBinHistograms(Int_t width) {
    binWidth = width;
    pair<Double_t, Double_t> xlims = g->GetModuleLimitsX();
    pair<Double_t, Double_t> ylims = g->GetModuleLimitsY();
@@ -60,7 +60,7 @@ void StatsStudy::InitializeSquareBinHistograms(Int_t width) {
 }
 
 // Loops through residuals and puts them in appropriate bins and hists
-void StatsStudy::FillSquareBinHistograms() {
+void SquareBinResidualHistogramEntries::FillSquareBinHistograms() {
     string plotName;
     for (auto r=residuals->begin(); r!=residuals->end(); r++) {
         plotName = GetSquareBinHistName(r->l, r->la, r->lb);
@@ -79,7 +79,7 @@ void StatsStudy::FillSquareBinHistograms() {
     return;
 }
 
-string StatsStudy::GetSquareBinHistName(UShort_t layer, 
+string SquareBinResidualHistogramEntries::GetSquareBinHistName(UShort_t layer, 
              UShort_t fixedLayer1, UShort_t fixedLayer2) {
     string name = "Residual_layer" + to_string(layer) +
                   "_fixedlayers" + to_string(fixedLayer1) +
@@ -88,7 +88,7 @@ string StatsStudy::GetSquareBinHistName(UShort_t layer,
     return name; 
 }
 
-void StatsStudy::PrintSquareBinHistograms(string filename) {
+void SquareBinResidualHistogramEntries::PrintSquareBinHistograms(string filename) {
     TCanvas* c = new TCanvas();
     c->Print((filename + "[").c_str());
     UShort_t lc; UShort_t ld;

@@ -1,6 +1,6 @@
 // Class for creating histograms to study bin sizes
-#ifndef StatsStudy_h
-#define StatsStudy_h
+#ifndef SquareBinResidualHistogramEntries_h
+#define SquareBinResidualHistogramEntries_h
 
 // C++ includes
 #include <iostream>
@@ -20,13 +20,13 @@
 #include "Residual.h"
 #include "Helper.h"
 
-class StatsStudy {
+class SquareBinResidualHistogramEntries {
   public:
-    StatsStudy(){};
-    StatsStudy(std::vector<Residual>* _residuals,
+    SquareBinResidualHistogramEntries(){};
+    SquareBinResidualHistogramEntries(std::vector<Residual>* _residuals,
                DetectorGeometry* _g,
                PlotManager* _pm);
-    ~StatsStudy(){};
+    ~SquareBinResidualHistogramEntries(){};
 
     // Members
     Int_t binWidth; // square bin width in mm

@@ -93,7 +93,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
     // printUncertaintyHistograms(pm);
     
     // Create square bin plots
-    StatsStudy statsStudy(&residuals, g, pm); 
+    SquareBinResidualHistogramEntries statsStudy(&residuals, g, pm); 
     statsStudy.InitializeSquareBinHistograms(20); // mm
     statsStudy.FillSquareBinHistograms();
     statsStudy.PrintSquareBinHistograms("residuals_square_bins_width_" + to_string(statsStudy.binWidth) + "mm.pdf");
