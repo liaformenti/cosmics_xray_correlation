@@ -24,6 +24,7 @@
 #include "Residual.h"
 #include "SquareBinResidualHistogramEntries.h"
 #include "Helper.h"
+#include "StatsStudy.h"
 
 void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorGeometry* _g);
 

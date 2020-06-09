@@ -98,13 +98,13 @@ void SquareBinResidualHistogramEntries::PrintSquareBinHistograms(string filename
             getOtherLayers(la, lb, &lc, &ld);
             hist = (TH2F*)pm->Get(GetSquareBinHistName(lc, la, lb));
             if (hist->GetEntries() != 0) {
-                hist->Draw("ColzTEXT");
+                hist->Draw("Colz");
                 c->Print(filename.c_str());
                 c->Clear();
             }
             hist = (TH2F*)pm->Get(GetSquareBinHistName(ld, la, lb));
             if (hist->GetEntries() != 0) {
-                hist->Draw("ColzTEXT");
+                hist->Draw("Colz");
                 c->Print(filename.c_str()); 
                 c->Clear();
             }

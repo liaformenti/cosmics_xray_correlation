@@ -1,4 +1,4 @@
-// Class for creating histograms to study bin sizes
+// Class for creating 2D histograms to study no. entries / square bin
 #ifndef SquareBinResidualHistogramEntries_h
 #define SquareBinResidualHistogramEntries_h
 
