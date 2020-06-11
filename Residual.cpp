@@ -25,3 +25,6 @@ Residual::Residual(Tracking &trackInfo, UShort_t layer) {
     res = trackInfo.fitYPos[l] - trackInfo.hitsY[l];
     // cout << "Constr.2 " << res << ' ' << l << ' ' << x << ' ' << y << ' ' << la << ' ' << lb << '\n';
 }
+Combination Residual::GetCombo() {
+    return Combination(l, la, lb);
+}

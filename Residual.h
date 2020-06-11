@@ -32,5 +32,6 @@ class Residual {
     Double_t y;
     UShort_t la;
     UShort_t lb;
+    Combination GetCombo();
 };
 #endif
