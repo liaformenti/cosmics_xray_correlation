@@ -58,11 +58,13 @@ void StatsStudy::InitializeResidualTH1Fs(
         }
     }
 }
-/*void StatsStudy::FillResidualTH1Fs() {
+void StatsStudy::FillResidualTH1Fs() {
     string plotName;
     Int_t xBinNum, yBinNum; // access correct histogram by bin num.
-    for (auto r=residuals->begin(); r!=residuals.end(); r++) {
-        
+    for (auto r=residuals->begin(); r!=residuals->end(); r++) {
+        Combination c = r->GetCombo();        
+        cout << c.String() << '\n';
+        break;
     }
 
-}*/
+}

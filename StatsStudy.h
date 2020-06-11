@@ -33,7 +33,7 @@ class StatsStudy {
     Int_t wx; // width of bins in x (mm)
     Int_t wy; // width of bins in y (mm)
     void InitializeResidualTH1Fs(Int_t xBinWidth, Int_t yBinWidth);
-
+    void FillResidualTH1Fs();
   private:
     std::vector<Residual>* residuals = nullptr;
     DetectorGeometry* g = nullptr; 
