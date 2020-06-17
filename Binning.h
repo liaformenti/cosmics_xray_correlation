@@ -25,16 +25,21 @@ class Binning {
     ~Binning(){};
 
     // Members
-    // Main member to hold bin boundaries for each layer
-    // std::map<UShort_t, Float_t*> xBinEdges;
-    // std::map<UShort_t, Float_t*> yBinEdges;
-    std::map<UShort_t, std::vector<Float_t>> xBinEdges;
-    std::map<UShort_t, std::vector<Float_t>> yBinEdges;
-
+    std::vector<Float_t> xBinEdges;
+    std::vector<Float_t> yBinEdges;
+    Int_t nBinsX;
+    Int_t nBinsY; 
+    // Old
+    // std::map<UShort_t, std::vector<Float_t>> xBinEdges;
+    // std::map<UShort_t, std::vector<Float_t>> yBinEdges;
+    // std::vector<std::vector<Float_t>> xBinEdges;
+    // std::vector<std::vector<Float_t>> yBinEdges;
     // Bin widths in mm initialized to negative and remain so unless
     // widths for binning scheme are fixed (re-init in constructor)
-    Int_t xw = -1; 
-    Int_t yw = -1; 
+    // Int_t xw = -1; 
+    // Int_t yw = -1; 
+    // std::vector<Int_t> xw = {-1};
+    // std::vector<Int_t> yw = {-1};
 
   private:
     // Members
