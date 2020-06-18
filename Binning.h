@@ -21,6 +21,7 @@ class Binning {
   public:
     Binning(){};
     // Takes in bin widths in mm
+    // Rectangular bins
     Binning(Int_t xWidth, Int_t yWidth, DetectorGeometry* _g);
     ~Binning(){};
 
