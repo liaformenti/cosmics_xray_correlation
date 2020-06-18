@@ -34,8 +34,11 @@ class ResPlots {
                PlotManager* _pm);
     ~ResPlots(){};
  
-    // Members
+    // Create members
     void CreateNumEntriesTH2Is(std::string nameBase);
+    // Print members
+    void PrintNumEntriesTH2Is(std::string nameBase, 
+                              std::string filename);
     // void FillResidualTH1Fs();
   private:
     std::vector<Residual>* residuals = nullptr;

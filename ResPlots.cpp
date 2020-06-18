@@ -36,6 +36,24 @@ void ResPlots::CreateNumEntriesTH2Is(string nameBase) {
     return;
 }
 
+void ResPlots::PrintNumEntriesTH2Is(string nameBase, string filename) {
+    TCanvas* c = new TCanvas();
+    c->Print((filename + "[").c_str());
+    TH2I* hist; // temp var
+    vector<Combination> comboVec = combinationVector();
+    for (auto combo=comboVec.begin(); combo!=comboVec.end(); combo++) {
+        hist = (TH2I*)pm->Get(nameBase + combo->String());  
+        if (hist->GetEntries() != 0) {
+            hist->Draw("Colz");
+            c->Print(filename.c_str());
+            c->Clear();
+        }
+    }
+    c->Print((filename + "]").c_str());
+    delete c;
+    return;
+}
+
 // Note that bin edges vectors of binning are transfered to Double_t
 // arrays for use with PlotManager methods.
 void ResPlots::InitializeNumEntriesTH2Is(string nameBase) {
