@@ -14,6 +14,9 @@
 // Root includes
 #include <TCanvas.h>
 #include <TH2F.h>
+#include <TH1F.h>
+#include <TH1I.h>
+#include <TH2I.h>
 
 // tgc_analysis includes
 #include "DetectorGeometry.h"
@@ -36,6 +39,7 @@ class ResPlots {
  
     // Create members
     void CreateNumEntriesTH2Is(std::string nameBase);
+    void CreatePosBinnedResPlots(std::string nameBase);
     // Print members
     void PrintNumEntriesTH2Is(std::string nameBase, 
                               std::string filename);
@@ -47,6 +51,7 @@ class ResPlots {
     PlotManager* pm = nullptr;
     // Initialization methods
     void InitializeNumEntriesTH2Is(std::string nameBase);
+    void InitializePosBinnedResPlots(std::string nameBase);
     // void InitializeResidualTH1Fs(Int_t xBinWidth, Int_t yBinWidth);
 };
 #endif

@@ -22,6 +22,11 @@ void ResPlots::CreateNumEntriesTH2Is(string nameBase) {
     }
     return;
 }
+// Name base is for TH2s. For TH1, prefix is residuals_
+void ResPlots::CreatePosBinnedResPlots(string nameBase) {
+    InitializePosBinnedResPlots(nameBase);
+    return;
+}
 
 void ResPlots::PrintNumEntriesTH2Is(string nameBase, string filename) {
     TCanvas* c = new TCanvas();
@@ -55,5 +60,41 @@ void ResPlots::InitializeNumEntriesTH2Is(string nameBase) {
         pm->Add(name, name, binning->nBinsX, xEdges,
                binning->nBinsY, yEdges, myTH2I); 
     }
+    return;
+}
+
+void ResPlots::InitializePosBinnedResPlots(string nameBase) {
+    string name;
+    string title;
+    vector<Combination> comboVec = combinationVector();
+    // Only go up to minus 1 as to not make plot starting from last bin
+    for (auto x=binning->xBinEdges.begin(); 
+    x!=binning->xBinEdges.end()-1; x++) {
+        for (auto y=binning->yBinEdges.begin(); y!=binning->yBinEdges.end()-1; y++) {
+                 for(auto combo=comboVec.begin(); 
+                 combo!=comboVec.end(); combo++){ 
+                     name = "residuals_x_in_" + to_string(*x) + "-";
+                     name += to_string(*x+1) + "_y_in_";
+                     name += to_string(*y);
+                     name += "-" + to_string(*y+1) + "_";
+                     name += combo->String();
+                     title = "Layer: ";
+                     title += to_string(combo->layer);
+                     title +=", Fixed Layers:";
+                     title += to_string(combo->fixed1);
+                     title += to_string(combo->fixed2);
+	             title += ", x#in["+Tools::CStr(*x,2)+",";
+                     title += Tools::CStr(*x+1,2)+"] mm, ";
+	             title += "y#in["+Tools::CStr(*y,2)+",";
+                     title += Tools::CStr(*y+1,2)+"] mm";
+	             title += ";Residuals [mm];Tracks";
+
+                    // Guessed appropriate range and num bins
+                    pm->Add(name, title, 100, -10, 10, myTH1I);
+            }
+        }
+    }
+    // Add TH2Fs
+    // Start with just sigma for now.
     return;
 }
