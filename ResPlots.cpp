@@ -20,19 +20,6 @@ void ResPlots::CreateNumEntriesTH2Is(string nameBase) {
         name = nameBase + combo.String();
         pm->Fill(name, r->x, r->y);
     }
-    /*Combination c1(1,3,4);
-    Combination c2(2,3,4);
-    TCanvas* c = new TCanvas("canvas", "canvas");
-    c->Print("test.pdf[");
-    TH2F* l1Hist = (TH2F*) pm->Get(nameBase+c1.String());
-    l1Hist->Draw("Colz");
-    c->Print("test.pdf");
-    c->Clear();
-    TH2F* l2Hist = (TH2F*) pm->Get(nameBase+c2.String());
-    l2Hist->Draw("Colz");
-    c->Print("test.pdf");
-    c->Print("test.pdf]");
-    delete c;*/
     return;
 }
 
