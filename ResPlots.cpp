@@ -63,9 +63,8 @@ void ResPlots::PrintNumEntriesTH2Is(string nameBase, string filename) {
     return;
 }
 
-// Names of residual Gaussians based on x and y position bin number
-// Starts from lowest coord value with bin number 1 and increments
-// in both directions.
+// Names of position binned residual plots based on x and y position 
+// bin number. Starts from lowest coord value with bin number 1 and increments in both directions.
 void ResPlots::InitializePosBinnedResPlots(string nameBase) {
     string name;
     string title;
@@ -74,10 +73,7 @@ void ResPlots::InitializePosBinnedResPlots(string nameBase) {
     Float_t y, yp1;
     vector<Combination> comboVec = combinationVector();
     // Only go up to minus 1 as to not make plot starting from last bin
-    // for (auto x=binning->xBinEdges.begin(); 
-    // x!=binning->xBinEdges.end()-1; x++) {
     for (Int_t i=0; i<binning->xBinEdges.size()-1; i++) {
-        // for (auto y=binning->yBinEdges.begin(); y!=binning->yBinEdges.end()-1; y++) {
         for (Int_t j=0; j<binning->yBinEdges.size()-1; j++) {
                  for(auto combo=comboVec.begin(); 
                  combo!=comboVec.end(); combo++){ 
@@ -85,11 +81,6 @@ void ResPlots::InitializePosBinnedResPlots(string nameBase) {
                      xp1 = binning->xBinEdges.at(i+1);
                      y = binning->yBinEdges.at(j);
                      yp1 = binning->yBinEdges.at(j+1);
-                     // cout << x << ' ' << xp1 << ' ' << y << ' ' << yp1 << '\n';
-                     // name = "residuals_x_in_" + to_string(*x) + "-";
-                     // name += to_string(*x+1) + "_y_in_";
-                     // name += to_string(*y);
-                     // name += "-" + to_string(*y+1) + "_";
                      name = "residuals_xbin_" + to_string(i+1);
                      name += "_ybin_" + to_string(j+1) + "_";
                      name += combo->String();
@@ -98,10 +89,6 @@ void ResPlots::InitializePosBinnedResPlots(string nameBase) {
                      title +=", Fixed Layers: ";
                      title += to_string(combo->fixed1);
                      title += to_string(combo->fixed2);
-	             // title += ", x#in["+Tools::CStr(*x,2)+",";
-                     // title += Tools::CStr(*x+1,2)+"] mm, ";
-	             // title += "y#in["+Tools::CStr(*y,2)+",";
-                     // title += Tools::CStr(*y+1,2)+"] mm";
                      title += ", x#in["+Tools::CStr(x,2)+",";
                      title += Tools::CStr(xp1,2)+"] mm, ";
 	             title += "y#in["+Tools::CStr(y,2)+",";
@@ -147,11 +134,6 @@ void ResPlots::CreatePosBinnedResPlots(string nameBase) {
        name += to_string(ybin) + "_" + combo.String();
        pm->Fill(name, r->res);
     }
-    /*TCanvas* c = new TCanvas();
-    TH1I* hist = (TH1I*)pm->Get("residuals_xbin_1_ybin_1_layer1_fixedlayers34");
-    hist->Draw();
-    c->Print("resPlot.pdf");
-    return;*/
 }
 
 void ResPlots::PrintPosBinnedResPlots(string nameBase, string filename){
