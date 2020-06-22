@@ -9,95 +9,6 @@ ResPlots::ResPlots(vector<Residual>* _residuals,
                    PlotManager* _pm) : residuals(_residuals),
                    binning(_binning), g(_g), pm(_pm) {}
 
-// Shows number of entries in each bin
-// Plot for each combination
-void ResPlots::CreateNumEntriesTH2Is(string nameBase) {
-    InitializeNumEntriesTH2Is(nameBase);
-    string name;
-    Combination combo;
-    for (auto r=residuals->begin(); r!=residuals->end(); r++) {
-        combo = r->GetCombo(); 
-        name = nameBase + combo.String();
-        pm->Fill(name, r->x, r->y);
-    }
-    return;
-}
-// Name base is for TH2s. For TH1, prefix is residuals_
-void ResPlots::CreatePosBinnedResPlots(string nameBase) {
-    InitializePosBinnedResPlots(nameBase);
-    Combination combo;
-    Int_t xbin, ybin; // bin numbers in x and y
-    string name;
-    for (auto r=residuals->begin(); r!=residuals->end(); r++) {
-        combo = r->GetCombo();
-        // Get bin numbers
-        for (Int_t i=0; i<binning->xBinEdges.size()-1; i++) {
-            if ( (binning->xBinEdges.at(i) < r->x) && 
-                 (r->x < binning->xBinEdges.at(i+1)) ) {
-                xbin = i+1;
-                break;
-            }
-        }
-        for (Int_t i=0; i<binning->yBinEdges.size()-1; i++) {
-            if ( (binning->yBinEdges.at(i) < r->y) && 
-                 (r->y < binning->yBinEdges.at(i+1)) ) {
-                ybin = i+1;
-                break;
-            }
-        }
-        // Fill plots
-       name = "residuals_xbin_" + to_string(xbin) + "_ybin_";
-       name += to_string(ybin) + "_" + combo.String();
-       pm->Fill(name, r->res);
-    }
-    /*TCanvas* c = new TCanvas();
-    TH1I* hist = (TH1I*)pm->Get("residuals_xbin_1_ybin_1_layer1_fixedlayers34");
-    hist->Draw();
-    c->Print("resPlot.pdf");
-    return;*/
-}
-
-void ResPlots::PrintNumEntriesTH2Is(string nameBase, string filename) {
-    TCanvas* c = new TCanvas();
-    c->Print((filename + "[").c_str());
-    TH2I* hist; // temp var
-    vector<Combination> comboVec = combinationVector();
-    for (auto combo=comboVec.begin(); combo!=comboVec.end(); combo++) {
-        hist = (TH2I*)pm->Get(nameBase + combo->String());  
-        if (hist->GetEntries() != 0) {
-            hist->Draw("Colz");
-            c->Print(filename.c_str());
-            c->Clear();
-        }
-    }
-    c->Print((filename + "]").c_str());
-    delete c;
-    return;
-}
-
-void ResPlots::PrintPosBinnedResPlots(string nameBase, string filename){
-    TCanvas* c = new TCanvas();
-    c->Print((filename +"[").c_str());
-    TH1I* hist; // temp var
-    vector<Combination> comboVec = combinationVector();
-    string name;
-    for (auto combo=comboVec.begin(); combo!=comboVec.end(); combo++) {
-        for (Int_t i=0; i<binning->xBinEdges.size()-1; i++) {
-            for (Int_t j=0; j<binning->yBinEdges.size()-1; j++) {
-                name = "residuals_xbin_" + to_string(i+1) + "_ybin_";
-                name += to_string(j+1) + "_" + combo->String();
-                hist = (TH1I*)pm->Get(name);
-                if (hist->GetEntries() != 0) {
-                    hist->Draw();
-                    c->Print(filename.c_str());
-                }
-            }
-        }
-    }
-    c->Print((filename + "]").c_str());
-    delete c;
-    return;
-}
 // Note that bin edges vectors of binning are transfered to Double_t
 // arrays for use with PlotManager methods.
 void ResPlots::InitializeNumEntriesTH2Is(string nameBase) {
@@ -117,6 +28,38 @@ void ResPlots::InitializeNumEntriesTH2Is(string nameBase) {
         pm->Add(name, title, binning->nBinsX, xEdges,
                binning->nBinsY, yEdges, myTH2I); 
     }
+    return;
+}
+
+// Shows number of entries in each bin
+// Plot for each combination
+void ResPlots::CreateNumEntriesTH2Is(string nameBase) {
+    InitializeNumEntriesTH2Is(nameBase);
+    string name;
+    Combination combo;
+    for (auto r=residuals->begin(); r!=residuals->end(); r++) {
+        combo = r->GetCombo(); 
+        name = nameBase + combo.String();
+        pm->Fill(name, r->x, r->y);
+    }
+    return;
+}
+
+void ResPlots::PrintNumEntriesTH2Is(string nameBase, string filename) {
+    TCanvas* c = new TCanvas();
+    c->Print((filename + "[").c_str());
+    TH2I* hist; // temp var
+    vector<Combination> comboVec = combinationVector();
+    for (auto combo=comboVec.begin(); combo!=comboVec.end(); combo++) {
+        hist = (TH2I*)pm->Get(nameBase + combo->String());  
+        if (hist->GetEntries() != 0) {
+            hist->Draw("Colz");
+            c->Print(filename.c_str());
+            c->Clear();
+        }
+    }
+    c->Print((filename + "]").c_str());
+    delete c;
     return;
 }
 
@@ -174,5 +117,63 @@ void ResPlots::InitializePosBinnedResPlots(string nameBase) {
     /*for(auto combo=comboVec.begin(); combo!=comboVec.end(); combo++) {
         name = 
     }*/
+    return;
+}
+// Name base is for TH2s. For TH1, prefix is residuals_
+void ResPlots::CreatePosBinnedResPlots(string nameBase) {
+    InitializePosBinnedResPlots(nameBase);
+    Combination combo;
+    Int_t xbin, ybin; // bin numbers in x and y
+    string name;
+    for (auto r=residuals->begin(); r!=residuals->end(); r++) {
+        combo = r->GetCombo();
+        // Get bin numbers
+        for (Int_t i=0; i<binning->xBinEdges.size()-1; i++) {
+            if ( (binning->xBinEdges.at(i) < r->x) && 
+                 (r->x < binning->xBinEdges.at(i+1)) ) {
+                xbin = i+1;
+                break;
+            }
+        }
+        for (Int_t i=0; i<binning->yBinEdges.size()-1; i++) {
+            if ( (binning->yBinEdges.at(i) < r->y) && 
+                 (r->y < binning->yBinEdges.at(i+1)) ) {
+                ybin = i+1;
+                break;
+            }
+        }
+        // Fill plots
+       name = "residuals_xbin_" + to_string(xbin) + "_ybin_";
+       name += to_string(ybin) + "_" + combo.String();
+       pm->Fill(name, r->res);
+    }
+    /*TCanvas* c = new TCanvas();
+    TH1I* hist = (TH1I*)pm->Get("residuals_xbin_1_ybin_1_layer1_fixedlayers34");
+    hist->Draw();
+    c->Print("resPlot.pdf");
+    return;*/
+}
+
+void ResPlots::PrintPosBinnedResPlots(string nameBase, string filename){
+    TCanvas* c = new TCanvas();
+    c->Print((filename +"[").c_str());
+    TH1I* hist; // temp var
+    vector<Combination> comboVec = combinationVector();
+    string name;
+    for (auto combo=comboVec.begin(); combo!=comboVec.end(); combo++) {
+        for (Int_t i=0; i<binning->xBinEdges.size()-1; i++) {
+            for (Int_t j=0; j<binning->yBinEdges.size()-1; j++) {
+                name = "residuals_xbin_" + to_string(i+1) + "_ybin_";
+                name += to_string(j+1) + "_" + combo->String();
+                hist = (TH1I*)pm->Get(name);
+                if (hist->GetEntries() != 0) {
+                    hist->Draw();
+                    c->Print(filename.c_str());
+                }
+            }
+        }
+    }
+    c->Print((filename + "]").c_str());
+    delete c;
     return;
 }
