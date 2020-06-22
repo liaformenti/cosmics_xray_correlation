@@ -50,6 +50,7 @@ void ResPlots::PrintNumEntriesTH2Is(string nameBase, string filename) {
 // arrays for use with PlotManager methods.
 void ResPlots::InitializeNumEntriesTH2Is(string nameBase) {
     string name;
+    string title;
     Double_t xEdges[binning->nBinsX + 1];
     copy(binning->xBinEdges.begin(), binning->xBinEdges.end(), xEdges);
     Double_t yEdges[binning->nBinsY + 1];
@@ -57,7 +58,11 @@ void ResPlots::InitializeNumEntriesTH2Is(string nameBase) {
     vector<Combination> combVec = combinationVector();    
     for (auto combo=combVec.begin(); combo!=combVec.end(); combo++) {
         name = nameBase + combo->String();
-        pm->Add(name, name, binning->nBinsX, xEdges,
+        title = "Layer: " + to_string(combo->layer); 
+        title += ", Fixed Layers: " + to_string(combo->fixed1);
+        title += to_string(combo->fixed2);
+        title += " No. Entries;x [mm];y [mm];";
+        pm->Add(name, title, binning->nBinsX, xEdges,
                binning->nBinsY, yEdges, myTH2I); 
     }
     return;
@@ -80,7 +85,7 @@ void ResPlots::InitializePosBinnedResPlots(string nameBase) {
                      name += combo->String();
                      title = "Layer: ";
                      title += to_string(combo->layer);
-                     title +=", Fixed Layers:";
+                     title +=", Fixed Layers: ";
                      title += to_string(combo->fixed1);
                      title += to_string(combo->fixed2);
 	             title += ", x#in["+Tools::CStr(*x,2)+",";
@@ -94,7 +99,9 @@ void ResPlots::InitializePosBinnedResPlots(string nameBase) {
             }
         }
     }
-    // Add TH2Fs
-    // Start with just sigma for now.
+    // TH2Fs for mean and stdev of each bin
+    /*for(auto combo=comboVec.begin(); combo!=comboVec.end(); combo++) {
+        name = 
+    }*/
     return;
 }
