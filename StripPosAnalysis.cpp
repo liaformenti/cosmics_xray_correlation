@@ -15,6 +15,7 @@
 //tgc_analysis includes
 #include "DetectorGeometryTools.h"
 #include "PlotManager.h"
+#include "AnalysisStyle.h"
 
 // My includes
 #include "RunAnalysis.h"
@@ -23,8 +24,8 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    gStyle->SetOptStat(0);    
-
+    // Set style
+    SetAnalysisStyle();
     // Check file
     if (argc < 2)
         throw runtime_error("Please specify the file to analyse.");
