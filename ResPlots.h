@@ -43,7 +43,7 @@ class ResPlots {
     // Print members
     void PrintNumEntriesTH2Is(std::string nameBase, 
                               std::string filename);
-    // void FillResidualTH1Fs();
+    void PrintPosBinnedResPlots(std::string namebase, std::string filename);
   private:
     std::vector<Residual>* residuals = nullptr;
     Binning* binning = nullptr;
