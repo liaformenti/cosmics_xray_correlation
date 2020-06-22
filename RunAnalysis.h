@@ -22,10 +22,9 @@
 // My includes
 #include "Tracking.h"
 #include "Residual.h"
-#include "SquareBinResidualHistogramEntries.h"
 #include "Helper.h"
 #include "Binning.h"
-#include "StatsStudy.h"
+#include "ResPlots.h"
 
 void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorGeometry* _g);
 
