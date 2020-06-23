@@ -38,12 +38,16 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
 
     // Vector to store calculated residuals
     vector<Residual> residuals;
-
+    Int_t count = 0;
+    ofstream out;
+    out.open("out/residualsOver15mm.txt");
+    out << "Eventnumber, layer, fixedlayer1, fixedlayer2, x, y, hity, residual [mm]\n";
+ 
     // initializeUncertaintyHistograms(pm);
     // Replace i<x=nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA_qs3p7.root with L3 and L4 fixed
-    for (Int_t i=0; i<3; i++) {
+    for (Int_t i=0; i<nEntries; i++) {
         trksTree.GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
         // Assumes uniform position distribution of hit across group
@@ -53,8 +57,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
 
         // for each permutation of two layers
         // la < lb and treated first always
-        // for (Int_t la=1; la<=4; la++) {
-        for (UShort_t la=3; la<=3; la++) {
+        for (Int_t la=1; la<=4; la++) {
+        // for (UShort_t la=3; la<=3; la++) {
             for (Int_t lb=(la+1); lb<=4; lb++) {
             // for (UShort_t lb=(la+1); lb<=4; lb++) {
 
@@ -73,12 +77,22 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
                     myTrack.EvaluateAt(lc);
                     // pm->Fill("uncertainty_y_evaluations_" + Combination(lc, la, lb).String(), myTrack.fitYUncerts.at(lc));
                     res = Residual(myTrack, lc);
+                    if (abs(res.res) > 15) {
+                        count++;
+                        // Record all the big residuals
+                        out << eventnumber << ' ' << res.l << ' ' << res.la << ' ' << res.lb << ' ' << res.x << ' ' << res.y << ' ' << myTrack.hitsY.at(res.l) << ' ' << res.res << '\n';
+                    }
                     residuals.push_back(res);
                 }
                 if (myTrack.hitsY.find(ld) != myTrack.hitsY.end()) {
                     myTrack.EvaluateAt(ld);
                     // pm->Fill("uncertainty_y_evaluations_" + Combination(ld, la, lb).String(), myTrack.fitYUncerts.at(ld));
                     res = Residual(myTrack, ld);
+                    if (abs(res.res) > 15) {
+                        count++;
+                        // Record all the big residuals
+                        out << eventnumber << ' ' << res.l << ' ' << res.la << ' ' << res.lb << ' ' << res.x << ' ' << res.y << ' ' << myTrack.hitsY.at(res.l) << ' ' << res.res << '\n';
+                    }
                     residuals.push_back(res);
                 }
                 /*if (i==0) {
@@ -91,14 +105,15 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
         }*/
     } // end event loop
     // printUncertaintyHistograms(pm);
-    
-    // Create square bin plots
-    /*SquareBinResidualHistogramEntries statsStudy(&residuals, g, pm); 
-    statsStudy.InitializeSquareBinHistograms(20); // mm
-    statsStudy.FillSquareBinHistograms();
-    statsStudy.PrintSquareBinHistograms("residuals_square_bins_width_" + to_string(statsStudy.binWidth) + "mm.pdf");*/
-    StatsStudy statsStudy(&residuals, g, pm);
-    statsStudy.InitializeResidualTH1Fs(300, 200);
+    /*Binning twentyY = Binning(36,20,g);
+    ResPlots resTwenty = ResPlots(&residuals, &twentyY, g, pm);
+    resTwenty.CreateNumEntriesTH2Is("rec_bins_36X20mm_entries_");
+    resTwenty.PrintNumEntriesTH2Is("rec_bins_36X20mm_entries_", "rec_bins_36X20mm_entries.pdf");
+    resTwenty.CreatePosBinnedResPlots("rec_bins_36X20mm_binstats_");
+    resTwenty.PrintPosBinnedResPlots("rec_bins_36X20mm_binstats_", "rec_bins_36X20mm_binstats.pdf");*/
+    Double_t frac = (Double_t)count / (Double_t)residuals.size();
+    out << "Fraction of residuals over 15 mm: " << frac << '\n';
+    out.close();
     return;
 }
 
