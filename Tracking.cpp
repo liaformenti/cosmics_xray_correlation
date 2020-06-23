@@ -84,23 +84,37 @@ void Tracking::PlotFit(string outName) {
 
     can.Print((outName + "[").c_str());
 
+    // Add x hits
+    for (auto it = hitsX.begin(); it!=hitsX.end(); it++) {
+        graphX.SetPoint(graphX.GetN(), g->GetZPosition(it->first),
+                        it->second);
+        graphX.SetPointError(graphX.GetN()-1, 0, 
+                             hitsXUncerts.at(it->first));
+    }
     graphX.SetMarkerStyle(kCircle);
     graphX.SetFillColor(0);
     graphX.SetTitle((title + "_x").c_str());
     graphX.GetYaxis()->SetTitle("x [mm]");
     graphX.GetXaxis()->SetTitle("z [mm]");
-    graphX.Draw();
+    graphX.Draw("AP");
     fitXFcn->Draw("Same");
     can.Print(outName.c_str());
 
     can.Clear(); // Necessary with Draw("Same")
+    // Add y hits
+    for (auto it = hitsY.begin(); it!=hitsY.end(); it++) {
+        graphY.SetPoint(graphY.GetN(), g->GetZPosition(it->first),
+                        it->second);
+        graphY.SetPointError(graphY.GetN()-1, 0, 
+                             hitsYUncerts.at(it->first));
+    }
 
     graphY.SetMarkerStyle(kCircle);
     graphY.SetFillColor(0);
     graphY.SetTitle((title + "_y").c_str());
     graphY.GetYaxis()->SetTitle("y [mm]");
     graphY.GetXaxis()->SetTitle("z [mm]");
-    graphY.Draw();
+    graphY.Draw("AP");
     fitYFcn->Draw("Same");
     can.Print(outName.c_str());
 
