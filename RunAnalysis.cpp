@@ -40,8 +40,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
     vector<Residual> residuals;
     Int_t count = 0;
     ofstream out;
-    out.open("out/residualsOver15mm.txt");
-    out << "Eventnumber, layer, fixedlayer1, fixedlayer2, x, y, hity, residual [mm]\n";
+    out.open("out/residualsOver50mm.txt");
+    out << "Eventnumber, layer, fixedlayer1, fixedlayer2, x, y, hity, residual [mm], yTrackAngle, xTrackAngle\n";
  
     // initializeUncertaintyHistograms(pm);
     // Replace i<x=nEntries eventually
@@ -77,10 +77,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
                     myTrack.EvaluateAt(lc);
                     // pm->Fill("uncertainty_y_evaluations_" + Combination(lc, la, lb).String(), myTrack.fitYUncerts.at(lc));
                     res = Residual(myTrack, lc);
-                    if (abs(res.res) > 15) {
+                    if (abs(res.res) > 30) {
                         count++;
                         // Record all the big residuals
-                        out << eventnumber << ' ' << res.l << ' ' << res.la << ' ' << res.lb << ' ' << res.x << ' ' << res.y << ' ' << myTrack.hitsY.at(res.l) << ' ' << res.res << '\n';
+                        out << eventnumber << ' ' << res.l << ' ' << res.la << ' ' << res.lb << ' ' << res.x << ' ' << res.y << ' ' << myTrack.hitsY.at(res.l) << ' ' << res.res << ' ' << atan(myTrack.resultY->Value(1))*180/3.14 << ' ' << atan(myTrack.resultY->Value(1))*180/3.14 << '\n';
                     }
                     residuals.push_back(res);
                 }
@@ -88,10 +88,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
                     myTrack.EvaluateAt(ld);
                     // pm->Fill("uncertainty_y_evaluations_" + Combination(ld, la, lb).String(), myTrack.fitYUncerts.at(ld));
                     res = Residual(myTrack, ld);
-                    if (abs(res.res) > 15) {
+                    if (abs(res.res) > 30) {
                         count++;
                         // Record all the big residuals
-                        out << eventnumber << ' ' << res.l << ' ' << res.la << ' ' << res.lb << ' ' << res.x << ' ' << res.y << ' ' << myTrack.hitsY.at(res.l) << ' ' << res.res << '\n';
+                        out << eventnumber << ' ' << res.l << ' ' << res.la << ' ' << res.lb << ' ' << res.x << ' ' << res.y << ' ' << myTrack.hitsY.at(res.l) << ' ' << res.res << ' ' << atan(myTrack.resultY->Value(1))*180/3.14 << ' ' << atan(myTrack.resultX->Value(1))*180/3.14 << '\n';
                     }
                     residuals.push_back(res);
                 }
@@ -112,7 +112,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
     resTwenty.CreatePosBinnedResPlots("rec_bins_36X20mm_binstats_");
     resTwenty.PrintPosBinnedResPlots("rec_bins_36X20mm_binstats_", "rec_bins_36X20mm_binstats.pdf");*/
     Double_t frac = (Double_t)count / (Double_t)residuals.size();
-    out << "Fraction of residuals over 15 mm: " << frac << '\n';
+    out << "Fraction of residuals over 30 mm: " << frac << '\n';
     out.close();
     return;
 }
