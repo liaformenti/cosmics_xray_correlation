@@ -3,12 +3,7 @@
 
 using namespace std;
 
-// Constructors all fill map of bin edges by layer
-// Length of array is used by other fcns to determine if binning
-// scheme varies by layer or combination (along with attributes of 
-// Combination).
-// Implement options to specify different schemes if end up with same
-// input parameters.
+// Constructors all fill bin edges vector
 
 // Constructor for rectangular bins, same for all layers.
 // Lowest y and highest x bin widths not controlled
