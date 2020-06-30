@@ -39,11 +39,11 @@ class ResPlots {
  
     // Create members
     void CreateNumEntriesTH2Is(std::string nameBase);
-    void PrintPosBinnedResPlots(std::string namebase, 
-                                std::string filename);
     void PrintNumEntriesTH2Is(std::string nameBase, 
                               std::string filename);
     void CreatePosBinnedResPlots(std::string nameBase);
+    void PrintPosBinnedResPlots(std::string namebase, 
+                                std::string filename);
     // Print members
   private:
     std::vector<Residual>* residuals = nullptr;

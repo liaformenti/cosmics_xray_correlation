@@ -65,6 +65,7 @@ void ResPlots::PrintNumEntriesTH2Is(string nameBase, string filename) {
 
 // Names of position binned residual plots based on x and y position 
 // bin number. Starts from lowest coord value with bin number 1 and increments in both directions.
+// NEED TO ADD NAMEBASE HERE IF YOU WANT TO USE WITH MULTIPLE BINNINGS
 void ResPlots::InitializePosBinnedResPlots(string nameBase) {
     string name;
     string title;
@@ -75,13 +76,14 @@ void ResPlots::InitializePosBinnedResPlots(string nameBase) {
     // Only go up to minus 1 as to not make plot starting from last bin
     for (Int_t i=0; i<binning->xBinEdges.size()-1; i++) {
         for (Int_t j=0; j<binning->yBinEdges.size()-1; j++) {
-                 for(auto combo=comboVec.begin(); 
-                 combo!=comboVec.end(); combo++){ 
+                 for (auto combo=comboVec.begin(); 
+                 combo!=comboVec.end(); combo++) { 
                      x = binning->xBinEdges.at(i);
                      xp1 = binning->xBinEdges.at(i+1);
                      y = binning->yBinEdges.at(j);
                      yp1 = binning->yBinEdges.at(j+1);
-                     name = "residuals_xbin_" + to_string(i+1);
+                     name = nameBase;
+                     name += "residuals_xbin_" + to_string(i+1);
                      name += "_ybin_" + to_string(j+1) + "_";
                      name += combo->String();
                      title = "Layer: ";
@@ -95,8 +97,8 @@ void ResPlots::InitializePosBinnedResPlots(string nameBase) {
                      title += Tools::CStr(yp1,2)+"] mm";
 	             title += ";Residuals [mm];Tracks";
 
-                    // Guessed appropriate range and num bins
-                    pm->Add(name, title, 100, -10, 10, myTH1I);
+                    // Width: 0.1 mm, range to do with usual spread
+                    pm->Add(name, title, 200, -10, 10, myTH1I);
             }
         }
     }
@@ -106,7 +108,7 @@ void ResPlots::InitializePosBinnedResPlots(string nameBase) {
     }*/
     return;
 }
-// Name base is for TH2s. For TH1, prefix is residuals_
+
 void ResPlots::CreatePosBinnedResPlots(string nameBase) {
     InitializePosBinnedResPlots(nameBase);
     Combination combo;
@@ -130,27 +132,35 @@ void ResPlots::CreatePosBinnedResPlots(string nameBase) {
             }
         }
         // Fill plots
-       name = "residuals_xbin_" + to_string(xbin) + "_ybin_";
-       name += to_string(ybin) + "_" + combo.String();
+       name = nameBase + "residuals_xbin_" + to_string(xbin);
+       name += "_ybin_" + to_string(ybin) + "_" + combo.String();
        pm->Fill(name, r->res);
     }
 }
 
-void ResPlots::PrintPosBinnedResPlots(string nameBase, string filename){
+void ResPlots::PrintPosBinnedResPlots(string nameBase, 
+                                      string filename){
     TCanvas* c = new TCanvas();
+    c->Divide(2,2); // 4 plots per pdf page
     c->Print((filename +"[").c_str());
     TH1I* hist; // temp var
     vector<Combination> comboVec = combinationVector();
     string name;
+    Int_t count = 0;
     for (auto combo=comboVec.begin(); combo!=comboVec.end(); combo++) {
         for (Int_t i=0; i<binning->xBinEdges.size()-1; i++) {
             for (Int_t j=0; j<binning->yBinEdges.size()-1; j++) {
-                name = "residuals_xbin_" + to_string(i+1) + "_ybin_";
-                name += to_string(j+1) + "_" + combo->String();
+                name = nameBase + "residuals_xbin_" + to_string(i+1);
+                name += "_ybin_" + to_string(j+1) + "_"; 
+                name += combo->String();
                 hist = (TH1I*)pm->Get(name);
                 if (hist->GetEntries() != 0) {
+                    c->cd(count%4 + 1);
                     hist->Draw();
-                    c->Print(filename.c_str());
+                    if (count%4==3) { // Add page once canvas is full
+                        c->Print(filename.c_str());
+                    }
+                    count++;
                 }
             }
         }
