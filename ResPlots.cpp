@@ -20,6 +20,7 @@ void ResPlots::InitializeNumEntriesTH2Is(string nameBase) {
     copy(binning->yBinEdges.begin(), binning->yBinEdges.end(), yEdges);
     vector<Combination> combVec = combinationVector();    
     for (auto combo=combVec.begin(); combo!=combVec.end(); combo++) {
+        // NEED TO ADD UNIQUE IDENTIFIER TO THIS
         name = nameBase + combo->String();
         title = "Layer: " + to_string(combo->layer); 
         title += ", Fixed Layers: " + to_string(combo->fixed1);
@@ -111,6 +112,7 @@ void ResPlots::InitializePosBinnedResPlots(string nameBase) {
 
 void ResPlots::CreatePosBinnedResPlots(string nameBase) {
     InitializePosBinnedResPlots(nameBase);
+    // Fill plots
     Combination combo;
     Int_t xbin, ybin; // bin numbers in x and y
     string name;
@@ -136,7 +138,7 @@ void ResPlots::CreatePosBinnedResPlots(string nameBase) {
        name += "_ybin_" + to_string(ybin) + "_" + combo.String();
        pm->Fill(name, r->res);
     }
-}
+} // end
 
 void ResPlots::PrintPosBinnedResPlots(string nameBase, 
                                       string filename){
@@ -168,4 +170,69 @@ void ResPlots::PrintPosBinnedResPlots(string nameBase,
     c->Print((filename + "]").c_str());
     delete c;
     return;
+}
+
+void ResPlots::InitializePosBinnedFitResultTH2Fs(string nameBase) {
+    string name;
+    string title;
+    // Put bin vectors into arrays
+    Double_t xEdges[binning->nBinsX + 1];
+    copy(binning->xBinEdges.begin(), binning->xBinEdges.end(), xEdges);
+    Double_t yEdges[binning->nBinsY + 1];
+    copy(binning->yBinEdges.begin(), binning->yBinEdges.end(), yEdges);
+    // Init plots
+    vector<Combination> combVec = combinationVector();    
+    vector<string> types = {"means", "sigmas"};
+    for (auto combo=combVec.begin(); combo!=combVec.end(); combo++) {
+        for (auto type=types.begin(); type!=types.end(); type++) {
+            name = nameBase + *type + "_" + combo->String();
+            title = "Layer: " + to_string(combo->layer); 
+            title += ", Fixed Layers: " + to_string(combo->fixed1);
+            title += to_string(combo->fixed2);
+            title += " " + *type + " by position;x [mm];y [mm];";
+            pm->Add(name, title, binning->nBinsX, xEdges,
+                   binning->nBinsY, yEdges, myTH2F); 
+        }
+    }
+    return;
+
+}
+
+void ResPlots::CreatePosBinnedFitResultTH2Fs(string nameBase) {
+    InitializePosBinnedFitResultTH2Fs(nameBase);
+    vector<Combination> comboVec = combinationVector();
+    string name;
+    TH1I* hist;
+    Int_t status; // hold fit result
+    TF1* theFit;
+    Double_t mean, meanErr;
+    Double_t sigma, sigmaErr;
+    TH2F* th2F; 
+    for (auto combo=comboVec.begin(); combo!=comboVec.end(); combo++){
+        for (Int_t i=0; i<binning->xBinEdges.size()-1; i++) {
+            for (Int_t j=0; j<binning->yBinEdges.size()-1; j++) {
+                name = nameBase + "residuals_xbin_" + to_string(i+1);
+                name += "_ybin_" + to_string(j+1) + "_"; 
+                name += combo->String();
+                hist = (TH1I*)pm->Get(name);
+                status = hist->Fit("gaus", "SQ");
+                if (status==0) { // Fit was success, fill TH2Fs
+                    theFit = (TF1*)hist->GetFunction("gaus");     
+                    mean = theFit->GetParameter(1);
+                    meanErr = theFit->GetParError(1);
+                    sigma = theFit->GetParameter(2);
+                    sigmaErr = theFit->GetParError(2);
+                }
+                // Now get TH2Fs for mean and sigma
+                name = nameBase + "means_" + combo->String();
+                th2F = (TH2F*)pm->GetTH2F(name);
+                th2F->SetBinContent(i+1, j+1, mean);
+                th2F->SetBinError(i+1, j+1, meanErr);
+                name = nameBase + "sigmas_" + combo->String();
+                th2F = (TH2F*)pm->GetTH2F(name);
+                th2F->SetBinContent(i+1, j+1, sigma);
+                th2F->SetBinError(i+1, j+1, sigmaErr);
+            } // end y bin loop
+        } // end x bin loop
+    }  // end combo loop
 }
