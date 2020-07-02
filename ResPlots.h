@@ -45,6 +45,7 @@ class ResPlots {
     void PrintPosBinnedResPlots(std::string namebase, 
                                 std::string filename);
     void CreatePosBinnedFitResultTH2Fs(std::string nameBase);
+    void PrintPosBinnedFitResultTH2Fs(std::string nameBase, std::string filename);
     // Print members
   private:
     std::vector<Residual>* residuals = nullptr;

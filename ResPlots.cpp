@@ -218,21 +218,46 @@ void ResPlots::CreatePosBinnedFitResultTH2Fs(string nameBase) {
                 status = hist->Fit("gaus", "SQ");
                 if (status==0) { // Fit was success, fill TH2Fs
                     theFit = (TF1*)hist->GetFunction("gaus");     
-                    mean = theFit->GetParameter(1);
+                    mean = theFit->GetParameter(1); 
                     meanErr = theFit->GetParError(1);
                     sigma = theFit->GetParameter(2);
                     sigmaErr = theFit->GetParError(2);
+                    // Now get TH2Fs for mean and sigma
+                    name = nameBase + "means_" + combo->String();
+                    th2F = (TH2F*)pm->GetTH2F(name);
+                    th2F->SetBinContent(i+1, j+1, mean);
+                    th2F->SetBinError(i+1, j+1, meanErr);
+                    name = nameBase + "sigmas_" + combo->String();
+                    th2F = (TH2F*)pm->GetTH2F(name);
+                    th2F->SetBinContent(i+1, j+1, sigma);
+                    th2F->SetBinError(i+1, j+1, sigmaErr);
                 }
-                // Now get TH2Fs for mean and sigma
-                name = nameBase + "means_" + combo->String();
-                th2F = (TH2F*)pm->GetTH2F(name);
-                th2F->SetBinContent(i+1, j+1, mean);
-                th2F->SetBinError(i+1, j+1, meanErr);
-                name = nameBase + "sigmas_" + combo->String();
-                th2F = (TH2F*)pm->GetTH2F(name);
-                th2F->SetBinContent(i+1, j+1, sigma);
-                th2F->SetBinError(i+1, j+1, sigmaErr);
             } // end y bin loop
         } // end x bin loop
     }  // end combo loop
+}
+
+void ResPlots:: PrintPosBinnedFitResultTH2Fs(string nameBase, string filename) {
+    TCanvas* c = new TCanvas();
+    c->Print((filename + "[").c_str());
+    TH2F* hist; // temp var
+    vector<Combination> comboVec = combinationVector();
+    for (auto combo=comboVec.begin(); combo!=comboVec.end(); combo++) {
+        hist = (TH2F*)pm->Get(nameBase + "means_" + combo->String());  
+        if (hist->GetEntries() != 0) { // If plot is not empty,
+            hist->Draw("Colz");
+            c->Print(filename.c_str());
+            c->Clear();
+        }
+        hist = (TH2F*)pm->Get(nameBase + "sigmas_" + combo->String()); 
+        if (hist->GetEntries() != 0) {
+            hist->Draw("Colz");
+            c->Print(filename.c_str());
+            c->Clear();
+        }
+
+    }
+    c->Print((filename + "]").c_str());
+    delete c;
+    return;
 }
