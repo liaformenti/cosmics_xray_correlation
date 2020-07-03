@@ -12,3 +12,6 @@ StripPosAnalysis
 # Outputs
 *.pdf
 out*
+
+# x-ray data
+results.db
