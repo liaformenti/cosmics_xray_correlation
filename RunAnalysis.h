@@ -25,6 +25,7 @@
 #include "Helper.h"
 #include "Binning.h"
 #include "ResPlots.h"
+#include "XRayData.h"
 
 void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorGeometry* _g);
 
