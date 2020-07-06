@@ -22,7 +22,7 @@ class XRayData {
   public:
     // Constructors
     XRayData(){};
-    XRayData(std::string databaseName); 
+    XRayData(std::string databaseName, AnalysisInfo &info); 
     ~XRayData(){};
 
     // Members

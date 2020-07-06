@@ -94,7 +94,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
     } // end event loop
     // printUncertaintyHistograms(pm);
     // Get xray data
-    XRayData("results.db");
+    XRayData("results.db", info);
     /*Binning loose(20, 36, g); // large rectangular bins
     ResPlots loosePlots(&residuals, &loose, g, pm);
     loosePlots.CreatePosBinnedResPlots("test_bins_");
