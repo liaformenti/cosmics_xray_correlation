@@ -43,7 +43,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
     // Replace i<x=nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA_qs3p7.root with L3 and L4 fixed
-    for (Int_t i=0; i<3; i++) {
+    for (Int_t i=0; i<nEntries; i++) {
         trksTree.GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
         // Assumes uniform position distribution of hit across group
@@ -53,8 +53,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
 
         // for each permutation of two layers
         // la < lb and treated first always
-        // for (Int_t la=1; la<=4; la++) {
-        for (UShort_t la=3; la<=3; la++) {
+        for (Int_t la=1; la<=4; la++) {
+        // for (UShort_t la=3; la<=3; la++) {
             for (Int_t lb=(la+1); lb<=4; lb++) {
             // for (UShort_t lb=(la+1); lb<=4; lb++) {
 
@@ -81,24 +81,23 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
                     res = Residual(myTrack, ld);
                     residuals.push_back(res);
                 }
+                // Plot linear fit
                 /*if (i==0) {
                     myTrack.PlotFit("fits_event_" + to_string(eventnumber) + "_fixed_layers_" + to_string(la) + "_" + to_string(lb) + ".pdf");
                 }*/
             } // end ld loop
         } // end lc loop
+        // Count iterations
         /*if (i%1000==0) {
             cout << "Iteration " << i << " of " <<  nEntries << '\n';
         }*/
     } // end event loop
     // printUncertaintyHistograms(pm);
-    
-    // Create square bin plots
-    /*SquareBinResidualHistogramEntries statsStudy(&residuals, g, pm); 
-    statsStudy.InitializeSquareBinHistograms(20); // mm
-    statsStudy.FillSquareBinHistograms();
-    statsStudy.PrintSquareBinHistograms("residuals_square_bins_width_" + to_string(statsStudy.binWidth) + "mm.pdf");*/
-    StatsStudy statsStudy(&residuals, g, pm);
-    statsStudy.InitializeResidualTH1Fs(300, 200);
+    /*Binning loose(20, 36, g); // large rectangular bins
+    ResPlots loosePlots(&residuals, &loose, g, pm);
+    loosePlots.CreatePosBinnedResPlots("test_bins_");
+    loosePlots.CreatePosBinnedFitResultTH2Fs("test_bins_");
+    loosePlots.PrintPosBinnedFitResultTH2Fs("test_bins_", "out/test_result_TH2Fs.pdf");*/
     return;
 }
 
