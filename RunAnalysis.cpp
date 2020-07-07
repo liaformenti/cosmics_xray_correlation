@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorGeometry* g) {
+void RunAnalysis(TTree &trksTree, AnalysisInfo* info, PlotManager* pm, DetectorGeometry* g) {
 
     // Declaration 
     Int_t nEntries;
@@ -94,12 +94,15 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
     } // end event loop
     // printUncertaintyHistograms(pm);
     // Get xray data
-    XRayData("results.db", info);
-    /*Binning loose(20, 36, g); // large rectangular bins
-    ResPlots loosePlots(&residuals, &loose, g, pm);
-    loosePlots.CreatePosBinnedResPlots("test_bins_");
-    loosePlots.CreatePosBinnedFitResultTH2Fs("test_bins_");
-    loosePlots.PrintPosBinnedFitResultTH2Fs("test_bins_", "out/test_result_TH2Fs.pdf");*/
+    // XRayData("results.db", info);
+    /*Binning loose(500, 500, g); // large rectangular bins
+    ResPlots loosePlots(&residuals, &loose, loose.name, info, g, pm);
+    loosePlots.CreateNumEntriesTH2Is();
+    loosePlots.CreatePosBinnedResPlots();
+    loosePlots.CreatePosBinnedFitResultTH2Fs();
+    loosePlots.PrintNumEntriesTH2Is("out/test_num_entries.pdf");
+    loosePlots.PrintPosBinnedResPlots("out/test_res_plots.pdf");
+    loosePlots.PrintPosBinnedFitResultTH2Fs("out/test_results.pdf");*/
     return;
 }
 
