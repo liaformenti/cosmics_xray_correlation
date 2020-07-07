@@ -31,6 +31,7 @@ class Binning {
     std::vector<Float_t> yBinEdges;
     Int_t nBinsX;
     Int_t nBinsY; 
+    std::string name; // holds a string describing the binning, useful for naming schemes
   private:
     // Members
     DetectorGeometry* g=nullptr;

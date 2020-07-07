@@ -1,9 +1,9 @@
 executable	= runStripPosAnalysis.sh
-output		= QS3P07_2900V/out.txt
-error		= QS3P07_2900V/err.txt
-log		= QS3P07_2900V/log.txt
+output		= QS3P07_2900V/squareBins20mm/out.txt
+error		= QS3P07_2900V/squareBins20mm/err.txt
+log		= QS3P07_2900V/squareBins20mm/log.txt
 requirements	= (OpSysAndVer =?= "CentOS7")
-+JobFlavour 	= "tomorrow"
++JobFlavour 	= "workday"
 should_transfer_files = YES
 transfer_input_files = tgc_analysis/geometry
 queue

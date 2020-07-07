@@ -41,4 +41,7 @@ Binning::Binning(Int_t wx, Int_t wy, DetectorGeometry* _g) :
         xBinEdges.insert(pair<UShort_t, vector<Float_t>>(i, xBins)); 
         yBinEdges.insert(pair<UShort_t,vector<Float_t>>(i, yBins));
     }*/
+    // Set name
+    name = "xbin_width_" + to_string(wx) + "mm_ybin_width_";
+    name += to_string(wy) + "mm";
 }

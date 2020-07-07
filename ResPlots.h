@@ -19,6 +19,7 @@
 #include <TH2I.h>
 
 // tgc_analysis includes
+#include "AnalysisInfo.h"
 #include "DetectorGeometry.h"
 #include "PlotManager.h"
 #include "Tools.h"
@@ -33,28 +34,34 @@ class ResPlots {
     ResPlots(){};
     ResPlots(std::vector<Residual>* _residuals,
                Binning* _binning,
+               std::string namebase,
+               AnalysisInfo* _info,
                DetectorGeometry* _g,
                PlotManager* _pm);
     ~ResPlots(){};
  
     // Create members
-    void CreateNumEntriesTH2Is(std::string nameBase);
-    void PrintNumEntriesTH2Is(std::string nameBase, 
-                              std::string filename);
-    void CreatePosBinnedResPlots(std::string nameBase);
-    void PrintPosBinnedResPlots(std::string namebase, 
-                                std::string filename);
-    void CreatePosBinnedFitResultTH2Fs(std::string nameBase);
-    void PrintPosBinnedFitResultTH2Fs(std::string nameBase, std::string filename);
+    std::string nameBase; // Used as prefix to plot names.
+    // Each plot name is of the format:
+    // namBase + unique_identifier + relevant_conditions
+    // Titles are generic
+    // Caution must be made in supplying a good pdf name in Prints
+    void CreateNumEntriesTH2Is();
+    void PrintNumEntriesTH2Is(std::string filename);
+    void CreatePosBinnedResPlots();
+    void PrintPosBinnedResPlots(std::string filename);
+    void CreatePosBinnedFitResultTH2Fs();
+    void PrintPosBinnedFitResultTH2Fs(std::string filename);
     // Print members
   private:
     std::vector<Residual>* residuals = nullptr;
     Binning* binning = nullptr;
+    AnalysisInfo* info = nullptr;
     DetectorGeometry* g = nullptr; 
     PlotManager* pm = nullptr;
     // Initialization methods
-    void InitializeNumEntriesTH2Is(std::string nameBase);
-    void InitializePosBinnedResPlots(std::string nameBase);
-    void InitializePosBinnedFitResultTH2Fs(std::string nameBase);
+    void InitializeNumEntriesTH2Is();
+    void InitializePosBinnedResPlots();
+    void InitializePosBinnedFitResultTH2Fs();
 };
 #endif
