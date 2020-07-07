@@ -93,11 +93,34 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo &info, PlotManager* pm, DetectorG
         }*/
     } // end event loop
     // printUncertaintyHistograms(pm);
-    /*Binning loose(20, 36, g); // large rectangular bins
-    ResPlots loosePlots(&residuals, &loose, g, pm);
-    loosePlots.CreatePosBinnedResPlots("test_bins_");
-    loosePlots.CreatePosBinnedFitResultTH2Fs("test_bins_");
-    loosePlots.PrintPosBinnedFitResultTH2Fs("test_bins_", "out/test_result_TH2Fs.pdf");*/
+    Binning minRecBins(37, 20, g); // 37 mm bc wire group sep is 36 mm; 30 mm because y uncerts on tracks generally < 20 mm
+    ResPlots minRecPlots(&residuals, &minRecBins, g, pm);
+    minRecPlots.CreateNumEntriesTH2Is("res_plots_min_");
+    minRecPlots.PrintNumEntriesTH2Is("res_plots_min_", "out/qs3p7_2900V_num_entries_xbins_36mm_ybins_20mm.pdf");
+    minRecPlots.CreatePosBinnedResPlots("res_plots_min_");
+    minRecPlots.PrintPosBinnedResPlots("res_plots_min_", "out/qs3p7_2900V_residuals_xbins_36mm_ybins_20mm.pdf");
+    minRecPlots.CreatePosBinnedFitResultTH2Fs("res_plots_min_");
+    minRecPlots.PrintPosBinnedFitResultTH2Fs("res_plots_min_", "out/qs3p7_2900V_residual_fits_xbins_36mm_ybins_20mm.pdf");
+
+    Binning medRecBins(37, 30, g); 
+    ResPlots medRecPlots(&residuals, &medRecBins, g, pm);
+    medRecPlots.CreateNumEntriesTH2Is("res_plots_med_");
+    medRecPlots.PrintNumEntriesTH2Is("res_plots_med_", "out/qs3p7_2900V_num_entries_xbins_36mm_ybins_30mm.pdf");
+    medRecPlots.CreatePosBinnedResPlots("res_plots_med_");
+    medRecPlots.PrintPosBinnedResPlots("res_plots_med_", "out/qs3p7_2900V_residuals_xbins_36mm_ybins_30mm.pdf");
+    medRecPlots.CreatePosBinnedFitResultTH2Fs("res_plots_med_");
+    medRecPlots.PrintPosBinnedFitResultTH2Fs("res_plots_med_", "out/qs3p7_2900V_residuals_fits_xbins_36mm_ybins_30mm.pdf");
+
+
+    Binning largeRecBins(37, 40, g); 
+    ResPlots largeRecPlots(&residuals, &largeRecBins, g, pm);
+    largeRecPlots.CreateNumEntriesTH2Is("res_plots_large_");
+    largeRecPlots.PrintNumEntriesTH2Is("res_plots_large_", "out/qs3p7_2900V_num_entries_xbins_36mm_ybins_40mm.pdf");
+    largeRecPlots.CreatePosBinnedResPlots("res_plots_large_");
+    largeRecPlots.PrintPosBinnedResPlots("res_plots_large_", "out/qs3p7_2900V_residuals_xbins_36mm_ybins_40mm.pdf");
+    largeRecPlots.CreatePosBinnedFitResultTH2Fs("res_plots_large_");
+    largeRecPlots.PrintPosBinnedFitResultTH2Fs("res_plots_large_", "out/qs3p7_2900V_residual_fits_xbins_36mm_ybins_40mm.pdf");
+
     return;
 }
 
