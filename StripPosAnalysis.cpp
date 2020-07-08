@@ -25,10 +25,25 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
     // Set style
-    SetAnalysisStyle();
+    // SetAnalysisStyle();
+    cout << "You commented out SetAnalysisStyle\n";
     // Check file
-    if (argc < 2)
-        throw runtime_error("Please specify the file to analyse.");
+    if ((argc < 3) || (argc > 4))
+        throw runtime_error("Please specify the file to analyse, the quadruplet name, and if desired a single string (nospaces) with futher information you would like to include in output file names.");
+
+    // Check quad name - need name to compare with xray data
+    if (argv[2][0] != 'Q') {
+        throw runtime_error("The second argument should be the quadruplet name, in the format, eg. QS3P07");
+    } 
+   
+    // Fill DataInfo struct
+    DataInfo about;
+    about.quadname = argv[2];
+    if (argc == 4) {
+        // An otherInfo string was included, for use in filenaming
+        about.otherInfo = argv[3];
+    }
+    
     if (gSystem->AccessPathName(argv[1]))
         throw runtime_error("File does not exist.");
 
@@ -48,11 +63,13 @@ int main(int argc, char* argv[]) {
     AnalysisInfo* analysisInfo = GetAnalysisInfo(cosmicsAnalysis);
     if (analysisInfo == nullptr)
        throw runtime_error("Error getting AnalysisInfo object, in function GetAnalysisInfo"); 
+
     PlotManager* plotManager = new PlotManager();    
     // Get detector geometry
     DetectorGeometry *geom = DetectorGeometryTools::GetDetectorGeometry(analysisInfo->detectortype);
 
-    RunAnalysis(*tracksTree, *analysisInfo, plotManager, geom);
+    RunAnalysis(*tracksTree, analysisInfo, plotManager, geom);
+    // cout << "You commented out call to RunAnalysis\n";
 
     delete plotManager;
     cosmicsAnalysis->Close();
