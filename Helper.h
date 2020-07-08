@@ -9,6 +9,18 @@
 
 // Root includes
 #include <TROOT.h>
+
+// Data info contains the quadruplet name (eg. qs3p7) and
+// the operating voltage (eg. 2900V), and the wedge id (eg. WSAP00002)
+struct DataInfo { 
+  std::string quadname;
+  std::string wedgeid;
+  std::string otherInfo = "";
+};
+
+// NOW MAKE HELPER THAT TAKES IN DATAINFO WITH QUAD NAME AND FILLS
+// WEDGEID
+
 struct Combination {
   Combination(){};
   Combination(UShort_t theLayer, UShort_t firstFixedLayer, UShort_t secondFixedLayer) : layer(theLayer), fixed1(firstFixedLayer), fixed2(secondFixedLayer){};
