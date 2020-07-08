@@ -15,11 +15,14 @@ XRayData::XRayData(string databaseName, AnalysisInfo &info) {
     sql += "WHERE dq_flag = 'OK' AND quad_type = " ;
     sql += "\'" + info.detectortype + "\' ";
     sql += "ORDER BY x_nom"; // Order by ascending x_nom for processing
-    cout << sql << endl;
     rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
     if (rc != SQLITE_OK) { 
         string msg(sqlite3_errmsg(db));
         throw logic_error("Unable to access xray data, SELECT failed: " + msg + "\n");
     }
-    // Now do the while loop
+    // For all selected rows
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+        string runId(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
+
+    }
 }
