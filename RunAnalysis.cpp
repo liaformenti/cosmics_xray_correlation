@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, DetectorGeometry* g) {
+void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, DetectorGeometry* g, InputInfo* myInfo) {
 
     // Declaration 
     Int_t nEntries;

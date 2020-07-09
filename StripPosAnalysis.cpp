@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
 
     PlotManager* plotManager = new PlotManager();    
 
-    RunAnalysis(*tracksTree, cosmicsInfo, plotManager, geom);
+    RunAnalysis(*tracksTree, cosmicsInfo, plotManager, geom, &myInfo);
     // cout << "You commented out call to RunAnalysis\n";
 
     delete plotManager;
