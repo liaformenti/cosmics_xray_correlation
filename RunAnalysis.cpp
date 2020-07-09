@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void RunAnalysis(TTree &trksTree, AnalysisInfo* info, PlotManager* pm, DetectorGeometry* g) {
+void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, DetectorGeometry* g) {
 
     // Declaration 
     Int_t nEntries;
@@ -94,9 +94,9 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* info, PlotManager* pm, DetectorG
     } // end event loop
     // printUncertaintyHistograms(pm);
     // Example output choices
-    /*Binning loose(500, 500, g); // large rectangular bins
-    ResPlots loosePlots(&residuals, &loose, loose.name, info, g, pm);
-    loosePlots.CreateNumEntriesTH2Is();
+    Binning loose(500, 500, g); // large rectangular bins
+    ResPlots loosePlots(&residuals, &loose, loose.name, cosmicsInfo, g, pm);
+    /*loosePlots.CreateNumEntriesTH2Is();
     loosePlots.CreatePosBinnedResPlots();
     loosePlots.CreatePosBinnedFitResultTH2Fs();
     loosePlots.PrintNumEntriesTH2Is("out/test_num_entries.pdf");
@@ -104,7 +104,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* info, PlotManager* pm, DetectorG
     loosePlots.PrintPosBinnedFitResultTH2Fs("out/test_results.pdf");*/
 
     // Get xray data
-    XRayData data("results.db", *info);
+    XRayData data("results.db", *cosmicsInfo);
     return;
 }
 

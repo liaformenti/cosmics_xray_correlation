@@ -35,7 +35,7 @@ class ResPlots {
     ResPlots(std::vector<Residual>* _residuals,
                Binning* _binning,
                std::string namebase,
-               AnalysisInfo* _info,
+               AnalysisInfo* _cinfo,
                DetectorGeometry* _g,
                PlotManager* _pm);
     ~ResPlots(){};
@@ -56,7 +56,7 @@ class ResPlots {
   private:
     std::vector<Residual>* residuals = nullptr;
     Binning* binning = nullptr;
-    AnalysisInfo* info = nullptr;
+    AnalysisInfo* cinfo = nullptr;
     DetectorGeometry* g = nullptr; 
     PlotManager* pm = nullptr;
     // Initialization methods

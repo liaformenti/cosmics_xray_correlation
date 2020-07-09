@@ -6,10 +6,10 @@ using namespace std;
 ResPlots::ResPlots(vector<Residual>* _residuals,
                    Binning* _binning,
                    std::string namebase,
-                   AnalysisInfo* _info,
+                   AnalysisInfo* _cinfo,
                    DetectorGeometry* _g,
                    PlotManager* _pm) : residuals(_residuals),
-                   binning(_binning), info(_info), g(_g), pm(_pm) {
+                   binning(_binning), cinfo(_cinfo), g(_g), pm(_pm) {
     // Initialize nameBase
     nameBase = namebase;
 }

@@ -4,8 +4,6 @@
 
 // C++ includes
 #include <iostream>
-#include <fstream>
-#include <dirent.h>
 
 // Root includes
 #include <TROOT.h>
@@ -45,9 +43,9 @@ int main(int argc, char* argv[]) {
         throw runtime_error("Output directory does not exist.");
 
     // Fill InputInfo struct
-    InputInfo about;
-    about.quadname = argv[2];
-    about.outpath = argv[3];
+    InputInfo myInfo;
+    myInfo.quadname = argv[2];
+    myInfo.outpath = argv[3];
 
     // Check input file
     if (gSystem->AccessPathName(argv[1]))
@@ -66,16 +64,16 @@ int main(int argc, char* argv[]) {
     TTree* tracksTree = (TTree*)cosmicsAnalysis->Get("tracks");
 
     // Get AnalysisInfo object, error handling done in fcn
-    AnalysisInfo* analysisInfo = GetAnalysisInfo(cosmicsAnalysis);
-    if (analysisInfo == nullptr)
+    AnalysisInfo* cosmicsInfo = GetAnalysisInfo(cosmicsAnalysis);
+    if (cosmicsInfo == nullptr)
        throw runtime_error("Error getting AnalysisInfo object, in function GetAnalysisInfo"); 
    
     // Get detector geometry
-    DetectorGeometry *geom = DetectorGeometryTools::GetDetectorGeometry(analysisInfo->detectortype);
+    DetectorGeometry *geom = DetectorGeometryTools::GetDetectorGeometry(cosmicsInfo->detectortype);
 
     PlotManager* plotManager = new PlotManager();    
 
-    RunAnalysis(*tracksTree, analysisInfo, plotManager, geom);
+    RunAnalysis(*tracksTree, cosmicsInfo, plotManager, geom);
     // cout << "You commented out call to RunAnalysis\n";
 
     delete plotManager;

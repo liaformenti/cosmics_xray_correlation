@@ -3,7 +3,7 @@
 
 using namespace std;
 
-XRayData::XRayData(string databaseName, AnalysisInfo &info) {
+XRayData::XRayData(string databaseName, AnalysisInfo &cinfo) {
     // Get relelvant data fom base
     sqlite3* db;
     sqlite3_stmt *stmt;
@@ -13,7 +13,7 @@ XRayData::XRayData(string databaseName, AnalysisInfo &info) {
     sql += "y_nom, y_jigcmm_holdercmm ";
     sql += "FROM results "; // assumes table name is results!
     sql += "WHERE dq_flag = 'OK' AND quad_type = " ;
-    sql += "\'" + info.detectortype + "\' ";
+    sql += "\'" + cinfo.detectortype + "\' ";
     sql += "ORDER BY x_nom"; // Order by ascending x_nom for processing
     rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
     if (rc != SQLITE_OK) { 
