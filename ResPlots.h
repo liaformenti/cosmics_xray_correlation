@@ -37,7 +37,8 @@ class ResPlots {
                std::string namebase,
                AnalysisInfo* _cinfo,
                DetectorGeometry* _g,
-               PlotManager* _pm);
+               PlotManager* _pm,
+               InputInfo* _myInfo);
     ~ResPlots(){};
  
     // Create members
@@ -59,6 +60,7 @@ class ResPlots {
     AnalysisInfo* cinfo = nullptr;
     DetectorGeometry* g = nullptr; 
     PlotManager* pm = nullptr;
+    InputInfo* myInfo = nullptr;
     // Initialization methods
     void InitializeNumEntriesTH2Is();
     void InitializePosBinnedResPlots();

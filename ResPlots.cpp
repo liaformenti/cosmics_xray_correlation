@@ -8,8 +8,10 @@ ResPlots::ResPlots(vector<Residual>* _residuals,
                    std::string namebase,
                    AnalysisInfo* _cinfo,
                    DetectorGeometry* _g,
-                   PlotManager* _pm) : residuals(_residuals),
-                   binning(_binning), cinfo(_cinfo), g(_g), pm(_pm) {
+                   PlotManager* _pm,
+                   InputInfo* _myInfo) : residuals(_residuals),
+                   binning(_binning), cinfo(_cinfo), g(_g), pm(_pm),
+                   myInfo(_myInfo) {
     // Initialize nameBase
     nameBase = namebase;
 }
