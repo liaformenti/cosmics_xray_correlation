@@ -4,6 +4,8 @@
 
 // C++ includes
 #include <iostream>
+#include <fstream>
+#include <dirent.h>
 
 // Root includes
 #include <TROOT.h>
@@ -24,30 +26,34 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
+    
     // Set style
-    // SetAnalysisStyle();
-    cout << "You commented out SetAnalysisStyle\n";
-    // Check file
-    if ((argc < 3) || (argc > 4))
-        throw runtime_error("Please specify the file to analyse, the quadruplet name, and if desired a single string (nospaces) with futher information you would like to include in output file names.");
+    SetAnalysisStyle();
+    // cout << "You commented out SetAnalysisStyle\n";
+    
+    // Check arguments
+    if (argc != 4) 
+        throw runtime_error("Please specify the file to analyse, the quadruplet name, and the output directory path.");
 
     // Check quad name - need name to compare with xray data
     if (argv[2][0] != 'Q') {
-        throw runtime_error("The second argument should be the quadruplet name, in the format, eg. QS3P07");
+        throw runtime_error("The second argument should be the quadruplet name, matching the format, QS3P07");
     } 
    
-    // Fill DataInfo struct
-    DataInfo about;
+    // Check that output directory exists
+    if (gSystem->AccessPathName(argv[3]))
+        throw runtime_error("Output directory does not exist.");
+
+    // Fill InputInfo struct
+    InputInfo about;
     about.quadname = argv[2];
-    if (argc == 4) {
-        // An otherInfo string was included, for use in filenaming
-        about.otherInfo = argv[3];
-    }
-    
+    about.outpath = argv[3];
+
+    // Check input file
     if (gSystem->AccessPathName(argv[1]))
         throw runtime_error("File does not exist.");
 
-    // Open file
+    // Open input file
     TFile* cosmicsAnalysis = new TFile(argv[1], "READ");
     if (cosmicsAnalysis->IsZombie())
         throw runtime_error("Error opening file.");
@@ -63,15 +69,17 @@ int main(int argc, char* argv[]) {
     AnalysisInfo* analysisInfo = GetAnalysisInfo(cosmicsAnalysis);
     if (analysisInfo == nullptr)
        throw runtime_error("Error getting AnalysisInfo object, in function GetAnalysisInfo"); 
-
-    PlotManager* plotManager = new PlotManager();    
+   
     // Get detector geometry
     DetectorGeometry *geom = DetectorGeometryTools::GetDetectorGeometry(analysisInfo->detectortype);
+
+    PlotManager* plotManager = new PlotManager();    
 
     RunAnalysis(*tracksTree, analysisInfo, plotManager, geom);
     // cout << "You commented out call to RunAnalysis\n";
 
     delete plotManager;
     cosmicsAnalysis->Close();
+    delete cosmicsAnalysis;
     return 0;
 }

@@ -10,17 +10,7 @@
 // Root includes
 #include <TROOT.h>
 
-// Data info contains the quadruplet name (eg. qs3p7) and
-// the operating voltage (eg. 2900V), and the wedge id (eg. WSAP00002)
-struct DataInfo { 
-  std::string quadname;
-  std::string wedgeid;
-  std::string otherInfo = "";
-};
-
-// NOW MAKE HELPER THAT TAKES IN DATAINFO WITH QUAD NAME AND FILLS
-// WEDGEID
-
+// A "Combination" is 2 fixed layers and the layer of interest
 struct Combination {
   Combination(){};
   Combination(UShort_t theLayer, UShort_t firstFixedLayer, UShort_t secondFixedLayer) : layer(theLayer), fixed1(firstFixedLayer), fixed2(secondFixedLayer){};
@@ -31,6 +21,16 @@ struct Combination {
 };
 
 std::vector<Combination> combinationVector(); 
+
+// Data info contains the quadruplet name (eg. QS3P07),
+// the wedge id (eg. WSAP00002), and the output directory path.
+// The output directory must exist and its name should likely include
+// the quadname and the run voltage of the input datafile. 
+struct InputInfo { 
+  std::string quadname;
+  std::string wedgeid;
+  std::string outpath;
+};
 
 void getOtherLayers(UShort_t la, UShort_t lb, UShort_t* lc, UShort_t* ld);
 // for creating strings of the form:
