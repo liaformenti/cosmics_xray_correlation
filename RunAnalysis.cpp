@@ -43,7 +43,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* info, PlotManager* pm, DetectorG
     // Replace i<x=nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA_qs3p7.root with L3 and L4 fixed
-    for (Int_t i=0; i<nEntries; i++) {
+    for (Int_t i=0; i<3; i++) {
         trksTree.GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
         // Assumes uniform position distribution of hit across group
@@ -53,8 +53,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* info, PlotManager* pm, DetectorG
 
         // for each permutation of two layers
         // la < lb and treated first always
-        for (Int_t la=1; la<=4; la++) {
-        // for (UShort_t la=3; la<=3; la++) {
+        // for (Int_t la=1; la<=4; la++) {
+        for (UShort_t la=3; la<=3; la++) {
             for (Int_t lb=(la+1); lb<=4; lb++) {
             // for (UShort_t lb=(la+1); lb<=4; lb++) {
 
@@ -104,7 +104,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* info, PlotManager* pm, DetectorG
     loosePlots.PrintPosBinnedFitResultTH2Fs("out/test_results.pdf");*/
 
     // Get xray data
-    // XRayData("results.db", info);
+    XRayData data("results.db", *info);
     return;
 }
 
