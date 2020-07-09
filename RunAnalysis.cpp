@@ -95,7 +95,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     // printUncertaintyHistograms(pm);
     // Example output choices
     Binning loose(500, 500, g); // large rectangular bins
-    ResPlots loosePlots(&residuals, &loose, loose.name, cosmicsInfo, g, pm);
+    ResPlots loosePlots(&residuals, &loose, loose.name, cosmicsInfo, g, pm, myInfo);
     /*loosePlots.CreateNumEntriesTH2Is();
     loosePlots.CreatePosBinnedResPlots();
     loosePlots.CreatePosBinnedFitResultTH2Fs();
@@ -104,7 +104,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     loosePlots.PrintPosBinnedFitResultTH2Fs("out/test_results.pdf");*/
 
     // Get xray data
-    XRayData data("results.db", *cosmicsInfo);
+    XRayData data("results.db", cosmicsInfo, myInfo);
     return;
 }
 
