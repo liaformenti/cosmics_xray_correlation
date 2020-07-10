@@ -6,6 +6,14 @@ using namespace std;
 XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
                    InputInfo* _myInfo) : cinfo(_cinfo), 
                    myInfo(_myInfo) {
+    // Check if there is xray data for quad
+    if (myInfo->wedgeid == "") {
+        cout << "No xray data available for quadruplet ";
+        cout << myInfo->quadname << ". XRayData object not filled ";
+        cout << "(XRayData constructor).\n";
+        return;
+    }
+
     // Get relelvant data fom base
     sqlite3* db;
     sqlite3_stmt *stmt;
@@ -22,7 +30,6 @@ XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
         string msg(sqlite3_errmsg(db));
         throw logic_error("Unable to access xray data, SELECT failed: " + msg + "\n");
     }
-    cout << myInfo->quadname << endl;
     // For all selected rows
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
         string runId(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
