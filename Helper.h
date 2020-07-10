@@ -6,6 +6,8 @@
 // C++ includes
 #include <iostream>
 #include <string>
+#include <map>
+#include <unordered_map>
 
 // Root includes
 #include <TROOT.h>
@@ -27,10 +29,14 @@ std::vector<Combination> combinationVector();
 // The output directory must exist and its name should likely include
 // the quadname and the run voltage of the input datafile. 
 struct InputInfo { 
+  InputInfo(){};
+  InputInfo(std::string theQuadName, std::string theOutPath);
   std::string quadname;
   std::string wedgeid;
   std::string outpath;
 };
+
+std::string quadToWedge(InputInfo* info);
 
 void getOtherLayers(UShort_t la, UShort_t lb, UShort_t* lc, UShort_t* ld);
 // for creating strings of the form:

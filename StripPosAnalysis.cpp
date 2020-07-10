@@ -43,9 +43,7 @@ int main(int argc, char* argv[]) {
         throw runtime_error("Output directory does not exist.");
 
     // Fill InputInfo struct
-    InputInfo myInfo;
-    myInfo.quadname = argv[2];
-    myInfo.outpath = argv[3];
+    InputInfo myInfo(argv[2], argv[3]);
 
     // Check input file
     if (gSystem->AccessPathName(argv[1]))
