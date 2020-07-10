@@ -24,10 +24,10 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    
+
     // Set style
     SetAnalysisStyle();
-    // cout << "You commented out SetAnalysisStyle\n";
+    // cout << "You commented out SetAnalysisStyle\n\n";
     
     // Check arguments
     if (argc != 4) 
@@ -64,16 +64,18 @@ int main(int argc, char* argv[]) {
     // Get AnalysisInfo object, error handling done in fcn
     AnalysisInfo* cosmicsInfo = GetAnalysisInfo(cosmicsAnalysis);
     if (cosmicsInfo == nullptr)
-       throw runtime_error("Error getting AnalysisInfo object, in function GetAnalysisInfo"); 
+       throw runtime_error("Error getting AnalysisInfo object, in function GetAnalysisInfo."); 
    
     // Get detector geometry
     DetectorGeometry *geom = DetectorGeometryTools::GetDetectorGeometry(cosmicsInfo->detectortype);
 
     PlotManager* plotManager = new PlotManager();    
 
+    cout << "Running analysis...\n\n";
     RunAnalysis(*tracksTree, cosmicsInfo, plotManager, geom, &myInfo);
-    // cout << "You commented out call to RunAnalysis\n";
+    // cout << "You commented out call to RunAnalysis\n\n";
 
+    cout << "Finishing up...\n\n"; 
     delete plotManager;
     cosmicsAnalysis->Close();
     delete cosmicsAnalysis;

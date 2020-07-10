@@ -43,7 +43,7 @@ InputInfo::InputInfo(string theQuadName, string theOutPath) :
     if (quadToWedge.find(quadname) != quadToWedge.end()) 
         wedgeid = quadToWedge.at(quadname);
     else {
-        cout << "Warning: quadruplet does not have x-ray data.\nIf it does, add the quadname and the MTF to the quadToWedge map in Helper.cpp (InputInfo constructor)\n";
+        cout << "Warning: quadruplet does not have x-ray data.\nIf it does, add the quadname and the MTF to the quadToWedge map in Helper.cpp (InputInfo constructor).\n\n";
         wedgeid = ""; // Empty string for no wedge
     }
 }

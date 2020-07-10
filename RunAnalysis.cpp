@@ -39,6 +39,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     // Vector to store calculated residuals
     vector<Residual> residuals;
 
+    cout << "Processing input data...\n\n";
+
     // initializeUncertaintyHistograms(pm);
     // Replace i<x=nEntries eventually
     // 3 events ensures you get one that passes cut 
@@ -92,19 +94,23 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
             cout << "Iteration " << i << " of " <<  nEntries << '\n';
         }*/
     } // end event loop
+
+    cout << "Analyzing results...\n\n";
+
     // printUncertaintyHistograms(pm);
     // Example output choices
     Binning loose(500, 500, g); // large rectangular bins
     ResPlots loosePlots(&residuals, &loose, loose.name, cosmicsInfo, g, pm, myInfo);
-    /*loosePlots.CreateNumEntriesTH2Is();
+    // loosePlots.CreateNumEntriesTH2Is();
     loosePlots.CreatePosBinnedResPlots();
-    loosePlots.CreatePosBinnedFitResultTH2Fs();
-    loosePlots.PrintNumEntriesTH2Is("out/test_num_entries.pdf");
-    loosePlots.PrintPosBinnedResPlots("out/test_res_plots.pdf");
-    loosePlots.PrintPosBinnedFitResultTH2Fs("out/test_results.pdf");*/
+    // loosePlots.CreatePosBinnedFitResultTH2Fs();
+    // loosePlots.PrintNumEntriesTH2Is(myInfo->outpath + "test_num_entries.pdf");
+    loosePlots.PrintPosBinnedResPlots(myInfo->outpath + "/test_res_plots.pdf");
+    // loosePlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + "test_results.pdf");
 
     // Get xray data
     XRayData data("results.db", cosmicsInfo, myInfo);
+    cout << "Finishing analysis...\n\n"; 
     return;
 }
 

@@ -10,7 +10,7 @@ XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
     if (myInfo->wedgeid == "") {
         cout << "No xray data available for quadruplet ";
         cout << myInfo->quadname << ". XRayData object not filled ";
-        cout << "(XRayData constructor).\n";
+        cout << "(XRayData constructor).\n\n";
         return;
     }
     
