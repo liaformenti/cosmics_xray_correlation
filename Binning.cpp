@@ -45,3 +45,25 @@ Binning::Binning(Int_t wx, Int_t wy, DetectorGeometry* _g) :
     name = "xbin_width_" + to_string(wx) + "mm_ybin_width_";
     name += to_string(wy) + "mm";
 }
+
+Binning::Binning(XRayData* data, Int_t wx, Int_t wy,
+                DetectorGeometry* _g) : g(_g) {
+    
+    // Get geom limits
+    pair<Double_t, Double_t> xlims = g->GetModuleLimitsX();
+    pair<Double_t, Double_t> ylims = g->GetModuleLimitsY();
+
+    // pushback lower lims
+    xBinEdges.push_back(xlims.first);
+    yBinEdges.push_back(ylims.second);
+   
+    // Should verify sizes are the same, maybe do this in XRayData
+    //if (data->xnoms.size() != data->ynoms.size()) 
+    /*for(unsigned i : indices(A)) {
+        cout << data->xnoms.at(i) << ' ';
+    }*/
+    /*for (auto& [x, y] : zip(data->xnoms, data->ynoms)) {
+        cout << x << ' ' << y << '\n';
+    }
+    cout << "\n\n";*/
+}

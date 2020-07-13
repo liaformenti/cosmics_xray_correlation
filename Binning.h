@@ -13,6 +13,7 @@
 #include "DetectorGeometry.h"
 
 // My includes
+#include <XRayData.h>
 
 class Binning {
   public:
@@ -21,6 +22,10 @@ class Binning {
     // Rectangular bins
     // Lowest y bin and highest x bin not width - controlled
     Binning(Int_t xWidth, Int_t yWidth, DetectorGeometry* _g);
+    // To bin a rectangle around xray points, with specified
+    // x and y widths
+    Binning(XRayData* data, Int_t xWidth, Int_t yWidth,
+            DetectorGeometry* _g);
     ~Binning(){};
 
     // Members
