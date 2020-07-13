@@ -7,6 +7,7 @@ XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
                    InputInfo* _myInfo) : cinfo(_cinfo), 
                    myInfo(_myInfo) {
     // Check if there is xray data for quad
+    // Do so by checking if wedgeid was filled
     if (myInfo->wedgeid == "") {
         cout << "No xray data available for quadruplet ";
         cout << myInfo->quadname << ". XRayData object not filled ";
