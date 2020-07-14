@@ -110,7 +110,10 @@ XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
 
 // Should add this to plot manager (need to send in plot manager)
 void XRayData::PlotPositions() {
-    
+    if (xnoms.size() == 0) {
+        cout << "Warning: no xray data positions. Position plots not created (XRayData::PlotPositions).\n\n";
+        return;
+    }    
     TCanvas* c = new TCanvas();
     // Copy vectors into arrays
     Double_t x[xnoms.size()];

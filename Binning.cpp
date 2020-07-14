@@ -55,11 +55,24 @@ Binning::Binning(XRayData* data, Int_t wx, Int_t wy,
 
     // pushback lower lims
     xBinEdges.push_back(xlims.first);
-    yBinEdges.push_back(ylims.second);
+    yBinEdges.push_back(ylims.first);
    
+    // Check if there is xray data
+    if (data->xnoms.size() == 0) {
+        cout << "Warning: no xray data positions. One bin over entire area (Binning constructor).\n\n";
+        xBinEdges.push_back(xlims.second);
+        yBinEdges.push_back(ylims.second);
+        nBinsX = 1; 
+        nBinsY = 1;
+        return;
+    }
+
     // Should verify sizes are the same, maybe do this in XRayData
     //if (data->xnoms.size() != data->ynoms.size()) 
-    /*for(unsigned i : indices(A)) {
+    /*for (Int_t i=0; i<data->xnoms.size(); i++) {
+        cout << data->xnoms.at(i) << ' ' << data->ynoms.at(i) << '\n';
+    }*/
+    /*for(unsigned i : indices(data->xnoms)) {
         cout << data->xnoms.at(i) << ' ';
     }*/
     /*for (auto& [x, y] : zip(data->xnoms, data->ynoms)) {
