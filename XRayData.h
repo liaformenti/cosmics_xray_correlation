@@ -14,6 +14,9 @@
 #include <vector>
 
 // ROOT includes
+#include <TCanvas.h>
+#include <TGraph.h>
+#include <TAxis.h>
 
 // tgc_analysis includes
 #include "AnalysisInfo.h"
@@ -34,6 +37,9 @@ class XRayData {
     std::vector<Double_t> xnoms;
     std::vector<Double_t> ynoms;
     std::vector<std::map<UShort_t, Double_t>> offsets; // layer to offset map
+   // Methods
+   // Plot ynoms vs xnoms, nominal xray positions
+   void PlotPositions();
 
   private:
     AnalysisInfo* cinfo = nullptr;

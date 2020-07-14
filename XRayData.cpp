@@ -107,3 +107,25 @@ XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
     }
     sqlite3_finalize(stmt);
 }
+
+// Should add this to plot manager (need to send in plot manager)
+void XRayData::PlotPositions() {
+    
+    TCanvas* c = new TCanvas();
+    // Copy vectors into arrays
+    Double_t x[xnoms.size()];
+    Double_t y[ynoms.size()];
+    copy(xnoms.begin(), xnoms.end(), x);
+    copy(ynoms.begin(), ynoms.end(), y);
+    // Create scatter plot
+    TGraph xRayGraph(xnoms.size(), x, y);
+    // Set display options
+    xRayGraph.SetTitle(("X-ray positions for " + myInfo->quadname).c_str());
+    xRayGraph.GetXaxis()->SetTitle("x [mm]");
+    xRayGraph.GetYaxis()->SetTitle("y [mm]");
+    xRayGraph.Draw("ap");
+
+    c->Print((myInfo->outpath + "xraypositions_" + myInfo->quadname + ".pdf").c_str());
+    delete c;
+
+}
