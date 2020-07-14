@@ -58,6 +58,7 @@ Binning::Binning(XRayData* data, Int_t wx, Int_t wy,
     yBinEdges.push_back(ylims.first);
    
     // Check if there is xray data
+    // if not, only 1 bin within geometric limits
     if (data->xnoms.size() == 0) {
         cout << "Warning: no xray data positions. One bin over entire area (Binning constructor).\n\n";
         xBinEdges.push_back(xlims.second);
@@ -68,15 +69,43 @@ Binning::Binning(XRayData* data, Int_t wx, Int_t wy,
     }
 
     // Should verify sizes are the same, maybe do this in XRayData
-    //if (data->xnoms.size() != data->ynoms.size()) 
-    /*for (Int_t i=0; i<data->xnoms.size(); i++) {
-        cout << data->xnoms.at(i) << ' ' << data->ynoms.at(i) << '\n';
-    }*/
-    /*for(unsigned i : indices(data->xnoms)) {
-        cout << data->xnoms.at(i) << ' ';
-    }*/
-    /*for (auto& [x, y] : zip(data->xnoms, data->ynoms)) {
-        cout << x << ' ' << y << '\n';
+    //if (data->xnoms.size() != data->ynoms.size())
+    // NOTE: No way to deal with overlap of spec. x ray pt bins
+    // For each x ray point, add rectangular bin
+    // First, copy into other arrays so sorting doesn't destroy
+    // original order
+    vector<Double_t> xs, ys;
+    copy(data->xnoms.begin(), data->xnoms.end(), back_inserter(xs));
+    copy(data->ynoms.begin(), data->ynoms.end(), back_inserter(ys));
+    
+    for (auto x=data->xnoms.begin(); x!=data->xnoms.end(); x++)
+        cout << *x << ' ';
+    cout << "\n\n";
+    for (auto x=xs.begin(); x!=xs.end(); x++)
+        cout << *x << ' ';
+    cout << "\n\n";
+    for (auto y=data->ynoms.begin(); y!=data->ynoms.end(); y++)
+        cout << *y << ' ';
+    cout << "\n\n";
+    for (auto y=ys.begin(); y!=ys.end(); y++)
+        cout << *y << ' ';
+    cout << "\n\n";
+
+    // Sort smallest to largest
+    sort(xs.begin(), xs.end());
+    for (auto x=xs.begin(); x!=xs.end(); x++)
+        cout << *x << ' ';
+    cout << "\n\n";
+
+    sort(ys.begin(), ys.end());
+    for (auto y=ys.begin(); y!=ys.end(); y++) {
+        cout << *y << ' ';
     }
-    cout << "\n\n";*/
+    cout << "\n\n";
+
+    // Finish off member initialization 
+    xBinEdges.push_back(xlims.second);
+    yBinEdges.push_back(ylims.second);
+    nBinsX = xBinEdges.size() - 1;
+    nBinsY = yBinEdges.size() -1;
 }

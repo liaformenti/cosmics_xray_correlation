@@ -5,10 +5,12 @@
 #include <iostream>
 #include <vector>
 #include <string.h>
+#include <algorithm>
 
 // Root includes
 #include <Rtypes.h>
 #include <TROOT.h>
+
 // tgc_analysis includes
 #include "DetectorGeometry.h"
 
