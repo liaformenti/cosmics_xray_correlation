@@ -165,7 +165,8 @@ Binning::Binning(XRayData* data, Int_t wx, Int_t wy,
     yBinEdges.push_back(ylims.second);
     nBinsX = xBinEdges.size() - 1;
     nBinsY = yBinEdges.size() -1;
-
+    name = "xray_min_xwidth_" + to_string(wx) + "mm_min_ywidth_";
+    name += to_string(wy) + "mm";
     // Code to print things
     /*for (auto x=data->xnoms.begin(); x!=data->xnoms.end(); x++)
         cout << *x << ' ';
