@@ -12,6 +12,7 @@
 #include <sqlite3.h>
 #include <map>
 #include <vector>
+#include <fstream>
 
 // ROOT includes
 #include <TCanvas.h>
@@ -40,6 +41,7 @@ class XRayData {
    // Methods
    // Plot ynoms vs xnoms, nominal xray positions
    void PlotPositions();
+   void WriteOutXRayData();
 
   private:
     AnalysisInfo* cinfo = nullptr;

@@ -132,3 +132,23 @@ void XRayData::PlotPositions() {
     delete c;
 
 }
+
+void XRayData::WriteOutXRayData() {
+    // To print out offsets for each xray position to file
+    // Caution: no guard against xnoms ynoms and offsets not being
+    // the same length (shouldn't happen)
+    ofstream f;
+    f.open(myInfo->outpath + myInfo->quadname + "_xray_data_offsets.txt");
+    f << "Nominal x position, nominal y position, ";
+    f << "Layer, offset (for as many as exist, mm)\n";
+    UShort_t i = 0;
+    for (i=0; i<xnoms.size(); i++) {
+        f << xnoms.at(i) << ' ' << ynoms.at(i) << ' ';
+        for (auto lo=offsets.at(i).begin(); lo!=offsets.at(i).end(); lo++) {
+            f << lo->first << ' ' << lo->second << ' ';
+        }
+        f << '\n';
+    }
+    f.close();
+    return;
+}
