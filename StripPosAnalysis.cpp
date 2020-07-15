@@ -24,15 +24,32 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
+
     // Set style
     SetAnalysisStyle();
-    // Check file
-    if (argc < 2)
-        throw runtime_error("Please specify the file to analyse.");
+    // cout << "You commented out SetAnalysisStyle\n\n";
+    
+    // Check arguments
+    if (argc != 4) 
+        throw runtime_error("Please specify the file to analyse, the quadruplet name, and the output directory path.");
+
+    // Check quad name - need name to compare with xray data
+    if (argv[2][0] != 'Q') {
+        throw runtime_error("The second argument should be the quadruplet name, matching the format, QS3P07");
+    } 
+   
+    // Check that output directory exists
+    if (gSystem->AccessPathName(argv[3]))
+        throw runtime_error("Output directory does not exist.");
+
+    // Fill InputInfo struct
+    InputInfo myInfo(argv[2], argv[3]);
+
+    // Check input file
     if (gSystem->AccessPathName(argv[1]))
         throw runtime_error("File does not exist.");
 
-    // Open file
+    // Open input file
     TFile* cosmicsAnalysis = new TFile(argv[1], "READ");
     if (cosmicsAnalysis->IsZombie())
         throw runtime_error("Error opening file.");
@@ -45,16 +62,22 @@ int main(int argc, char* argv[]) {
     TTree* tracksTree = (TTree*)cosmicsAnalysis->Get("tracks");
 
     // Get AnalysisInfo object, error handling done in fcn
-    AnalysisInfo* analysisInfo = GetAnalysisInfo(cosmicsAnalysis);
-    if (analysisInfo == nullptr)
-       throw runtime_error("Error getting AnalysisInfo object, in function GetAnalysisInfo"); 
-    PlotManager* plotManager = new PlotManager();    
+    AnalysisInfo* cosmicsInfo = GetAnalysisInfo(cosmicsAnalysis);
+    if (cosmicsInfo == nullptr)
+       throw runtime_error("Error getting AnalysisInfo object, in function GetAnalysisInfo."); 
+   
     // Get detector geometry
-    DetectorGeometry *geom = DetectorGeometryTools::GetDetectorGeometry(analysisInfo->detectortype);
+    DetectorGeometry *geom = DetectorGeometryTools::GetDetectorGeometry(cosmicsInfo->detectortype);
 
-    RunAnalysis(*tracksTree, analysisInfo, plotManager, geom);
+    PlotManager* plotManager = new PlotManager();    
 
+    cout << "Running analysis...\n\n";
+    RunAnalysis(*tracksTree, cosmicsInfo, plotManager, geom, &myInfo);
+    // cout << "You commented out call to RunAnalysis\n\n";
+
+    cout << "Finishing up...\n\n"; 
     delete plotManager;
     cosmicsAnalysis->Close();
+    delete cosmicsAnalysis;
     return 0;
 }

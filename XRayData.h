@@ -12,17 +12,25 @@
 #include <sqlite3.h>
 #include <map>
 #include <vector>
+#include <fstream>
 
 // ROOT includes
+#include <TCanvas.h>
+#include <TGraph.h>
+#include <TAxis.h>
 
 // tgc_analysis includes
 #include "AnalysisInfo.h"
+
+// My includes
+#include "Helper.h"
 
 class XRayData {
   public:
     // Constructors
     XRayData(){};
-    XRayData(std::string databaseName, AnalysisInfo &info); 
+    XRayData(std::string databaseName, AnalysisInfo* _cinfo,
+             InputInfo* _myInfo); 
     ~XRayData(){};
 
     // Members
@@ -30,8 +38,14 @@ class XRayData {
     std::vector<Double_t> xnoms;
     std::vector<Double_t> ynoms;
     std::vector<std::map<UShort_t, Double_t>> offsets; // layer to offset map
+   // Methods
+   // Plot ynoms vs xnoms, nominal xray positions
+   void PlotPositions();
+   void WriteOutXRayData();
 
-  /*private:
-    parseRunID(string runId);*/
+  private:
+    AnalysisInfo* cinfo = nullptr;
+    InputInfo* myInfo = nullptr;
+    //parseRunID(string runId);
 };
 #endif

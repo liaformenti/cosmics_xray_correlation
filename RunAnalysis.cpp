@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void RunAnalysis(TTree &trksTree, AnalysisInfo* info, PlotManager* pm, DetectorGeometry* g) {
+void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, DetectorGeometry* g, InputInfo* myInfo) {
 
     // Declaration 
     Int_t nEntries;
@@ -39,6 +39,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* info, PlotManager* pm, DetectorG
     // Vector to store calculated residuals
     vector<Residual> residuals;
 
+    cout << "Processing input data...\n\n";
+
     // initializeUncertaintyHistograms(pm);
     // Replace i<x=nEntries eventually
     // 3 events ensures you get one that passes cut 
@@ -56,7 +58,6 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* info, PlotManager* pm, DetectorG
         for (Int_t la=1; la<=4; la++) {
         // for (UShort_t la=3; la<=3; la++) {
             for (Int_t lb=(la+1); lb<=4; lb++) {
-            // for (UShort_t lb=(la+1); lb<=4; lb++) {
 
                 if (MissingHitsOnFixedLayers(la, lb, 
                    trackX, trackYGaussian))
@@ -92,35 +93,28 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* info, PlotManager* pm, DetectorG
             cout << "Iteration " << i << " of " <<  nEntries << '\n';
         }*/
     } // end event loop
+
+    cout << "Analyzing results...\n\n";
+
     // printUncertaintyHistograms(pm);
-    /*Binning minRecBins(37, 20, g); // 37 mm bc wire group sep is 36 mm; 30 mm because y uncerts on tracks generally < 20 mm
-    ResPlots minRecPlots(&residuals, &minRecBins, minRecBins.name, info, g, pm);
-    minRecPlots.CreateNumEntriesTH2Is();
-    minRecPlots.PrintNumEntriesTH2Is("out/qs3p6_2900V_num_entries_xbins_37mm_ybins_20mm.pdf");
-    minRecPlots.CreatePosBinnedResPlots();
-    minRecPlots.CreatePosBinnedFitResultTH2Fs();
-    minRecPlots.PrintPosBinnedResPlots("out/qs3p6_2900V_residuals_xbins_37mm_ybins_20mm.pdf");
-    minRecPlots.PrintPosBinnedFitResultTH2Fs("out/qs3p6_2900V_residual_fits_xbins_37mm_ybins_20mm.pdf");
+    
+    // Get xray data
+    XRayData data("results.db", cosmicsInfo, myInfo);
+    data.PlotPositions();
+    data.WriteOutXRayData();
 
-    Binning medRecBins(37, 30, g); 
-    ResPlots medRecPlots(&residuals, &medRecBins, medRecBins.name, info, g, pm);
-    medRecPlots.CreateNumEntriesTH2Is();
-    medRecPlots.PrintNumEntriesTH2Is("out/qs3p6_2900V_num_entries_xbins_37mm_ybins_30mm.pdf");
-    medRecPlots.CreatePosBinnedResPlots();
-    medRecPlots.CreatePosBinnedFitResultTH2Fs();
-    medRecPlots.PrintPosBinnedResPlots("out/qs3p6_2900V_residuals_xbins_37mm_ybins_30mm.pdf");
-    medRecPlots.PrintPosBinnedFitResultTH2Fs("out/qs3p6_2900V_residuals_fits_xbins_37mm_ybins_30mm.pdf");*/
+    // Create ResPlots for XRayData
+    Binning xRayBins(&data, 36, 20, g);
+    // Make xray data binned plots
+    ResPlots xRayPlots(&residuals, &xRayBins, xRayBins.name, cosmicsInfo, g, pm, myInfo);
+    xRayPlots.CreateNumEntriesTH2Is();
+    xRayPlots.CreatePosBinnedResPlots();
+    xRayPlots.CreatePosBinnedFitResultTH2Fs();
+    xRayPlots.PrintNumEntriesTH2Is(myInfo->outpath + myInfo->quadname + "_3100V_num_entries_binning_" + xRayBins.name + ".pdf");
+    xRayPlots.PrintPosBinnedResPlots(myInfo->outpath + myInfo->quadname + "_3100V_residual_fits_binning_" + xRayBins.name + ".pdf");
+    xRayPlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + myInfo->quadname + "_3100V_fit_results_binning_" + xRayBins.name + ".pdf");
 
-
-    Binning largeRecBins(37, 40, g); 
-    ResPlots largeRecPlots(&residuals, &largeRecBins, largeRecBins.name, info, g, pm);
-    largeRecPlots.CreateNumEntriesTH2Is();
-    largeRecPlots.PrintNumEntriesTH2Is("out/qs3p6_2900V_num_entries_xbins_37mm_ybins_40mm.pdf");
-    largeRecPlots.CreatePosBinnedResPlots();
-    largeRecPlots.CreatePosBinnedFitResultTH2Fs();
-    largeRecPlots.PrintPosBinnedResPlots("out/qs3p6_2900V_residuals_xbins_37mm_ybins_40mm.pdf");
-    largeRecPlots.PrintPosBinnedFitResultTH2Fs("out/qs3p6_2900V_residual_fits_xbins_37mm_ybins_40mm.pdf");
-
+    cout << "Finishing analysis...\n\n";
     return;
 }
 

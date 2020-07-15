@@ -35,9 +35,10 @@ class ResPlots {
     ResPlots(std::vector<Residual>* _residuals,
                Binning* _binning,
                std::string namebase,
-               AnalysisInfo* _info,
+               AnalysisInfo* _cinfo,
                DetectorGeometry* _g,
-               PlotManager* _pm);
+               PlotManager* _pm,
+               InputInfo* _myInfo);
     ~ResPlots(){};
  
     // Create members
@@ -56,9 +57,10 @@ class ResPlots {
   private:
     std::vector<Residual>* residuals = nullptr;
     Binning* binning = nullptr;
-    AnalysisInfo* info = nullptr;
+    AnalysisInfo* cinfo = nullptr;
     DetectorGeometry* g = nullptr; 
     PlotManager* pm = nullptr;
+    InputInfo* myInfo = nullptr;
     // Initialization methods
     void InitializeNumEntriesTH2Is();
     void InitializePosBinnedResPlots();
