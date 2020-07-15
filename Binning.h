@@ -42,6 +42,14 @@ class Binning {
   private:
     // Members
     DetectorGeometry* g=nullptr;
+    // Methods
+    // To define a bin around the centre, q
+    // Adds bin lims to xBinEdges or yBinEdges depending on
+    // string xOrY.
+    // Assumes it will be called sequentially (order of increasing bin
+    // limits) from XRayData based Binning constructor
+    void DefineXRayBin(Float_t q, Float_t qmin, Float_t qmax, 
+                       Int_t width, std::string xOrY);
 
 };
 #endif

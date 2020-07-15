@@ -99,17 +99,30 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
 
     // printUncertaintyHistograms(pm);
     // Example output choices
-    Binning loose(500, 500, g); // large rectangular bins
+    /*Binning loose(500, 500, g); // large rectangular bins
     ResPlots loosePlots(&residuals, &loose, loose.name, cosmicsInfo, g, pm, myInfo);
-    // loosePlots.CreateNumEntriesTH2Is();
+    loosePlots.CreateNumEntriesTH2Is();
     loosePlots.CreatePosBinnedResPlots();
-    // loosePlots.CreatePosBinnedFitResultTH2Fs();
-    // loosePlots.PrintNumEntriesTH2Is(myInfo->outpath + "test_num_entries.pdf");
+    loosePlots.CreatePosBinnedFitResultTH2Fs();
+    loosePlots.PrintNumEntriesTH2Is(myInfo->outpath + "test_num_entries.pdf");
     loosePlots.PrintPosBinnedResPlots(myInfo->outpath + "/test_res_plots.pdf");
-    // loosePlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + "test_results.pdf");
+    loosePlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + "test_results.pdf");*/
 
     // Get xray data
     XRayData data("results.db", cosmicsInfo, myInfo);
+    Binning xRayBins(&data, 36, 20, g);
+    /*ResPlots test(&residuals, &xRayBins, xRayBins.name, cosmicsInfo, g, pm, myInfo);
+    cout << "CreateNumEntriesTH2Is\n\n";
+    test.CreateNumEntriesTH2Is();
+    cout << "PrintNumEntriesTH2Is\n\n";
+    test.PrintNumEntriesTH2Is("noData_test.pdf");*/
+    /* To print out offsets for each xray position
+    for (auto m=data.offsets.begin(); m!=data.offsets.end(); m++) {
+        for (auto l=m->begin(); l!=m->end(); l++) {
+            cout << l->first << ' ' << setprecision(15) << l->second << '\n';
+        }
+        cout << '\n';
+    }*/
     cout << "Finishing analysis...\n\n"; 
     return;
 }
