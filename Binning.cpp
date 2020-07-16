@@ -194,7 +194,7 @@ void Binning::DefineXRayBin(Float_t q, Float_t qmin, Float_t qmax,
     }
     Float_t binLimLow, binLimHigh;
     // Defining and adding lower bin limit
-    binLimLow = q - width/2;
+    binLimLow = q - width/2.0;
     // If low limit is out of range, don't add it to Edges vector
     // Note: because of averaging x-ray points nearby,
     // don't have to deal with case where pt lower boundary < 
@@ -213,7 +213,7 @@ void Binning::DefineXRayBin(Float_t q, Float_t qmin, Float_t qmax,
     }*/
 
     // Defining and adding upper bin limit
-    binLimHigh = q + width/2;
+    binLimHigh = q + width/2.0;
     // Similarly to lower limit,
     if (binLimHigh < qmax) {
         // Add to Edges
