@@ -48,7 +48,10 @@ Binning::Binning(Int_t wx, Int_t wy, DetectorGeometry* _g) :
 
 Binning::Binning(XRayData* data, Int_t wx, Int_t wy,
                 DetectorGeometry* _g) : g(_g) {
-    
+    // I THINK THIS IS BUGGY.
+    // GOT AN XRAY BIN SMALLER THAN DESIRED WIDTH.
+    // NOT SURE HOW.
+    // SOMETHING FUNKY WITH THE AVERAGING. 
     // Get geom limits
     pair<Double_t, Double_t> xlims = g->GetModuleLimitsX();
     pair<Double_t, Double_t> ylims = g->GetModuleLimitsY();
