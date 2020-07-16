@@ -38,14 +38,20 @@ class XRayData {
     std::vector<Double_t> xnoms;
     std::vector<Double_t> ynoms;
     std::vector<std::map<UShort_t, Double_t>> offsets; // layer to offset map
-   // Methods
-   // Plot ynoms vs xnoms, nominal xray positions
-   void PlotPositions();
-   void WriteOutXRayData();
+    // When init'ed, XRayData contains all XRayData pts.
+    // User can choose to Cut x ray points that only have offset for
+    // one layer, in which case Bool_t will be set to True.
+    Bool_t curated = false;
+    // Methods
+    // Plot ynoms vs xnoms, nominal xray positions
+    void PlotPositions();
+    // Writes out positions and offsets for each available layer
+    void WriteOutXRayData();
+    // Cut xray points from members that only have offset for one layer
+    void CutSingleLayerOnlyPoints();
 
   private:
     AnalysisInfo* cinfo = nullptr;
     InputInfo* myInfo = nullptr;
-    //parseRunID(string runId);
 };
 #endif

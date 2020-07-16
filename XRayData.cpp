@@ -152,3 +152,22 @@ void XRayData::WriteOutXRayData() {
     f.close();
     return;
 }
+
+void XRayData::CutSingleLayerOnlyPoints() {
+    vector<Double_t> xnomsUncut = xnoms;
+    vector<Double_t> ynomsUncut = ynoms;
+    vector<map<UShort_t, Double_t>> offsetsUncut = offsets;
+    xnoms.clear();
+    ynoms.clear();
+    offsets.clear();
+    for (UShort_t i=0; i<xnomsUncut.size(); i++) {
+        // If there is an offset for more than one layer,
+        if (offsetsUncut.at(i).size() > 1) { // copy back
+            xnoms.push_back(xnomsUncut.at(i));
+            ynoms.push_back(ynomsUncut.at(i));
+            offsets.push_back(offsetsUncut.at(i));
+        }
+    }
+    curated = true;
+    return;
+}
