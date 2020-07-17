@@ -153,6 +153,7 @@ void XRayData::WriteOutXRayData() {
     return;
 }
 
+// Probably gonna delete this
 void XRayData::CutSingleLayerOnlyPoints() {
     vector<Double_t> xnomsUncut = xnoms;
     vector<Double_t> ynomsUncut = ynoms;
@@ -170,4 +171,43 @@ void XRayData::CutSingleLayerOnlyPoints() {
     }
     curated = true;
     return;
+}
+
+// Note: keys are guaranteed to be ordered smallest to largest
+// (feature of map object).
+vector<pair<UShort_t, UShort_t>> XRayData::GetDiffCombos(
+        map<UShort_t, Double_t> offset) {
+    vector<pair<UShort_t, UShort_t>> diffCombos;
+    UShort_t size = offset.size();
+    UShort_t keys[size]; // To hold keys to make combinations
+    Int_t i = 0;
+    for (auto m=offset.begin(); m!=offset.end(); m++) {
+        keys[i] = m->first;
+        i++;
+    }
+    switch (size) {
+        case 1:
+            // return empty if not enough data to take difference
+            break;
+        case 2:
+            diffCombos.push_back(make_pair(keys[0], keys[1]));
+            break;
+        case 3:
+            diffCombos.push_back(make_pair(keys[0], keys[1]));
+            diffCombos.push_back(make_pair(keys[0], keys[2]));
+            diffCombos.push_back(make_pair(keys[1], keys[2]));
+            break;
+        case 4:
+            diffCombos.push_back(make_pair(keys[0], keys[1]));
+            diffCombos.push_back(make_pair(keys[0], keys[2]));
+            diffCombos.push_back(make_pair(keys[0], keys[3]));
+            diffCombos.push_back(make_pair(keys[1], keys[2]));
+            diffCombos.push_back(make_pair(keys[1], keys[3]));
+            diffCombos.push_back(make_pair(keys[2], keys[3]));
+        default:
+            cout << "Warning: Layer-xray offset map sent to XRayData::GetDiffCombos has less than one or more than four entries.\n\n";
+            break;
+    }
+    return diffCombos;
+
 }

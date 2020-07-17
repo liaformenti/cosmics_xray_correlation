@@ -48,7 +48,12 @@ class XRayData {
     // Writes out positions and offsets for each available layer
     void WriteOutXRayData();
     // Cut xray points from members that only have offset for one layer
+    // Probably gonna delete this
     void CutSingleLayerOnlyPoints();
+    // For an offsets entry, return all combinations of layers which
+    // have an offset for further processing
+    std::vector<std::pair<UShort_t, UShort_t>> GetDiffCombos(
+                                  std::map<UShort_t, Double_t> offset);
 
   private:
     AnalysisInfo* cinfo = nullptr;
