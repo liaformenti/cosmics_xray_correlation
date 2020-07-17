@@ -39,13 +39,13 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     // Vector to store calculated residuals
     vector<Residual> residuals;
 
-    cout << "Processing input data...\n\n";
+    cout << "Tracking and calculating residuals...\n\n";
 
     // initializeUncertaintyHistograms(pm);
     // Replace i<x=nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA_qs3p7.root with L3 and L4 fixed
-    for (Int_t i=0; i<nEntries; i++) {
+    for (Int_t i=0; i<3; i++) {
         trksTree.GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
         // Assumes uniform position distribution of hit across group
@@ -55,8 +55,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
 
         // for each permutation of two layers
         // la < lb and treated first always
-        for (Int_t la=1; la<=4; la++) {
-        // for (UShort_t la=3; la<=3; la++) {
+        // for (Int_t la=1; la<=4; la++) {
+        for (UShort_t la=3; la<=3; la++) {
             for (Int_t lb=(la+1); lb<=4; lb++) {
 
                 if (MissingHitsOnFixedLayers(la, lb, 
@@ -99,8 +99,31 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     // printUncertaintyHistograms(pm);
 
     // Get xray data
-    XRayData data("results.db", cosmicsInfo, myInfo);
-    data.PlotPositions();
+    XRayData xData("results.db", cosmicsInfo, myInfo);
+    // Will hold pairs of layers to take offset difference
+    vector<pair<UShort_t, UShort_t>> layers;
+    CombinedData data;
+
+    // for (UShort_t i = 0; i<xData.xnoms.size(); i++) {
+    for (UShort_t i = 3; i<4; i++) {
+        layers = xData.GetDiffCombos(xData.offsets.at(i));
+        cout << layers.size() << '\n';
+        for (auto ls=layers.begin(); ls!=layers.end(); ls++) {
+            data(36, 20, xData.xnoms.at(i), xData.ynoms.at(i),
+                 ls->first, ls->second, 
+                 xData.offsets.at(i).at(ls->first),
+                 xData.offsets.at(i).at(ls->second),
+                 &residuals, g, pm);
+            cout << xData.xnoms.at(i) << ' ' << xData.ynoms.at(i) << '\n';
+            cout << ls->first << ' ' << ls->second << '\n';
+            cout << xData.offsets.at(i).at(ls->first) << ' ';
+            cout << xData.offsets.at(i).at(ls->second) << '\n';
+
+             
+        }
+        cout << '\n';
+    }
+    /*data.PlotPositions();
     data.WriteOutXRayData();
 
     // Create ResPlots for XRayData
@@ -112,7 +135,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     xRayPlots.CreatePosBinnedFitResultTH2Fs();
     xRayPlots.PrintNumEntriesTH2Is(myInfo->outpath + myInfo->quadname + "_3100V_num_entries_binning_" + xRayBins.name + ".pdf");
     xRayPlots.PrintPosBinnedResPlots(myInfo->outpath + myInfo->quadname + "_3100V_residual_fits_binning_" + xRayBins.name + ".pdf");
-    xRayPlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + myInfo->quadname + "_3100V_fit_results_binning_" + xRayBins.name + ".pdf");
+    xRayPlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + myInfo->quadname + "_3100V_fit_results_binning_" + xRayBins.name + ".pdf");*/
 
     cout << "Finishing analysis...\n\n";
     return;

@@ -26,6 +26,7 @@
 #include "Binning.h"
 #include "ResPlots.h"
 #include "XRayData.h"
+#include "CombinedData.h"
 
 void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, DetectorGeometry* g, InputInfo* myInfo);
 
