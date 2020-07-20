@@ -27,33 +27,45 @@ class CombinedData {
     CombinedData(){};
     // Takes in the data from an XRayData entry and methods fill
     // members. wx and wy are widths of regions of interest in x and y
-    // in mm.
+    // in mm. Note that lc should always be the layer with the 
+    // smaller numerical value.
     CombinedData(Int_t wx, Int_t wy, Double_t _x, Double_t _y, 
-                 UShort_t _lA, UShort_t _lB, 
-                 Double_t _offA, Double_t _offB, 
+                 UShort_t _lc, UShort_t _ld, 
+                 Double_t _offC, Double_t _offD, 
                  std::vector<Residual>* _resData,
                  DetectorGeometry* _g, PlotManager* _pm);
     ~CombinedData(){};
 
   private:
-    // To be filled sequentially by method
+    // Members
+    // To be filled sequentially by methods
     Float_t x, y; // nominal xray x and y
     // x and y lims of region of interest centered around position:
     std::pair<Float_t, Float_t> xROI, yROI;
     // Flag swapped to true if ROI exceeds module limits
     Bool_t outOfRange = false; 
-    UShort_t lA, lB; // layers of offsets used in difference
-    Double_t offA, offB; // Offsets for layers A and B
+    UShort_t lc, ld; // layers of offsets used in difference
+    Double_t offC, offD; // Offsets for layers A and B
     Double_t offDiff; // Difference in layer A and B's offsets
+    // First pair is x lims around xray x, second pair is ylims
+    // Can make a constructor that takes ROI instead of widths
+    // to vary bin size point by point
+    std::pair<Float_t, Float_t> ROI[2];
     // Vector to hold residuals that fall in ROI, for fixed layers
     // corresponding to difference
-    std::vector<Double_t> residualsInROI;
-    Double_t meanA, meanB; // Mean of Gaussian fit to residuals
-    Double_t sigmaA, sigmaB;
+    std::vector<Double_t> residualsInROIC;
+    std::vector<Double_t> residualsInROID;
+    Double_t meanC, meanD; // Mean of Gaussian fit to residuals
+    Double_t sigmaC, sigmaD;
     Double_t meanDiff; // Difference in means
     Double_t meanDiffUncert; // Propagated error in difference 
     std::vector<Residual>* resData = nullptr;
     DetectorGeometry* g = nullptr;
     PlotManager* pm = nullptr;
+
+    // Methods
+    // Returns point to an array of 2 pairs with x lim and y lim for 
+    // around xray point position, x and y.
+    void DefineRectangularROI(Int_t wx, Int_t wy);
 };
 #endif
