@@ -49,10 +49,10 @@ CombinedData::CombinedData(Int_t xWidth, Int_t yWidth, Double_t _x,
     string name, title;
     // For lc
     WidthSpecifiedPlotNameAndTitle(name, title, lc, la, lb, xWidth, yWidth);
-    fitResultC = FitGaussian(name, title, &histC, residualsInROIC, 200, -10, 10);
+    fitResultC = FitGaussian(name, title, &histC, &fitC, residualsInROIC, 200, -10, 10);
     // For ld
     WidthSpecifiedPlotNameAndTitle(name, title, ld, la, lb, xWidth, yWidth);
-    fitResultD = FitGaussian(name, title, &histD, residualsInROID, 200, -10, 10); 
+    fitResultD = FitGaussian(name, title, &histD, &fitD, residualsInROID, 200, -10, 10); 
     // AND FINALLY, THE RESULT!
     meanDiff = fitResultC.mean - fitResultD.mean;
     // Error propagation . . . covariance?
@@ -72,11 +72,10 @@ void CombinedData::DefineRectangularROI(Int_t wx, Int_t wy) {
 }
 
 FitResult CombinedData::FitGaussian(string name, string title,
-    TH1I* hist, vector<Double_t>& filling, Int_t nBins, 
+    TH1I* hist, TF1* fit, vector<Double_t>& filling, Int_t nBins, 
     Float_t lowLim, Float_t upLim) {
     Int_t status; // Whether fit was successful (0) or not (1)
     FitResult result;
-    TF1* fit;
     // Book
     pm->Add(name, title, nBins, lowLim, upLim, myTH1I);
     // Fill
@@ -84,11 +83,13 @@ FitResult CombinedData::FitGaussian(string name, string title,
         pm->Fill(name, *f);
     }
     // Get TH1I
-    hist = (TH1I*)pm->GetTH1I(name);
+    TH1I* localHist = (TH1I*)pm->GetTH1I(name);
+    *hist = *localHist;
     status = hist->Fit("gaus", "SQ");
     // If it worked
     if (status==0) {
-        fit = (TF1*)hist->GetFunction("gaus");
+        TF1* localFit = (TF1*)hist->GetFunction("gaus");
+        *fit = *localFit;
         result.mean = fit->GetParameter(1);
         result.meanErr = fit->GetParError(1);
         result.sigma = fit->GetParameter(2);
@@ -111,21 +112,33 @@ void CombinedData::WidthSpecifiedPlotNameAndTitle(string &name,
     string &title, UShort_t layer, UShort_t fixed1, UShort_t fixed2,
     Int_t xWidth, Int_t yWidth) {
     Combination combo(layer, fixed1, fixed2);
-    name = "residuals_around_x_" + Tools::CStr(x) + "_y_"; 
-    name += Tools::CStr(y);
+    name = "residuals_around_x_" + Tools::CStr(x,2) + "_y_"; 
+    name += Tools::CStr(y,2);
     name += "_width_in_x_" + to_string(xWidth) + "_width_in_y_";
     name += to_string(yWidth) + "_" + combo.String();
     title = "Layer: " + to_string(combo.layer) + ", Fixed Layers: ";
     title += to_string(combo.fixed1) + to_string(combo.fixed2);
-    title += ", x#in["+Tools::CStr(ROI[0].first)+",";
-    title += Tools::CStr(ROI[0].second) + "], mm y#in[";
-    title += Tools::CStr(ROI[1].first) + ","; 
-    title += Tools::CStr(ROI[1].second) + "] mm;Residuals [mm];";
+    title += ", x#in["+Tools::CStr(ROI[0].first,2)+",";
+    title += Tools::CStr(ROI[0].second,2) + "], mm y#in[";
+    title += Tools::CStr(ROI[1].first,2) + ","; 
+    title += Tools::CStr(ROI[1].second,2) + "] mm;Residuals [mm];";
     title += "Tracks";
     return;
 }
 
-/*void CombinedData::PrintResHist() {
-    string name, string title;
+// Didn't quite get this to work bc appending to pdf if atomic
+/*void CombinedData::PrintResHists(string filename) {
+    TCanvas* c = new TCanvas();
+    c->Print((filename + "[").c_str());
+    c->Divide(1, 2);
+    c->cd(1);
+    histC.Draw();
+    fitC.Draw("Same");
+    c->cd(2);
+    histD.Draw();
+    fitD.Draw("Same");
+    c->Print(filename.c_str());
+    c->Print((filename + "]").c_str());
+    delete c;
     return;
 }*/

@@ -50,8 +50,11 @@ class CombinedData {
     // Members
     // Histograms of residuals falling in region of interest
     TH1I histC, histD;
+    // Fit to histC and histD
+    TF1 fitC, fitD;
     // Methods
-    // void PrintResHist();
+    // Not quite working, can't append plots to pdf
+    // void PrintResHists(std::string filename);
     
   private:
     // Members
@@ -91,7 +94,7 @@ class CombinedData {
     // Pointer to vector indicates residualInROI - C or D
     // Going to be filling the ref, hist.
     FitResult FitGaussian(std::string name, std::string title,
-        TH1I* hist, std::vector<Double_t>& filling, Int_t nBins, 
-        Float_t lowLim, Float_t upLim);
+        TH1I* hist, TF1* fit, std::vector<Double_t>& filling, 
+        Int_t nBins, Float_t lowLim, Float_t upLim);
 };
 #endif
