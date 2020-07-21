@@ -60,7 +60,7 @@ CombinedData::CombinedData(Int_t xWidth, Int_t yWidth, Int_t _ptIndex,
     // AND FINALLY, THE RESULT!
     meanDiff = fitResultC.mean - fitResultD.mean;
     // Error propagation . . . covariance?
-    meanDiffErr = sqrt(pow(fitResultC.sigma,2) + pow(fitResultD.sigma, 2));
+    meanDiffErr = sqrt(pow(fitResultC.meanErr,2) + pow(fitResultD.meanErr, 2));
     return; 
 } 
 
