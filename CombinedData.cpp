@@ -141,8 +141,8 @@ void CombinedData::WidthSpecifiedPlotNameAndTitle(string &name,
 }
 
 void CombinedData::PrintClassDataToFile(ofstream& f) {
-    f << lc << "," << ld << "," << offC << "," << offD << ",";
-    f << offDiff << ","; 
+    f << x << "," << y << "," << lc << "," << ld << "," << offC;
+    f << "," << offD << "," << offDiff << ","; 
     if (fitResultC.success == true) {
         f << fitResultC.mean << "," << fitResultC.meanErr <<  ",";
         f << fitResultC.sigma << "," << fitResultC.sigErr << ",";
