@@ -5,13 +5,14 @@ using namespace std;
 
 // Region of interest is rectange of x (y) width of wx (wy).
 // Use flag outOfRange to indicate if bin goes outside module limits
-CombinedData::CombinedData(Int_t xWidth, Int_t yWidth, Double_t _x, 
-                           Double_t _y, UShort_t _lc, UShort_t _ld,
-                           Double_t _offC, Double_t _offD,
+CombinedData::CombinedData(Int_t xWidth, Int_t yWidth, Int_t _ptIndex, 
+                           Double_t _x, Double_t _y, UShort_t _lc, 
+                           UShort_t _ld, Double_t _offC, Double_t _offD,
                            vector<Residual>* _resData,
                            DetectorGeometry* _g, PlotManager* _pm) :
-    x(_x), y(_y), lc(_lc), ld(_ld), offC(_offC), offD(_offD), 
-    resData(_resData), g(_g), pm(_pm) {
+    ptIndex(_ptIndex), x(_x), y(_y), lc(_lc), ld(_ld), offC(_offC), 
+    offD(_offD), resData(_resData), g(_g), pm(_pm) {
+
     UShort_t la, lb;
     // lc and ld are layers of interest, la and lb are fixed layers
     // Note that lc < ld always
@@ -49,10 +50,13 @@ CombinedData::CombinedData(Int_t xWidth, Int_t yWidth, Double_t _x,
     string name, title;
     // For lc
     WidthSpecifiedPlotNameAndTitle(name, title, lc, la, lb, xWidth, yWidth);
-    fitResultC = FitGaussian(name, title, &histC, &fitC, residualsInROIC, 200, -10, 10);
+    // fitResultC = FitGaussian(name, title, &histC, &fitC, residualsInROIC, 200, -10, 10);
+    fitResultC = FitGaussian(name, title, residualsInROIC, 200, -10, 10);
     // For ld
     WidthSpecifiedPlotNameAndTitle(name, title, ld, la, lb, xWidth, yWidth);
-    fitResultD = FitGaussian(name, title, &histD, &fitD, residualsInROID, 200, -10, 10); 
+    // fitResultD = FitGaussian(name, title, &histD, &fitD, residualsInROID, 200, -10, 10); 
+    fitResultD = FitGaussian(name, title, residualsInROID, 200, -10, 10); 
+
     // AND FINALLY, THE RESULT!
     meanDiff = fitResultC.mean - fitResultD.mean;
     // Error propagation . . . covariance?
@@ -71,9 +75,13 @@ void CombinedData::DefineRectangularROI(Int_t wx, Int_t wy) {
     return;
 }
 
-FitResult CombinedData::FitGaussian(string name, string title,
+/*FitResult CombinedData::FitGaussian(string name, string title,
     TH1I* hist, TF1* fit, vector<Double_t>& filling, Int_t nBins, 
+    Float_t lowLim, Float_t upLim) {*/
+FitResult CombinedData::FitGaussian(string name, string title,
+    vector<Double_t>& filling, Int_t nBins, 
     Float_t lowLim, Float_t upLim) {
+
     Int_t status; // Whether fit was successful (0) or not (1)
     FitResult result;
     // Book
@@ -83,13 +91,15 @@ FitResult CombinedData::FitGaussian(string name, string title,
         pm->Fill(name, *f);
     }
     // Get TH1I
-    TH1I* localHist = (TH1I*)pm->GetTH1I(name);
-    *hist = *localHist;
+    // TH1I* localHist = (TH1I*)pm->GetTH1I(name);
+    // *hist = *localHist;
+    TH1I* hist = (TH1I*)pm->GetTH1I(name);
     status = hist->Fit("gaus", "SQ");
     // If it worked
     if (status==0) {
-        TF1* localFit = (TF1*)hist->GetFunction("gaus");
-        *fit = *localFit;
+        // TF1* localFit = (TF1*)hist->GetFunction("gaus");
+        // *fit = *localFit;
+        TF1* fit = (TF1*)hist->GetFunction("gaus");
         result.mean = fit->GetParameter(1);
         result.meanErr = fit->GetParError(1);
         result.sigma = fit->GetParameter(2);
@@ -112,10 +122,14 @@ void CombinedData::WidthSpecifiedPlotNameAndTitle(string &name,
     string &title, UShort_t layer, UShort_t fixed1, UShort_t fixed2,
     Int_t xWidth, Int_t yWidth) {
     Combination combo(layer, fixed1, fixed2);
-    name = "residuals_around_x_" + Tools::CStr(x,2) + "_y_"; 
+    /*name = "residuals_around_x_" + Tools::CStr(x,2) + "_y_"; 
     name += Tools::CStr(y,2);
     name += "_width_in_x_" + to_string(xWidth) + "_width_in_y_";
+    name += to_string(yWidth) + "_" + combo.String();*/
+    name = "residuals_around_xray_pt_" + to_string(ptIndex);
+    name += "_width_in_x_" + to_string(xWidth) + "_width_in_y_";
     name += to_string(yWidth) + "_" + combo.String();
+    cout << name << "\n\n";
     title = "Layer: " + to_string(combo.layer) + ", Fixed Layers: ";
     title += to_string(combo.fixed1) + to_string(combo.fixed2);
     title += ", x#in["+Tools::CStr(ROI[0].first,2)+",";

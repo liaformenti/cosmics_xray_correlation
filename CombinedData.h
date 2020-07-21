@@ -40,17 +40,17 @@ class CombinedData {
     // members. wx and wy are widths of regions of interest in x and y
     // in mm. Note that lc should always be the layer with the 
     // smaller numerical value.
-    CombinedData(Int_t wx, Int_t wy, Double_t _x, Double_t _y, 
-                 UShort_t _lc, UShort_t _ld, 
+    CombinedData(Int_t wx, Int_t wy, Int_t _ptIndex, Double_t _x, 
+                 Double_t _y, UShort_t _lc, UShort_t _ld, 
                  Double_t _offC, Double_t _offD, 
                  std::vector<Residual>* _resData,
                  DetectorGeometry* _g, PlotManager* _pm);
     ~CombinedData(){};
     // Members
     // Histograms of residuals falling in region of interest
-    TH1I histC, histD;
+    // TH1I histC, histD;
     // Fit to histC and histD
-    TF1 fitC, fitD;
+    // TF1 fitC, fitD;
     // Methods
     // Not quite working, can't append plots to pdf
     // void PrintResHists(std::string filename);
@@ -58,6 +58,9 @@ class CombinedData {
     
   private:
     // Members
+    // Index of xray point (from XRayData)
+    // Used to number the histograms added to plot manager, pm
+    Int_t ptIndex;
     // To be filled sequentially by methods
     Float_t x, y; // nominal xray x and y
     // x and y lims of region of interest centered around position:
@@ -91,10 +94,13 @@ class CombinedData {
     void WidthSpecifiedPlotNameAndTitle(std::string& name, 
         std::string& title, UShort_t layer, UShort_t fixed1, 
         UShort_t fixed2, Int_t xWidth, Int_t yWidth);
-    // Pointer to vector indicates residualInROI - C or D
+    // OLD AND SEGY: Pointer to vector indicates residualInROI - C or D
     // Going to be filling the ref, hist.
-    FitResult FitGaussian(std::string name, std::string title,
+    /*FitResult FitGaussian(std::string name, std::string title,
         TH1I* hist, TF1* fit, std::vector<Double_t>& filling, 
-        Int_t nBins, Float_t lowLim, Float_t upLim);
+        Int_t nBins, Float_t lowLim, Float_t upLim);*/
+    FitResult FitGaussian(std::string name, std::string title,
+        std::vector<Double_t>& filling, Int_t nBins, Float_t lowLim, 
+        Float_t upLim);
 };
 #endif

@@ -48,6 +48,7 @@ XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
     // Vars to hold column entries and calculated offset
     string runid, mtf;
     UShort_t gv; 
+    Int_t num = 0;
     Double_t xnom, ynom, yjigcmmholdercmm, offset;
 
     // For all selected rows
@@ -71,6 +72,8 @@ XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
         if (xnoms.size() == 0) { 
             xnoms.push_back(xnom);
             ynoms.push_back(ynom);
+            nums.push_back(num);
+            num++;
             // Add new offset for gas volume
             // First, create new map
             map<UShort_t, Double_t> offsetPerGV;
@@ -82,6 +85,8 @@ XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
         else if ((abs(xnom - xnoms.back()) > 0.1) || (abs(ynom - ynoms.back()) > 0.1)) {
             xnoms.push_back(xnom);
             ynoms.push_back(ynom);
+            nums.push_back(num);
+            num++;
             // Add new offset for gas volume
             // First, create new map
             map<UShort_t, Double_t> offsetPerGV;
@@ -150,26 +155,6 @@ void XRayData::WriteOutXRayData() {
         f << '\n';
     }
     f.close();
-    return;
-}
-
-// Probably gonna delete this
-void XRayData::CutSingleLayerOnlyPoints() {
-    vector<Double_t> xnomsUncut = xnoms;
-    vector<Double_t> ynomsUncut = ynoms;
-    vector<map<UShort_t, Double_t>> offsetsUncut = offsets;
-    xnoms.clear();
-    ynoms.clear();
-    offsets.clear();
-    for (UShort_t i=0; i<xnomsUncut.size(); i++) {
-        // If there is an offset for more than one layer,
-        if (offsetsUncut.at(i).size() > 1) { // copy back
-            xnoms.push_back(xnomsUncut.at(i));
-            ynoms.push_back(ynomsUncut.at(i));
-            offsets.push_back(offsetsUncut.at(i));
-        }
-    }
-    curated = true;
     return;
 }
 

@@ -104,27 +104,43 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     XRayData xData("results.db", cosmicsInfo, myInfo);
     // Will hold pairs of layers to take offset difference
     vector<pair<UShort_t, UShort_t>> layers;
+    Int_t xWidth = 37;
+    Int_t yWidth = 20;
+    UShort_t la, lb;
     CombinedData data;
+    string nameBase;
+    TH1I* hist;
     TCanvas * c = new TCanvas();
     c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf[").c_str());
     ofstream tableOut;
     tableOut.open(myInfo->outpath + myInfo->quadname + "_compare_mean_and_offset_differences_table.csv");
-    for (UShort_t i = 0; i<xData.xnoms.size(); i++) {
+    for (Int_t i = 0; i<xData.xnoms.size(); i++) {
     // Just looking at a single xray pt:
     // for (UShort_t i = 3; i<4; i++) {
+        cout << "Check num: " << xData.nums.at(i) << ' ' << i << '\n';
         layers = xData.GetDiffCombos(xData.offsets.at(i));
         for (auto ls=layers.begin(); ls!=layers.end(); ls++) {
-            data = CombinedData(37, 20, xData.xnoms.at(i), 
+            data = CombinedData(xWidth, yWidth, i, xData.xnoms.at(i), 
                 xData.ynoms.at(i), ls->first, ls->second, 
                 xData.offsets.at(i).at(ls->first),
                 xData.offsets.at(i).at(ls->second),
                 &residuals, g, pm);
-            data.histC.Draw();
-            data.fitC.Draw("Same");
+            getOtherLayers(ls->first, ls->second, &la, &lb);
+            nameBase = "residuals_around_xray_pt_" + to_string(i);
+            nameBase += "_width_in_x_" + to_string(xWidth);
+            nameBase += "_width_in_y_" + to_string(yWidth) + "_";
+            hist = (TH1I*)pm->GetTH1I(nameBase + Combination(ls->first, la, lb).String());
+            hist->Draw();             
             c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
-            data.histD.Draw();
-            data.fitD.Draw("Same");
+            hist = (TH1I*)pm->GetTH1I(nameBase + Combination(ls->second, la, lb).String()); 
+            hist->Draw();             
             c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
+            // data.histC.Draw();
+            // data.fitC.Draw("Same");
+            // c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
+            // data.histD.Draw();
+            // data.fitD.Draw("Same");
+            // c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
             data.PrintClassDataToFile(tableOut);
         }
         cout << '\n';
