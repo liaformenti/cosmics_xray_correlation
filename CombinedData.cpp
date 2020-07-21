@@ -93,7 +93,7 @@ FitResult CombinedData::FitGaussian(string name, string title,
         result.mean = fit->GetParameter(1);
         result.meanErr = fit->GetParError(1);
         result.sigma = fit->GetParameter(2);
-        result.sigErr = fit->GetParameter(2);
+        result.sigErr = fit->GetParError(2);
         result.success = true;
     }
     else { // fit failed
@@ -126,6 +126,32 @@ void CombinedData::WidthSpecifiedPlotNameAndTitle(string &name,
     return;
 }
 
+void CombinedData::PrintClassDataToFile(ofstream& f) {
+    f << lc << "," << ld << "," << offC << "," << offD << ",";
+    f << offDiff << ","; 
+    if (fitResultC.success == true) {
+        f << fitResultC.mean << "," << fitResultC.meanErr <<  ",";
+        f << fitResultC.sigma << "," << fitResultC.sigErr << ",";
+    }
+    else { // If fit was not successful, write "NA"
+        f << "NA" << "," << "NA" <<  "," << "NA" << "," << "NA" << ",";
+    }
+    if (fitResultD.success == true) {
+        f << fitResultD.mean << "," << fitResultD.meanErr <<  ",";
+        f << fitResultD.sigma << "," << fitResultD.sigErr << ",";
+    }
+    else { // If fit was not successful, write "NA"
+        f << "NA" << "," << "NA" <<  "," << "NA" << "," << "NA" << ",";
+    }
+    // If both fits were successful print difference
+    if ((fitResultC.success == true) && (fitResultD.success == true)) {
+        f << meanDiff << "," << meanDiffErr << '\n';
+    }
+    else { // If not print NA
+        f << "NA,NA\n";
+    }
+    return;
+}
 // Didn't quite get this to work bc appending to pdf if atomic
 /*void CombinedData::PrintResHists(string filename) {
     TCanvas* c = new TCanvas();

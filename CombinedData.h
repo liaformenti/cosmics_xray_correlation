@@ -19,7 +19,6 @@
 
 // Designed for Gaussian, could be bastardized generally
 struct FitResult {
-    Double_t amp;
     Double_t mean;
     Double_t sigma;
     Double_t meanErr;
@@ -55,6 +54,7 @@ class CombinedData {
     // Methods
     // Not quite working, can't append plots to pdf
     // void PrintResHists(std::string filename);
+    void PrintClassDataToFile(std::ofstream& f);
     
   private:
     // Members

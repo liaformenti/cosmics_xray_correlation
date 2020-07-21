@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <fstream>
 
 // Root includes
 #include <TTree.h>

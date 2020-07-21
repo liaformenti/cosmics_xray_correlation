@@ -56,6 +56,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
         // for each permutation of two layers
         // la < lb and treated first always
         // for (Int_t la=1; la<=4; la++) {
+        // Given data right now only do fixed layers 1,4
         for (UShort_t la=1; la<=1; la++) {
             // for (Int_t lb=(la+1); lb<=4; lb++) {
             for (UShort_t lb=4; lb<=4; lb++) {
@@ -105,27 +106,31 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     vector<pair<UShort_t, UShort_t>> layers;
     CombinedData data;
     TCanvas * c = new TCanvas();
-    c->Print("test.pdf[");
+    c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf[").c_str());
+    ofstream tableOut;
+    tableOut.open(myInfo->outpath + myInfo->quadname + "_compare_mean_and_offset_differences_table.csv");
     for (UShort_t i = 0; i<xData.xnoms.size(); i++) {
     // Just looking at a single xray pt:
     // for (UShort_t i = 3; i<4; i++) {
         layers = xData.GetDiffCombos(xData.offsets.at(i));
         for (auto ls=layers.begin(); ls!=layers.end(); ls++) {
-            data = CombinedData(36, 20, xData.xnoms.at(i), 
+            data = CombinedData(37, 20, xData.xnoms.at(i), 
                 xData.ynoms.at(i), ls->first, ls->second, 
                 xData.offsets.at(i).at(ls->first),
                 xData.offsets.at(i).at(ls->second),
                 &residuals, g, pm);
             data.histC.Draw();
             data.fitC.Draw("Same");
-            c->Print("test.pdf");
+            c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
             data.histD.Draw();
             data.fitD.Draw("Same");
-            c->Print("test.pdf");
+            c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
+            data.PrintClassDataToFile(tableOut);
         }
         cout << '\n';
     }
-    c->Print("test.pdf]");
+    c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf]").c_str());
+    tableOut.close();
     /*data.PlotPositions();
     data.WriteOutXRayData();
 
