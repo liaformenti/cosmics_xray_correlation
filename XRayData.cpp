@@ -4,8 +4,8 @@
 using namespace std;
 
 XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
-                   InputInfo* _myInfo) : cinfo(_cinfo), 
-                   myInfo(_myInfo) {
+                   InputInfo* _myInfo, PlotManager* _pm) : 
+cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     // Check if there is xray data for quad
     // Do so by checking if wedgeid was filled
     if (myInfo->wedgeid == "") {
@@ -15,7 +15,7 @@ XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
         return;
     }
     
-    // Get relelvant data fom base
+    // Get relevant data from database
     sqlite3* db;
     sqlite3_stmt *stmt;
     int rc;
@@ -23,18 +23,19 @@ XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
     // run_id is to check run0 vs run1 (gun angle bias)
     // mtf is to check you have the correct wedge for the quad
     // gv is gasvolume == layer
-    // For now, only take pts with dq_flag OK
-    // xnom and ynom are so you know where to bin
-    // y_jigcmm_holdercmm is used to calculate offset
+    // Take dq_flags 'OK', 'LARGEOFFSET' and 'WARNING_*'
+    // my xnom = database xnom
+    // my ynom = database y_jigcmm_holdercmm
+    // y_meas is used to calculate offset
     string sql = "SELECT run_id, mtf, quad_type, gv, dq_flag, x_nom, ";
-    sql += "y_nom, y_jigcmm_holdercmm ";
+    sql += "y_jigcmm_holdercmm, y_meas, y_meas_error ";
     sql += "FROM results "; // assumes table name is results!
     sql += "WHERE dq_flag in ('OK', 'LARGEOFFSET', 'WARNING_VMMEDGE',";
     sql += "'WARNING_LARGEOFFSET', 'WARNING_NEAR_WIRE_SUPPORT')";
     sql += "AND quad_type = \'" + cinfo->detectortype + "\' ";
     sql += "ORDER BY x_nom"; 
     // Order by ascending x_nom necessary so only unique nominal
-    // positions are recorded in xnoms and ynoms 
+    // positions are recorded in ptVec (vector of XRayPt's)
 
     // Prepare query
     rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
@@ -47,30 +48,51 @@ XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
     }
 
     // Vars to hold column entries and calculated offset
-    string runid, mtf;
+    // Temp var names match xray data database
+    string run_id, mtf, dq_flag;
     UShort_t gv; 
+    Double_t xnom, y_jigcmm_holdercmm, y_meas, y_meas_error; 
+    Double_t offset, offsetError;
     Int_t num = 0;
-    Double_t xnom, ynom, yjigcmmholdercmm, offset;
 
     // For all selected rows
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
-        runid = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        // Get and check row data
+        run_id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
         mtf = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
         // If wrong wedge or run1 instead of run0, skip
         if ((mtf != myInfo->wedgeid) || 
-            (runid.substr(runid.size() - 4) != "run0")) {
+            (run_id.substr(run_id.size() - 4) != "run0")) {
             continue;
         }
-        // Add unique xnoms and y noms to object vectors
-        xnom = (Double_t)(sqlite3_column_double(stmt, 5));
-        ynom = (Double_t)(sqlite3_column_double(stmt, 6));
-        gv = (UShort_t)(sqlite3_column_int(stmt, 3));
-        yjigcmmholdercmm = (Double_t)(sqlite3_column_double(stmt, 7));
-        offset = ynom - yjigcmmholdercmm;
 
+        // Add unique xnoms and y noms to object vectors
+        gv = (UShort_t)(sqlite3_column_int(stmt, 3));
+        dq_flag = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+        xnom = (Double_t)(sqlite3_column_double(stmt, 5));
+        y_jigcmm_holdercmm = (Double_t)(sqlite3_column_double(stmt, 6));
+        y_meas = (Double_t)(sqlite3_column_double(stmt, 7));
+        y_meas_error = (Double_t)(sqlite3_column_double(stmt, 8));
+        offset = y_jigcmm_holdercmm - y_meas;
+        offsetError = y_meas_error; // Adding 1 error in quadrature
+        // cout << run_id << ' ' << mtf << ' ' << gv << ' ' << dq_flag << ' ' << xnom << ' ' << y_jigcmm_holdercmm << ' ' << y_meas << ' ' << y_meas_error << ' ' << offset << ' ' << offsetError << '\n';
+       
         // If position is new, add it to vectors
         // Deal with 1st entry separately to prevent seg fault
-        if (xnoms.size() == 0) { 
+        XRayPt point;
+        if (pointVec.size() == 0) {
+            // Initialize point
+            point.num = num;
+            point.xnom = xnom;
+            point.ynom = y_jigcmm_holdercmm;
+            point.dqFlag = dq_flag;
+            point.offsets.insert(pair<UShort_t, Double_t>(gv, offset));
+            point.offsetErrors.insert(
+                pair<UShort_t, Double_t>(gv, offsetError));
+            // Add to member vector
+            pointVec.push_back(point);
+            num++;
+            /* // OLD
             xnoms.push_back(xnom);
             ynoms.push_back(ynom);
             nums.push_back(num);
@@ -81,12 +103,24 @@ XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
             // Second, add new key
             offsetPerGV.insert(pair<UShort_t, Double_t>(gv, offset));
             // Finally, pushback new map
-            offsets.push_back(offsetPerGV);
+            offsets.push_back(offsetPerGV);*/
         }
-        // If last x and y position are different, push_back and 
-        // create new map
-        else if ((abs(xnom - xnoms.back()) > 0.1) || (abs(ynom - ynoms.back()) > 0.1)) {
-            xnoms.push_back(xnom);
+        // If last x and y position are different, initialize new point
+        // and push_back
+        else if ((abs(xnom - pointVec.back().xnom) > 0.1) || 
+             (abs(y_jigcmm_holdercmm - pointVec.back().ynom) > 0.1)) {
+            // Initialize point
+            point.num = num;
+            point.xnom = xnom; 
+            point.ynom = y_jigcmm_holdercmm;
+            point.dqFlag = dq_flag;
+            point.offsets.insert(pair<UShort_t, Double_t>(gv, offset));
+            point.offsetErrors.insert(
+                pair<UShort_t, Double_t>(gv, offsetError));
+            // Add member to vector
+            pointVec.push_back(point);
+            num++;
+            /*xnoms.push_back(xnom);
             ynoms.push_back(ynom);
             nums.push_back(num);
             num++;
@@ -96,52 +130,60 @@ XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
             // Second, add new key
             offsetPerGV.insert(pair<UShort_t, Double_t>(gv, offset));
             // Finally, pushback new map
-            offsets.push_back(offsetPerGV);
+            offsets.push_back(offsetPerGV);*/
         }
         else {
-            // Add offset for new gv for last push_backed map
+            // Add offset for new gv to offsets from last pushed point
             // If gv key DNE, add new gv offset to map
             // else, print warning and do not overwrite
-            if (offsets.back().find(gv) == offsets.back().end()) {
-                offsets.back().insert(pair<UShort_t, Double_t>(gv, 
-                                                         offset));
+            if (pointVec.back().offsets.find(gv) == 
+                pointVec.back().offsets.end()) {
+                pointVec.back().offsets.insert(pair<UShort_t, Double_t>
+                    (gv, offset));
+                pointVec.back().offsetErrors.insert(
+                    pair<UShort_t, Double_t>(gv, offsetError));
             }
             else {
                 cout << "Warning: found duplicate row for xray data\n";
-                cout << runid << ' ' << mtf << ' ' << gv << ' '; 
-                cout << xnom << ' ' << ynom << "\n\n";
+                cout << run_id << ' ' << mtf << ' ' << gv << ' '; 
+                cout << xnom << ' ' << "\n\n";
             }
         }
     }
     sqlite3_finalize(stmt);
+    sqlite3_close(db);
+    return;
 }
 
+// Plots the positions of all the xray point in pointVec
 // Should add this to plot manager (need to send in plot manager)
 void XRayData::PlotPositions() {
-    if (xnoms.size() == 0) {
+    if (pointVec.size() == 0) {
         cout << "Warning: no xray data positions. Position plots not created (XRayData::PlotPositions).\n\n";
         return;
     }    
-    TCanvas* c = new TCanvas();
     // Copy vectors into arrays
-    Double_t x[xnoms.size()];
-    Double_t y[ynoms.size()];
-    copy(xnoms.begin(), xnoms.end(), x);
-    copy(ynoms.begin(), ynoms.end(), y);
-    // Create scatter plot
-    TGraph xRayGraph(xnoms.size(), x, y);
-    // Set display options
-    xRayGraph.SetTitle(("X-ray positions for " + myInfo->quadname).c_str());
-    xRayGraph.GetXaxis()->SetTitle("x [mm]");
-    xRayGraph.GetYaxis()->SetTitle("y [mm]");
-    xRayGraph.Draw("ap");
-
-    c->Print((myInfo->outpath + "xraypositions_" + myInfo->quadname + ".pdf").c_str());
+    Double_t x[pointVec.size()];
+    Double_t y[pointVec.size()];
+    for (UInt_t i=0; i<pointVec.size(); i++) {
+        x[i] = pointVec.at(i).xnom;
+        y[i] = pointVec.at(i).ynom;
+    }
+    // Initialize plot
+    pm->Add("xray_positions_" + myInfo->quadname, 
+            "X-ray positions for" + myInfo->quadname +";x [mm];y [mm]",
+            pointVec.size(), x, y, myTGraph);
+    // Draw
+    TCanvas* c = new TCanvas();
+    TGraph* xRayGraph = (TGraph*)pm->Get(
+        "xray_positions_" + myInfo->quadname);
+    xRayGraph->Draw("ap");
     delete c;
 
+    return;
 }
 
-void XRayData::WriteOutXRayData() {
+/*void XRayData::WriteOutXRayData() {
     // To print out offsets for each xray position to file
     // Caution: no guard against xnoms ynoms and offsets not being
     // the same length (shouldn't happen)
@@ -159,11 +201,11 @@ void XRayData::WriteOutXRayData() {
     }
     f.close();
     return;
-}
+}*/
 
 // Note: keys are guaranteed to be ordered smallest to largest
 // (feature of map object).
-vector<pair<UShort_t, UShort_t>> XRayData::GetDiffCombos(
+/*vector<pair<UShort_t, UShort_t>> XRayData::GetDiffCombos(
         map<UShort_t, Double_t> offset) {
     vector<pair<UShort_t, UShort_t>> diffCombos;
     UShort_t size = offset.size();
@@ -198,4 +240,4 @@ vector<pair<UShort_t, UShort_t>> XRayData::GetDiffCombos(
     }
     return diffCombos;
 
-}
+}*/
