@@ -46,7 +46,7 @@ Binning::Binning(Int_t wx, Int_t wy, DetectorGeometry* _g) :
     name += to_string(wy) + "mm";
 }
 
-Binning::Binning(XRayData* data, Int_t wx, Int_t wy,
+/*Binning::Binning(XRayData* data, Int_t wx, Int_t wy,
                 DetectorGeometry* _g) : g(_g) {
     // I THINK THIS IS BUGGY.
     // GOT AN XRAY BIN SMALLER THAN DESIRED WIDTH.
@@ -171,7 +171,7 @@ Binning::Binning(XRayData* data, Int_t wx, Int_t wy,
     name = "xray_min_xwidth_" + to_string(wx) + "mm_min_ywidth_";
     name += to_string(wy) + "mm";
     // Code to print things
-    /*for (auto x=data->xnoms.begin(); x!=data->xnoms.end(); x++)
+    for (auto x=data->xnoms.begin(); x!=data->xnoms.end(); x++)
         cout << *x << ' ';
     cout << "\n\n";
     for (auto x=xs.begin(); x!=xs.end(); x++)
@@ -182,9 +182,9 @@ Binning::Binning(XRayData* data, Int_t wx, Int_t wy,
     cout << "\n\n";
     for (auto y=ys.begin(); y!=ys.end(); y++)
         cout << *y << ' ';
-    cout << "\n\n";*/
+    cout << "\n\n";
 
-}
+}*/
 
 void Binning::DefineXRayBin(Float_t q, Float_t qmin, Float_t qmax,
                              Int_t width, string xOrY) {
