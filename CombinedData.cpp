@@ -50,26 +50,21 @@ CombinedData::CombinedData(Int_t xWidth, Int_t yWidth, Int_t _ptIndex,
     string name, title;
     // For lc
     WidthSpecifiedPlotNameAndTitle(name, title, lc, la, lb, xWidth, yWidth);
-    // fitResultC = FitGaussian(name, title, &histC, &fitC, residualsInROIC, 200, -10, 10);
     fitResultC = FitGaussian(name, title, residualsInROIC, 200, -10, 10);
     // For ld
     WidthSpecifiedPlotNameAndTitle(name, title, ld, la, lb, xWidth, yWidth);
-    // fitResultD = FitGaussian(name, title, &histD, &fitD, residualsInROID, 200, -10, 10); 
     fitResultD = FitGaussian(name, title, residualsInROID, 200, -10, 10); 
 
     // AND FINALLY, THE RESULT!
     meanDiff = fitResultC.mean - fitResultD.mean;
-    // Error propagation . . . covariance?
+    // Error propagation
     meanDiffErr = sqrt(pow(fitResultC.meanErr,2) + pow(fitResultD.meanErr, 2));
     return; 
 } 
 
-// This function fills lims, declared externally
 void CombinedData::DefineRectangularROI(Int_t wx, Int_t wy) {
-    // Define xlims
     ROI[0].first = x - wx/2.0;
     ROI[0].second = x + wx/2.0;
-    // Define ylims
     ROI[1].first = y - wy/2.0;
     ROI[1].second = y + wy/2.0;
     return;
