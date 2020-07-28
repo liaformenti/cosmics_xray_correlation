@@ -85,7 +85,7 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
             point.num = num;
             point.xnom = xnom;
             point.ynom = y_jigcmm_holdercmm;
-            point.dqFlag = dq_flag;
+            point.dqFlags.insert(pair<UShort_t, string>(gv, dq_flag));
             point.offsets.insert(pair<UShort_t, Double_t>(gv, offset));
             point.offsetErrors.insert(
                 pair<UShort_t, Double_t>(gv, offsetError));
@@ -113,7 +113,7 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
             point.num = num;
             point.xnom = xnom; 
             point.ynom = y_jigcmm_holdercmm;
-            point.dqFlag = dq_flag;
+            point.dqFlags.insert(pair<UShort_t, string>(gv, dq_flag));
             point.offsets.insert(pair<UShort_t, Double_t>(gv, offset));
             point.offsetErrors.insert(
                 pair<UShort_t, Double_t>(gv, offsetError));
@@ -138,6 +138,8 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
             // else, print warning and do not overwrite
             if (pointVec.back().offsets.find(gv) == 
                 pointVec.back().offsets.end()) {
+                pointVec.back().dqFlags.insert(pair<UShort_t, string>
+                    (gv, dq_flag));
                 pointVec.back().offsets.insert(pair<UShort_t, Double_t>
                     (gv, offset));
                 pointVec.back().offsetErrors.insert(
@@ -146,7 +148,9 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
             else {
                 cout << "Warning: found duplicate row for xray data\n";
                 cout << run_id << ' ' << mtf << ' ' << gv << ' '; 
-                cout << xnom << ' ' << "\n\n";
+                cout << y_meas << ' ' << y_meas_error << ' ';
+                cout << dq_flag << ' ' << xnom << ' ';
+                cout << y_jigcmm_holdercmm << "\n\n";
             }
         }
     }
@@ -183,25 +187,34 @@ void XRayData::PlotPositions() {
     return;
 }
 
-/*void XRayData::WriteOutXRayData() {
+void XRayData::WriteOutXRayData() {
     // To print out offsets for each xray position to file
     // Caution: no guard against xnoms ynoms and offsets not being
     // the same length (shouldn't happen)
     ofstream f;
     f.open(myInfo->outpath + myInfo->quadname + "_xray_data_offsets.txt");
-    f << "Nominal x position, nominal y position, ";
-    f << "Layer, offset (for as many as exist, mm)\n";
-    UShort_t i = 0;
+    f << "Point number, nominal x position, nominal y position, ";
+    f << "layer, dq flag, offset, offset error (as exists, in mm)\n";
+    for (auto p=pointVec.begin(); p!=pointVec.end(); p++) {
+        f << p->num << ' ' << p->xnom << ' ' << p->ynom << ' ';
+        for (auto off=p->offsets.begin(); off!=p->offsets.end(); off++)
+        {
+            f << off->first << ' ' << p->dqFlags.at(off->first) << ' ';
+            f << off->second << ' ' << p->offsetErrors.at(off->first);
+        }
+        f << '\n';
+    }
+    /*UShort_t i = 0;
     for (i=0; i<xnoms.size(); i++) {
         f << xnoms.at(i) << ' ' << ynoms.at(i) << ' ';
         for (auto lo=offsets.at(i).begin(); lo!=offsets.at(i).end(); lo++) {
             f << lo->first << ' ' << lo->second << ' ';
         }
         f << '\n';
-    }
+    }*/
     f.close();
     return;
-}*/
+}
 
 // Note: keys are guaranteed to be ordered smallest to largest
 // (feature of map object).

@@ -31,7 +31,7 @@ struct XRayPt {
     Double_t xnom;
     // Note: my ynom = y_jigcmm_holdercmm in xray data
     Double_t ynom; 
-    std::string dqFlag;
+    std::map<UShort_t, std::string> dqFlags;
     // Keys are layers
     std::map<UShort_t, Double_t> offsets;
     std::map<UShort_t, Double_t> offsetErrors;
@@ -60,7 +60,7 @@ class XRayData {
     // Plot ynoms vs xnoms, nominal xray positions
     void PlotPositions();
     // Writes out positions and offsets for each available layer
-    // void WriteOutXRayData();
+    void WriteOutXRayData();
     // For an offsets entry, return all combinations of layers which
     // have an offset for further processing
     // std::vector<std::pair<UShort_t, UShort_t>> GetDiffCombos(
