@@ -201,24 +201,17 @@ void XRayData::WriteOutXRayData() {
         {
             f << off->first << ' ' << p->dqFlags.at(off->first) << ' ';
             f << off->second << ' ' << p->offsetErrors.at(off->first);
+            f << ' ';
         }
         f << '\n';
     }
-    /*UShort_t i = 0;
-    for (i=0; i<xnoms.size(); i++) {
-        f << xnoms.at(i) << ' ' << ynoms.at(i) << ' ';
-        for (auto lo=offsets.at(i).begin(); lo!=offsets.at(i).end(); lo++) {
-            f << lo->first << ' ' << lo->second << ' ';
-        }
-        f << '\n';
-    }*/
     f.close();
     return;
 }
 
 // Note: keys are guaranteed to be ordered smallest to largest
 // (feature of map object).
-/*vector<pair<UShort_t, UShort_t>> XRayData::GetDiffCombos(
+vector<pair<UShort_t, UShort_t>> XRayData::GetDiffCombos(
         map<UShort_t, Double_t> offset) {
     vector<pair<UShort_t, UShort_t>> diffCombos;
     UShort_t size = offset.size();
@@ -253,4 +246,4 @@ void XRayData::WriteOutXRayData() {
     }
     return diffCombos;
 
-}*/
+}

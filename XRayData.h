@@ -63,8 +63,8 @@ class XRayData {
     void WriteOutXRayData();
     // For an offsets entry, return all combinations of layers which
     // have an offset for further processing
-    // std::vector<std::pair<UShort_t, UShort_t>> GetDiffCombos(
-    //    std::map<UShort_t, Double_t> theOffset);
+    std::vector<std::pair<UShort_t, UShort_t>> GetDiffCombos(
+       std::map<UShort_t, Double_t> theOffset);
 
   private:
     AnalysisInfo* cinfo = nullptr;
