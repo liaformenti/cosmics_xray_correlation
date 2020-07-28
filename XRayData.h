@@ -47,15 +47,7 @@ class XRayData {
 
     // Members
     std::vector<XRayPt> pointVec;
-    // Following three are ordered by distinct xray data positions
-    // std::vector<Int_t> nums; // Arbitrary xray pt index
-    // std::vector<Double_t> xnoms;
-    // std::vector<Double_t> ynoms;
-    // std::vector<std::map<UShort_t, Double_t>> offsets; // layer to offset map
-    // When init'ed, XRayData contains all XRayData pts.
-    // User can choose to Cut x ray points that only have offset for
-    // one layer, in which case Bool_t will be set to True.
-    // Bool_t curated = false;
+
     // Methods
     // Plot ynoms vs xnoms, nominal xray positions
     void PlotPositions();

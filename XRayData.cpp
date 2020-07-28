@@ -24,8 +24,8 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     // mtf is to check you have the correct wedge for the quad
     // gv is gasvolume == layer
     // Take dq_flags 'OK', 'LARGEOFFSET' and 'WARNING_*'
-    // my xnom = database xnom
-    // my ynom = database y_jigcmm_holdercmm
+    // my xnom = xray database xnom
+    // my ynom = xray database y_jigcmm_holdercmm
     // y_meas is used to calculate offset
     string sql = "SELECT run_id, mtf, quad_type, gv, dq_flag, x_nom, ";
     sql += "y_jigcmm_holdercmm, y_meas, y_meas_error ";
@@ -53,7 +53,7 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     UShort_t gv; 
     Double_t xnom, y_jigcmm_holdercmm, y_meas, y_meas_error; 
     Double_t offset, offsetError;
-    Int_t num = 0;
+    Int_t num = 0; // For indexing xray points
 
     // For all selected rows
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
@@ -61,12 +61,13 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
         run_id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
         mtf = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
         // If wrong wedge or run1 instead of run0, skip
+        // Note that you could have done mtf cut with SELECT statement
         if ((mtf != myInfo->wedgeid) || 
             (run_id.substr(run_id.size() - 4) != "run0")) {
             continue;
         }
 
-        // Add unique xnoms and y noms to object vectors
+        // Get column values
         gv = (UShort_t)(sqlite3_column_int(stmt, 3));
         dq_flag = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
         xnom = (Double_t)(sqlite3_column_double(stmt, 5));
@@ -75,13 +76,14 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
         y_meas_error = (Double_t)(sqlite3_column_double(stmt, 8));
         offset = y_jigcmm_holdercmm - y_meas;
         offsetError = y_meas_error; // Adding 1 error in quadrature
+
         // cout << run_id << ' ' << mtf << ' ' << gv << ' ' << dq_flag << ' ' << xnom << ' ' << y_jigcmm_holdercmm << ' ' << y_meas << ' ' << y_meas_error << ' ' << offset << ' ' << offsetError << '\n';
        
-        // If position is new, add it to vectors
+        // If position is new, add point entry to pointVec
         // Deal with 1st entry separately to prevent seg fault
         XRayPt point;
         if (pointVec.size() == 0) {
-            // Initialize point
+            // Initialize point with column values
             point.num = num;
             point.xnom = xnom;
             point.ynom = y_jigcmm_holdercmm;
@@ -91,22 +93,10 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
                 pair<UShort_t, Double_t>(gv, offsetError));
             // Add to member vector
             pointVec.push_back(point);
-            num++;
-            /* // OLD
-            xnoms.push_back(xnom);
-            ynoms.push_back(ynom);
-            nums.push_back(num);
-            num++;
-            // Add new offset for gas volume
-            // First, create new map
-            map<UShort_t, Double_t> offsetPerGV;
-            // Second, add new key
-            offsetPerGV.insert(pair<UShort_t, Double_t>(gv, offset));
-            // Finally, pushback new map
-            offsets.push_back(offsetPerGV);*/
+            num++; // Increment num for indexing
         }
         // If last x and y position are different, initialize new point
-        // and push_back
+        // and push_back. This is same procedure as for first point.
         else if ((abs(xnom - pointVec.back().xnom) > 0.1) || 
              (abs(y_jigcmm_holdercmm - pointVec.back().ynom) > 0.1)) {
             // Initialize point
@@ -120,20 +110,14 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
             // Add member to vector
             pointVec.push_back(point);
             num++;
-            /*xnoms.push_back(xnom);
-            ynoms.push_back(ynom);
-            nums.push_back(num);
-            num++;
-            // Add new offset for gas volume
-            // First, create new map
-            map<UShort_t, Double_t> offsetPerGV;
-            // Second, add new key
-            offsetPerGV.insert(pair<UShort_t, Double_t>(gv, offset));
-            // Finally, pushback new map
-            offsets.push_back(offsetPerGV);*/
         }
         else {
-            // Add offset for new gv to offsets from last pushed point
+            // Looking at data for same xnom, ynom
+            // Add new gv data to maps of last pushed point
+            // This works because you ordered rows by xnom in SELECT,
+            // so last point pushed back is always of same xnom, ynom
+            // since you handled the case of unique xnoms and ynoms
+            // already.
             // If gv key DNE, add new gv offset to map
             // else, print warning and do not overwrite
             if (pointVec.back().offsets.find(gv) == 
@@ -166,7 +150,7 @@ void XRayData::PlotPositions() {
         cout << "Warning: no xray data positions. Position plots not created (XRayData::PlotPositions).\n\n";
         return;
     }    
-    // Copy vectors into arrays
+    // Copy positions for binning into arrays
     Double_t x[pointVec.size()];
     Double_t y[pointVec.size()];
     for (UInt_t i=0; i<pointVec.size(); i++) {
@@ -189,8 +173,8 @@ void XRayData::PlotPositions() {
 
 void XRayData::WriteOutXRayData() {
     // To print out offsets for each xray position to file
-    // Caution: no guard against xnoms ynoms and offsets not being
-    // the same length (shouldn't happen)
+    // Caution: no guard against map members not being
+    // the same length (shouldn't happen, controlled in constructor)
     ofstream f;
     f.open(myInfo->outpath + myInfo->quadname + "_xray_data_offsets.txt");
     f << "Point number, nominal x position, nominal y position, ";
@@ -211,16 +195,22 @@ void XRayData::WriteOutXRayData() {
 
 // Note: keys are guaranteed to be ordered smallest to largest
 // (feature of map object).
+// Returned pairs are in enforced order (used throughout this analysis)
+// Technically, and map from the desired point struct would do as 
+// argument, but keep name as offset for simplicity and readability
 vector<pair<UShort_t, UShort_t>> XRayData::GetDiffCombos(
         map<UShort_t, Double_t> offset) {
     vector<pair<UShort_t, UShort_t>> diffCombos;
     UShort_t size = offset.size();
-    UShort_t keys[size]; // To hold keys to make combinations
+    // Get keys of offset map and copy them to array
+    UShort_t keys[size];
     Int_t i = 0;
     for (auto m=offset.begin(); m!=offset.end(); m++) {
         keys[i] = m->first;
         i++;
     }
+    // Brute force determine different pairs of two layers to take
+    // offset difference
     switch (size) {
         case 1:
             // return empty if not enough data to take difference
