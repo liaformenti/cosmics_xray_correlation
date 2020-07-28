@@ -29,8 +29,9 @@ XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
     string sql = "SELECT run_id, mtf, quad_type, gv, dq_flag, x_nom, ";
     sql += "y_nom, y_jigcmm_holdercmm ";
     sql += "FROM results "; // assumes table name is results!
-    sql += "WHERE dq_flag = 'OK' AND quad_type = " ;
-    sql += "\'" + cinfo->detectortype + "\' ";
+    sql += "WHERE dq_flag in ('OK', 'LARGEOFFSET', 'WARNING_VMMEDGE',";
+    sql += "'WARNING_LARGEOFFSET', 'WARNING_NEAR_WIRE_SUPPORT')";
+    sql += "AND quad_type = \'" + cinfo->detectortype + "\' ";
     sql += "ORDER BY x_nom"; 
     // Order by ascending x_nom necessary so only unique nominal
     // positions are recorded in xnoms and ynoms 
@@ -82,6 +83,8 @@ XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
             // Finally, pushback new map
             offsets.push_back(offsetPerGV);
         }
+        // If last x and y position are different, push_back and 
+        // create new map
         else if ((abs(xnom - xnoms.back()) > 0.1) || (abs(ynom - ynoms.back()) > 0.1)) {
             xnoms.push_back(xnom);
             ynoms.push_back(ynom);
