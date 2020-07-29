@@ -203,6 +203,9 @@ void ResPlots::InitializePosBinnedFitResultTH2Fs() {
 
 }
 
+// Note: You can also add fits to plot manager so that you could do
+// fit in CreatePosBinnedResPlots, but access it here explicitly
+// instead of doing it here
 void ResPlots::CreatePosBinnedFitResultTH2Fs() {
     InitializePosBinnedFitResultTH2Fs();
     vector<Combination> comboVec = combinationVector();
