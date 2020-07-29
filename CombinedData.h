@@ -17,90 +17,75 @@
 #include "Helper.h"
 #include "Residual.h"
 
-// Designed for Gaussian, could be bastardized generally
-struct FitResult {
-    Double_t mean;
-    Double_t sigma;
-    Double_t meanErr;
-    Double_t sigErr;
-    Bool_t success;  
-};
+// Combined data is a class which examines an xray point on two
+// different layers, and selects and processes the corrresponding
+// residuals data for that xray point.
+// The elements to be compared are the difference in xray offsets
+// between layers vs the difference in the means of the residuals
+// that occured around that xray point
 
-// CombinedData organizes and analyses the xray data and fixed-layer
-// based residuals data together.
-// The first constructor compares differences in xray offsets 
-// across layers to the difference in residuals means on those layers 
-// in a region of interest (rectangular, defined in constructor).
+// PtLayerData contains the layer specific information required for
+// the CombinedData analysis. It is useful for storing the layer spec
+// info in map in the CombinedData class, keyed by each of the layers
+// that are being compared. 
+
+struct PtLayerData {
+    // xray data elements
+    // List of residuals that fall into region of interest
+    std::vector<Residual> residualsInROI;
+    Double_t offset;
+    Double_t offsetError;
+    // Residual data elements
+    // Mean and sigma from fit, based on Gaussian but could be filled
+    // with any fit's metric of "centre" and "width"
+    // Also stores whether fit was successful
+    Bool_t success;
+    Double_t mean;
+    Double_t meanError;
+    Double_t sigma;
+    Double_t sigmaError;
+    // Your prev. data analysis showed amplitude was best "goodness of 
+    // fit" qualifier
+    Double_t amplitude; 
+    // Maybe add: Bool_t ROIOutOfRange
+};
 
 class CombinedData {
   public:
     // Constructors
     CombinedData(){};
-    // Takes in the data from an XRayData entry and methods fill
-    // members. wx and wy are widths of regions of interest in x and y
-    // in mm. Note that lc should always be the layer with the 
-    // smaller numerical value.
-    CombinedData(Int_t wx, Int_t wy, Int_t _ptIndex, Double_t _x, 
-                 Double_t _y, UShort_t _lc, UShort_t _ld, 
-                 Double_t _offC, Double_t _offD, 
-                 std::vector<Residual>* _resData,
-                 DetectorGeometry* _g, PlotManager* _pm);
-    ~CombinedData(){};
+    // Constructor takes in an xray point and the two layers you want
+    // to analyze the difference of. Note the role reversal of la and
+    // lb from being fixed layers to layers of interest
+    CombinedData(XRayPt xPt, UShort_t layerA, UShort_t layerB, 
+        std::vector<Residual>* _resData, DetectorGeometry* _g,
+        PlotManager* _pm);
+    ~CombinedData(){}; 
+
     // Members
-    // Histograms of residuals falling in region of interest
-    // TH1I histC, histD;
-    // Fit to histC and histD
-    // TF1 fitC, fitD;
-    // Methods
-    // Not quite working, can't append plots to pdf
-    // void PrintResHists(std::string filename);
-    void PrintClassDataToFile(std::ofstream& f);
-    
+    // Xray point's index (for naming plots)
+    Int_t xPtIndex; 
+    Double_t x, y; // Position of xray point 
+    // Upper and lower limits of rectange of tgc_analysis coordinate
+    // space around xray point. We compare xray offset differences
+    // to the mean of residuals that fall in this ROI.
+    std::pair<Double_t, Double_t> xROI, yROI;
+    // Layers of interest
+    UShort_t la, lb;
+    // Residuals must be calculated with these layers fixed to study
+    // layers of interest. Notice name reversal of la lb vs lc ld 
+    // compared to Tracking.
+    UShort_t lc, ld;
+    // Map of layer of interest specific data used to generate results
+    std::map<UShort_t, PtLayerData> layerData;
+    // And the actual results we want:
+    // Difference in xray offsets on two layers
+    Double_t offDiff, offDiffError;
+    Double_t meanDiff, meanDiffError;
+
   private:
-    // Members
-    // Index of xray point (from XRayData)
-    // Used to number the histograms added to plot manager, pm
-    Int_t ptIndex;
-    // To be filled sequentially by methods
-    Float_t x, y; // nominal xray x and y
-    // x and y lims of region of interest centered around position:
-    std::pair<Float_t, Float_t> xROI, yROI;
-    // Flag swapped to true if ROI exceeds module limits
-    Bool_t outOfRange = false; 
-    UShort_t lc, ld; // layers of offsets used in difference
-    Double_t offC, offD; // Offsets for layers A and B
-    Double_t offDiff; // Difference in layer A and B's offsets
-    // First pair is x lims around xray x, second pair is ylims
-    // Can make a constructor that takes ROI instead of widths
-    // to vary bin size point by point
-    std::pair<Float_t, Float_t> ROI[2];
-    // Vector to hold residuals that fall in ROI, for fixed layers
-    // corresponding to difference
-    std::vector<Double_t> residualsInROIC;
-    std::vector<Double_t> residualsInROID;
-    FitResult fitResultC;
-    FitResult fitResultD;
-    Double_t meanDiff; // Difference in means
-    Double_t meanDiffErr; // Propagated error in difference 
     std::vector<Residual>* resData = nullptr;
     DetectorGeometry* g = nullptr;
     PlotManager* pm = nullptr;
-
-    // Methods
-    // Returns point to an array of 2 pairs with x lim and y lim for 
-    // around xray point position, x and y.
-    void DefineRectangularROI(Int_t wx, Int_t wy);
-    // For known ROI widths, fills plot name and title for Gaus fit
-    void WidthSpecifiedPlotNameAndTitle(std::string& name, 
-        std::string& title, UShort_t layer, UShort_t fixed1, 
-        UShort_t fixed2, Int_t xWidth, Int_t yWidth);
-    // OLD AND SEGY: Pointer to vector indicates residualInROI - C or D
-    // Going to be filling the ref, hist.
-    /*FitResult FitGaussian(std::string name, std::string title,
-        TH1I* hist, TF1* fit, std::vector<Double_t>& filling, 
-        Int_t nBins, Float_t lowLim, Float_t upLim);*/
-    FitResult FitGaussian(std::string name, std::string title,
-        std::vector<Double_t>& filling, Int_t nBins, Float_t lowLim, 
-        Float_t upLim);
 };
 #endif
