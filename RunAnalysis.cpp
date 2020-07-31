@@ -45,7 +45,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     // Replace i<x=nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA_qs3p7.root with L3 and L4 fixed
-    for (Int_t i=0; i<nEntries; i++) {
+    for (Int_t i=0; i<3; i++) {
         trksTree.GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
         // Assumes uniform position distribution of hit across group
@@ -55,11 +55,9 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
 
         // for each permutation of two layers
         // la < lb and treated first always
-        // for (Int_t la=1; la<=4; la++) {
-        // Given data right now only do fixed layers 1,4
-        for (UShort_t la=1; la<=1; la++) {
-            // for (Int_t lb=(la+1); lb<=4; lb++) {
-            for (UShort_t lb=4; lb<=4; lb++) {
+        for (UShort_t la=1; la<=4; la++) {
+            for (UShort_t lb=(la+1); lb<=4; lb++) {
+            // for (UShort_t lb=4; lb<=4; lb++) {
 
                 if (MissingHitsOnFixedLayers(la, lb, 
                    trackX, trackYGaussian))
@@ -101,12 +99,23 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     // printUncertaintyHistograms(pm);
 
     // Get xray data
-    XRayData xData("results.db", cosmicsInfo, myInfo);
+    XRayData xData("results.db", cosmicsInfo, myInfo, pm);
+    /*for (auto p=xData.pointVec.begin(); p!=xData.pointVec.end(); p++) {
+        cout << p->num << ' ' << p->xnom << ' ' << p->ynom << ' ' << p->dqFlag << ' ';
+        for (auto off=p->offsets.begin(); off!=p->offsets.end(); off++) {
+            cout << off->first << ' ' << off->second << ' ' << p->offsetErrors.at(off->first) << "\n";
+        }
+        cout << '\n';
+    }*/
+    // xData.PlotPositions();
+    xData.WriteOutXRayData();
+
+    // Main offset vs mean difference analysis
     // Will hold pairs of layers to take offset difference
     vector<pair<UShort_t, UShort_t>> layers;
     Int_t xWidth = 37;
-    Int_t yWidth = 20;
-    UShort_t la, lb;
+    Int_t yWidth = 25;
+    // UShort_t la, lb;
     CombinedData data;
     string nameBase;
     TH1I* hist;
@@ -114,12 +123,18 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf[").c_str());
     ofstream tableOut;
     tableOut.open(myInfo->outpath + myInfo->quadname + "_compare_mean_and_offset_differences_table.csv");
-    for (Int_t i = 0; i<xData.xnoms.size(); i++) {
+    CombinedData test(xData.pointVec.at(10), 1, 2, &residuals, g, pm);
+    /*for (auto xrayPt=xData.pointVec.begin(); 
+              xrayPt!=xData.pointVec.end(); xrayPt++) {
+        // layers = xData.GetDiffCombos(xrayPt.offsets
+
+    }*/
+    /*for (UShort_t i = 0; i<xData.xnoms.size(); i++) {
     // Just looking at a single xray pt:
     // for (UShort_t i = 3; i<4; i++) {
-        cout << "Check num: " << xData.nums.at(i) << ' ' << i << '\n';
         layers = xData.GetDiffCombos(xData.offsets.at(i));
         for (auto ls=layers.begin(); ls!=layers.end(); ls++) {
+            cout << i << ' ' << ls->first << ' ' << ls->second << '\n';
             data = CombinedData(xWidth, yWidth, i, xData.xnoms.at(i), 
                 xData.ynoms.at(i), ls->first, ls->second, 
                 xData.offsets.at(i).at(ls->first),
@@ -135,21 +150,15 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
             hist = (TH1I*)pm->GetTH1I(nameBase + Combination(ls->second, la, lb).String()); 
             hist->Draw();             
             c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
-            // data.histC.Draw();
-            // data.fitC.Draw("Same");
-            // c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
-            // data.histD.Draw();
-            // data.fitD.Draw("Same");
-            // c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
             data.PrintClassDataToFile(tableOut);
         }
         cout << '\n';
-    }
+    }*/
     c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf]").c_str());
     tableOut.close();
-    /*data.PlotPositions();
-    data.WriteOutXRayData();
 
+
+    /*
     // Create ResPlots for XRayData
     Binning xRayBins(&data, 36, 20, g);
     // Make xray data binned plots
@@ -162,7 +171,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     xRayPlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + myInfo->quadname + "_3100V_fit_results_binning_" + xRayBins.name + ".pdf");*/
 
     cout << "Finishing analysis...\n\n";
-    delete c;
+    // delete c;
     return;
 }
 
