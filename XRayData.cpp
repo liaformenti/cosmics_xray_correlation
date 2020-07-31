@@ -198,14 +198,13 @@ void XRayData::WriteOutXRayData() {
 // Returned pairs are in enforced order (used throughout this analysis)
 // Technically, and map from the desired point struct would do as 
 // argument, but keep name as offset for simplicity and readability
-vector<pair<UShort_t, UShort_t>> XRayData::GetDiffCombos(
-        map<UShort_t, Double_t> offset) {
+vector<pair<UShort_t, UShort_t>> XRayPt::GetDiffCombos() {
     vector<pair<UShort_t, UShort_t>> diffCombos;
-    UShort_t size = offset.size();
-    // Get keys of offset map and copy them to array
+    UShort_t size = offsets.size();
+    // Get keys of offsets map and copy them to array
     UShort_t keys[size];
     Int_t i = 0;
-    for (auto m=offset.begin(); m!=offset.end(); m++) {
+    for (auto m=offsets.begin(); m!=offsets.end(); m++) {
         keys[i] = m->first;
         i++;
     }
