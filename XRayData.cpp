@@ -53,7 +53,10 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     UShort_t gv; 
     Double_t xnom, y_jigcmm_holdercmm, y_meas, y_meas_error; 
     Double_t offset, offsetError;
-    Int_t num = 0; // For indexing xray points
+    // For indexing xray points
+    // Each time an XRayPt is added to the ptVec, for EACH TIME THE 
+    // CONSTRUCTOR IS CALLED, num is incremented.
+    static Int_t num = 0; 
 
     // For all selected rows
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
