@@ -49,6 +49,9 @@ InputInfo::InputInfo(string theQuadName, string theOutPath) :
 }
 
 void getOtherLayers(UShort_t la, UShort_t lb, UShort_t* lc, UShort_t* ld) {
+    string throwStatement = "Invalid layer numbers: " + to_string(la);
+    throwStatement += ", " + to_string(lb) + ", (getOtherLayers, ";
+    throwStatement += "Helper.cpp).\n\n";
     switch(la) {
         case 1 : switch(lb) {
                      case 2 : *lc=3; *ld=4;
@@ -57,22 +60,22 @@ void getOtherLayers(UShort_t la, UShort_t lb, UShort_t* lc, UShort_t* ld) {
                               return;
                      case 4 : *lc=2; *ld=3;
                               return;
-                     default : throw runtime_error("Invalid layer number.");
+                     default : throw invalid_argument(throwStatement);
                   }
         case 2 : switch(lb) {
                      case 3 : *lc=1; *ld=4;
                               return;
                      case 4 : *lc=1; *ld=3;
                               return;
-                     default : throw runtime_error("Invalid layer number.");
+                     default : throw invalid_argument(throwStatement);
 
                  }
         case 3 : switch(lb) {
                      case 4 : *lc=1; *ld=2;
                               return;
-                     default : throw runtime_error("Invalid layer number.");
+                     default : throw invalid_argument(throwStatement);
                  }
-        default : throw runtime_error("Invalid layer number.");
+        default : throw invalid_argument(throwStatement);
     }
     return;
 }
