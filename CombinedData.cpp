@@ -68,3 +68,100 @@ CombinedData::CombinedData(XRayPt xPt, UShort_t layerA,
 
     return;
 }
+
+void CombinedData::DefineRectangularROI(Double_t xWidth, 
+                                        Double_t yWidth) {
+    if ((xWidth <= 0) || (yWidth <= 0)) {
+        throw invalid_argument("Please give positive widths (CombinedData::DefineRectangularROI).\n\n");
+    }
+    xROI.first = x - xWidth/2.0;
+    xROI.second = x + xWidth/2.0;
+    yROI.first = y - yWidth/2.0;
+    yROI.second = y + yWidth/2.0;
+    return;
+}
+
+void CombinedData::FillROIsWithResiduals() {
+    // If ROIs are not assigned,
+    Float_t eps = 0.001;
+    if ( ( (abs(xROI.first) < eps) && (abs(xROI.second) < eps) ) ||
+         ( (abs(yROI.first) < eps) && (abs(yROI.second < eps)) ) ) {
+        throw logic_error("Region of interest around xray point not defined (CombinedData::FillROIWithResiduals).\n\n");
+    }
+
+    for (auto r=resData->begin(); r!=resData->end(); r++) {
+        // If residuals is not on right layer, skip.
+        if ((r->l != la) && (r->l != lb)) continue;
+        // If fixed layers are not right, skip.
+        // Note confusing naming convention!
+        // For Residual struct la and lb are fixed layers
+        // but lc and ld and fixed layers here,
+        if ((r->la != lc) || (r->lb != ld)) continue;
+        // If residual is in ROI
+        if ( (r->x > xROI.first) && (r->x < xROI.second) &&
+             (r->y > yROI.first) && (r->y < yROI.second) ) {
+           layerData.at(r->l).residualsInROI.push_back(r->res);
+        }
+    }
+    return;
+}
+
+void CombinedData::FitGaussian() {
+    string name, title;
+    Combination combo;
+    TH1I* hist;
+    TF1* fit;
+    Int_t status; // To hold fit return value
+    // For layers of interest,
+    for (auto pld=layerData.begin(); pld!=layerData.end(); pld++) {
+        
+        // Build name and title
+        // Might make this a method so I can use same naming scheme
+        // for other fit types
+        combo = Combination(pld->first, lc, ld);
+        name = "residuals_around_xray_point_" + to_string(xPtIndex);
+        name += "_width_in_x_" +Tools::CStr(xROI.second-xROI.first, 2);        name += "_width_in_y_" +Tools::CStr(yROI.second-yROI.first, 2);
+        name += "_" + combo.String();
+        cout << name << "\n\n";
+        title = "Layer: " + to_string(combo.layer) +", Fixed Layers: ";
+        title += to_string(combo.fixed1) + to_string(combo.fixed2);
+        title += ", x#in["+Tools::CStr(xROI.first,2) + ",";
+        title += Tools::CStr(xROI.second,2) + "], mm y#in[";
+        title += Tools::CStr(yROI.first, 2) + ",";
+        title += Tools::CStr(yROI.second,2) + "] mm;Residuals [mm];";
+        title += "Tracks";
+        
+        // Book TH1I
+        pm->Add(name, title, 200, -10, 10, myTH1I);
+
+        // Fill
+        for (auto res=pld->second.residualsInROI.begin();
+                  res!=pld->second.residualsInROI.end(); res++) {
+            pm->Fill(name, *res);
+        }
+
+        // Book gaus fit
+        // pm->Add(name + "_gaus_fit", title, -10, 10, myTF1);
+
+        // Do gaus fit
+        hist = (TH1I*)pm->GetTH1I(name);
+        status = hist->Fit("gaus", "Q");
+        if (status == 0) { // If fit was successful,
+            pld->second.success = true;
+            // fit = (TF1*)pm->Get(name + "_gaus_fit");
+            fit = (TF1*)hist->GetFunction("gaus");
+            pld->second.mean = fit->GetParameter(1);
+            pld->second.meanError = fit->GetParError(1);
+            pld->second.sigma = fit->GetParameter(2);
+            pld->second.sigmaError = fit->GetParError(2);
+            pld->second.amplitude = fit->GetParameter(0);
+        } 
+        else { // fit failed
+            cout << "Warning: Gaussian fit of residuals in ROI ";
+            cout << "around xray point (" << x << ", " << y;
+            cout << ") on layer " << pld->first; 
+            cout << " failed (CombinedData::FitGaussian).\n\n";
+        }
+    }
+    return;    
+}

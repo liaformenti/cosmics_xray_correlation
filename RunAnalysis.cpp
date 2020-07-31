@@ -45,7 +45,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     // Replace i<x=nEntries eventually
     // 3 events ensures you get one that passes cut 
     // with testCA_qs3p7.root with L3 and L4 fixed
-    for (Int_t i=0; i<3; i++) {
+    for (Int_t i=0; i<nEntries; i++) {
         trksTree.GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
         // Assumes uniform position distribution of hit across group
@@ -55,9 +55,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
 
         // for each permutation of two layers
         // la < lb and treated first always
-        for (UShort_t la=1; la<=4; la++) {
-            for (UShort_t lb=(la+1); lb<=4; lb++) {
-            // for (UShort_t lb=4; lb<=4; lb++) {
+        // for (UShort_t la=1; la<=4; la++) {
+        for (UShort_t la=1; la <=1; la++) {
+            // for (UShort_t lb=(la+1); lb<=4; lb++) {
+            for (UShort_t lb=4; lb<=4; lb++) {
 
                 if (MissingHitsOnFixedLayers(la, lb, 
                    trackX, trackYGaussian))
@@ -95,20 +96,12 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     } // end event loop
 
     cout << "Analyzing results...\n\n";
-
     // printUncertaintyHistograms(pm);
 
     // Get xray data
     XRayData xData("results.db", cosmicsInfo, myInfo, pm);
-    /*for (auto p=xData.pointVec.begin(); p!=xData.pointVec.end(); p++) {
-        cout << p->num << ' ' << p->xnom << ' ' << p->ynom << ' ' << p->dqFlag << ' ';
-        for (auto off=p->offsets.begin(); off!=p->offsets.end(); off++) {
-            cout << off->first << ' ' << off->second << ' ' << p->offsetErrors.at(off->first) << "\n";
-        }
-        cout << '\n';
-    }*/
     // xData.PlotPositions();
-    xData.WriteOutXRayData();
+    // xData.WriteOutXRayData();
 
     // Main offset vs mean difference analysis
     // Will hold pairs of layers to take offset difference
@@ -121,14 +114,26 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     TH1I* hist;
     TCanvas * c = new TCanvas();
     c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf[").c_str());
+    // c->Print("test_pm_TF1.pdf[");
     ofstream tableOut;
     tableOut.open(myInfo->outpath + myInfo->quadname + "_compare_mean_and_offset_differences_table.csv");
-    CombinedData test(xData.pointVec.at(10), 1, 2, &residuals, g, pm);
-    /*for (auto xrayPt=xData.pointVec.begin(); 
+    // CombinedData test(xData.pointVec.at(10), 1, 2, &residuals, g, pm);
+    for (auto xrayPt=xData.pointVec.begin(); 
               xrayPt!=xData.pointVec.end(); xrayPt++) {
-        // layers = xData.GetDiffCombos(xrayPt.offsets
-
-    }*/
+        // Get pairs of layers on which there is data to do differences
+        layers = xrayPt->GetDiffCombos();
+        for (auto lp=layers.begin(); lp!=layers.end(); lp++) {
+            // if ((lp->first != 2) && (lp->second != 3)) continue;
+            data = CombinedData(*xrayPt, lp->first, lp->second, 
+                                &residuals, g, pm);
+            data.DefineRectangularROI(xWidth, yWidth);
+            data.FillROIsWithResiduals();
+            data.FitGaussian();
+            // TF1* testFit = (TF1*)pm->Get("residuals_around_xray_point_" + to_string(data.xPtIndex) + "_width_in_x_" + Tools::CStr(data.xROI.second-data.xROI.first,2) + "_width_in_y_" + Tools::CStr(data.yROI.second-data.yROI.first,2) + "_" + Combination(2, 1, 4).String() + "_gaus_fit");
+            /*testFit->Draw();
+            c->Print("test_pm_TF1.pdf");*/
+        }
+    }
     /*for (UShort_t i = 0; i<xData.xnoms.size(); i++) {
     // Just looking at a single xray pt:
     // for (UShort_t i = 3; i<4; i++) {
@@ -171,7 +176,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     xRayPlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + myInfo->quadname + "_3100V_fit_results_binning_" + xRayBins.name + ".pdf");*/
 
     cout << "Finishing analysis...\n\n";
-    // delete c;
+    delete c;
     return;
 }
 

@@ -28,11 +28,12 @@
 // the CombinedData analysis. It is useful for storing the layer spec
 // info in map in the CombinedData class, keyed by each of the layers
 // that are being compared. 
-
+// Maybe eventually add an outOfRange member indicating if the class
+// ROI reaches beyond a layer edge.
 struct PtLayerData {
     // xray data elements
     // List of residuals that fall into region of interest
-    std::vector<Residual> residualsInROI;
+    std::vector<Double_t> residualsInROI;
     Double_t offset;
     Double_t offsetError;
     // Residual data elements
@@ -86,8 +87,11 @@ class CombinedData {
     // Methods
     // To define a specified width of rectangle around the x ray pt
     // Widths are in mm
-    DefineRectangularROI(Double_t xWidth, Double_t yWidth);
-
+    void DefineRectangularROI(Double_t xWidth, Double_t yWidth);
+    // Loop residuals and add those in ROIs to residualsInROIs members
+    // of PtLayerData
+    void FillROIsWithResiduals();
+    void FitGaussian();
   private:
     std::vector<Residual>* resData = nullptr;
     DetectorGeometry* g = nullptr;
