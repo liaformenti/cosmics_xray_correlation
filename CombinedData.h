@@ -82,6 +82,11 @@ class CombinedData {
     // Difference in xray offsets on two layers
     Double_t offDiff, offDiffError;
     Double_t meanDiff, meanDiffError;
+   
+    // Methods
+    // To define a specified width of rectangle around the x ray pt
+    // Widths are in mm
+    DefineRectangularROI(Double_t xWidth, Double_t yWidth);
 
   private:
     std::vector<Residual>* resData = nullptr;
