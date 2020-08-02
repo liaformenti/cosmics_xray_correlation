@@ -37,6 +37,8 @@ struct PtLayerData {
     Double_t offset;
     Double_t offsetError;
     // Residual data elements
+    // Holds pm name for histogram to be fit
+    std::string histName;
     // Mean and sigma from fit, based on Gaussian but could be filled
     // with any fit's metric of "centre" and "width"
     // Also stores whether fit was successful
@@ -91,6 +93,7 @@ class CombinedData {
     // Loop residuals and add those in ROIs to residualsInROIs members
     // of PtLayerData
     void FillROIsWithResiduals();
+    void CreateResidualHistograms();
     void FitGaussian();
   private:
     std::vector<Residual>* resData = nullptr;

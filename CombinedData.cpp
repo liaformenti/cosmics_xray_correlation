@@ -43,7 +43,9 @@ CombinedData::CombinedData(XRayPt xPt, UShort_t layerA,
     second.offset = xPt.offsets.at(lb);
     second.offset = xPt.offsetErrors.at(lb);
 
+    // Placeholder initialization.
     first.residualsInROI = {}, second.residualsInROI = {};
+    first.histName = "", second.histName="";
     // Use fit false as a marker for before fit and failed fit
     first.success = false, second.success = false;
     // Init fit params to zero
@@ -106,12 +108,9 @@ void CombinedData::FillROIsWithResiduals() {
     return;
 }
 
-void CombinedData::FitGaussian() {
+void CombinedData::CreateResidualHistograms() {
     string name, title;
     Combination combo;
-    TH1I* hist;
-    TF1* fit;
-    Int_t status; // To hold fit return value
     // For layers of interest,
     for (auto pld=layerData.begin(); pld!=layerData.end(); pld++) {
         
@@ -133,19 +132,46 @@ void CombinedData::FitGaussian() {
         
         // Book TH1I
         pm->Add(name, title, 200, -10, 10, myTH1I);
+        
+        // Add name to PtLayerData struct
+        pld->second.histName = name;
 
+        // Print warning if residuals is empty (in case user forgot
+        // to call FillROIsWithResiduals method
+        if (pld->second.residualsInROI.size() == 0) {
+            cout << "Warning: list of residuals in ROI around xray ";
+            cout << "point, " << xPtIndex << ", on layer, ";
+            cout << pld->first << ", is empty. Are you calling the ";
+            cout << "FillROIsWithResiduals method ";
+            cout << "(CombinedData::CreateResidualHistograms)?";
+        }
         // Fill
         for (auto res=pld->second.residualsInROI.begin();
                   res!=pld->second.residualsInROI.end(); res++) {
             pm->Fill(name, *res);
         }
+    }
+    return;
+}
 
-        // Book gaus fit
-        // pm->Add(name + "_gaus_fit", title, -10, 10, myTF1);
+void CombinedData::FitGaussian() {
+    TH1I* hist;
+    TF1* fit;
+    Int_t status; // To hold fit return value
 
+    for (auto pld=layerData.begin(); pld!=layerData.end(); pld++) {
         // Do gaus fit
-        hist = (TH1I*)pm->GetTH1I(name);
+        hist = (TH1I*)pm->GetTH1I(pld->second.histName);
+
+        // Don't bother fitting an empty histogram. Fit success
+        // flag in layer data will remain false.
+        if (hist->GetEntries() == 0) continue;
+
+        // If you want to have the fit stored in plot manager,
+        // could define function, giving it a name, add it to pm, 
+        // fit it, get out the custom params, and carry on
         status = hist->Fit("gaus", "Q");
+
         if (status == 0) { // If fit was successful,
             pld->second.success = true;
             // fit = (TF1*)pm->Get(name + "_gaus_fit");
@@ -162,6 +188,6 @@ void CombinedData::FitGaussian() {
             cout << ") on layer " << pld->first; 
             cout << " failed (CombinedData::FitGaussian).\n\n";
         }
-    }
+    } 
     return;    
 }

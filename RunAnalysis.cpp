@@ -128,10 +128,13 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
                                 &residuals, g, pm);
             data.DefineRectangularROI(xWidth, yWidth);
             data.FillROIsWithResiduals();
+            data.CreateResidualHistograms();
             data.FitGaussian();
-            // TF1* testFit = (TF1*)pm->Get("residuals_around_xray_point_" + to_string(data.xPtIndex) + "_width_in_x_" + Tools::CStr(data.xROI.second-data.xROI.first,2) + "_width_in_y_" + Tools::CStr(data.yROI.second-data.yROI.first,2) + "_" + Combination(2, 1, 4).String() + "_gaus_fit");
-            /*testFit->Draw();
-            c->Print("test_pm_TF1.pdf");*/
+            hist = (TH1I*)pm->Get(data.layerData.at(lp->first).histName);
+            if (hist->GetEntries() != 0) {
+                hist->Draw();
+                c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
+            }
         }
     }
     /*for (UShort_t i = 0; i<xData.xnoms.size(); i++) {
