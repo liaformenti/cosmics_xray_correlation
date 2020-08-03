@@ -107,14 +107,14 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     // Will hold pairs of layers to take offset difference
     vector<pair<UShort_t, UShort_t>> layers;
     Int_t xWidth = 37;
-    Int_t yWidth = 25;
+    Int_t yWidth = 35;
     CombinedData data;
     TH1I* hist;
     TCanvas * c = new TCanvas();
-    string drawOutFileName = myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf";
+    string drawOutFileName = myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt_xROI_" + to_string(xWidth) + "mm_width_yROI_" + to_string(yWidth) + "mm_width.pdf";
     c->Print((drawOutFileName + "[").c_str());
     ofstream tableOut;
-    string tableOutFileName = myInfo->outpath + myInfo->quadname + "_compare_mean_and_offset_differences_table.csv";
+    string tableOutFileName = myInfo->outpath + myInfo->quadname + "_compare_mean_and_offset_differences_table_xROI_" + to_string(xWidth) + "mm_width_yROI_" + to_string(yWidth) + "mm_width.csv";
     tableOut.open(tableOutFileName);
 
     for (auto xrayPt=xData.pointVec.begin(); 
@@ -137,19 +137,19 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
             hist = (TH1I*)pm->Get(data.layerData.at(lp->first).histName);
             if (hist->GetEntries() != 0) {
                 hist->Draw();
-                c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
+                c->Print(drawOutFileName.c_str());
             }
             // Draw layerB histogram
             hist = (TH1I*)pm->Get(data.layerData.at(lp->second).histName);
             if (hist->GetEntries() != 0) {
                 hist->Draw();
-                c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
+                c->Print(drawOutFileName.c_str());
             }
 
         } // end layers loop
     } // end xray point loop
 
-    c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf]").c_str());
+    c->Print((drawOutFileName + "]").c_str());
 
     /*
     // Create ResPlots for XRayData
