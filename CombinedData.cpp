@@ -196,3 +196,46 @@ void CombinedData::CalculateMeanDifference() {
                          pow(layerData.at(lb).meanError,2));
     return;
 }
+
+void CombinedData::AppendCombinedDataToTable(ofstream &f) {
+    f << xPtIndex << "," << x << "," << y << "," << la << "," << lb;
+    f << "," << layerData.at(la).offset << ",";
+    f << layerData.at(la).offsetError << ",";
+    f << layerData.at(lb).offset << ",";
+    f << layerData.at(lb).offsetError << "," << offDiff << ",";
+    f << offDiffError << ","; 
+
+    // If fit on layerA was successful, print results
+    if (layerData.at(la).success == true) {
+        f << layerData.at(la).amplitude << ",";
+        f << layerData.at(la).mean << ",";
+        f << layerData.at(la).meanError <<  ",";
+        f << layerData.at(la).sigma << ","; 
+        f << layerData.at(la).sigmaError << ",";
+    }
+    else { // If fit was not successful, write "NA"
+        f << "NA,NA,NA,NA,NA,";
+    }
+
+    if (layerData.at(lb).success == true) {
+        f << layerData.at(lb).amplitude << ",";
+        f << layerData.at(lb).mean << ",";
+        f << layerData.at(lb).meanError <<  ",";
+        f << layerData.at(lb).sigma << ",";
+        f << layerData.at(lb).sigmaError << ",";
+    }
+    else { // If fit was not successful, write "NA"
+         f << "NA,NA,NA,NA,NA,";
+    }
+
+    // If both fits were successful print residual mean difference
+    if ((layerData.at(la).success == true) && 
+         (layerData.at(lb).success == true)) {
+        f << meanDiff << "," << meanDiffError << '\n';
+    }
+    else { // If not print NA
+        f << "NA,NA\n";
+    }
+
+    return;
+}

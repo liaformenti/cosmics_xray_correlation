@@ -106,7 +106,7 @@ class CombinedData {
     void FitGaussian();
     // Use gaus fit parameters to calculate residual mean difference
     void CalculateMeanDifference();
-    void AppendCombinedDataToTable(std::string filename);
+    void AppendCombinedDataToTable(std::ofstream& f);
   private:
     std::vector<Residual>* resData = nullptr;
     DetectorGeometry* g = nullptr;

@@ -130,11 +130,21 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
             data.FillROIsWithResiduals();
             data.CreateResidualHistograms();
             data.FitGaussian();
+            data.CalculateMeanDifference();
+            data.AppendCombinedDataToTable(tableOut);
+            // Draw layerA histogram
             hist = (TH1I*)pm->Get(data.layerData.at(lp->first).histName);
             if (hist->GetEntries() != 0) {
                 hist->Draw();
                 c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
             }
+            // Draw layerB histogram
+            hist = (TH1I*)pm->Get(data.layerData.at(lp->second).histName);
+            if (hist->GetEntries() != 0) {
+                hist->Draw();
+                c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
+            }
+
         }
     }
     /*for (UShort_t i = 0; i<xData.xnoms.size(); i++) {
