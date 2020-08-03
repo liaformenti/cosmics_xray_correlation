@@ -169,6 +169,7 @@ void XRayData::PlotPositions() {
     TGraph* xRayGraph = (TGraph*)pm->Get(
         "xray_positions_" + myInfo->quadname);
     xRayGraph->Draw("ap");
+    c->Print((myInfo->outpath + myInfo->quadname + "_xray_positions.pdf").c_str());
     delete c;
 
     return;
