@@ -46,9 +46,12 @@ Binning::Binning(Int_t wx, Int_t wy, DetectorGeometry* _g) :
     name += to_string(wy) + "mm";
 }
 
-Binning::Binning(XRayData* data, Int_t wx, Int_t wy,
+/*Binning::Binning(XRayData* data, Int_t wx, Int_t wy,
                 DetectorGeometry* _g) : g(_g) {
-    
+    // I THINK THIS IS BUGGY.
+    // GOT AN XRAY BIN SMALLER THAN DESIRED WIDTH.
+    // NOT SURE HOW.
+    // SOMETHING FUNKY WITH THE AVERAGING. 
     // Get geom limits
     pair<Double_t, Double_t> xlims = g->GetModuleLimitsX();
     pair<Double_t, Double_t> ylims = g->GetModuleLimitsY();
@@ -168,7 +171,7 @@ Binning::Binning(XRayData* data, Int_t wx, Int_t wy,
     name = "xray_min_xwidth_" + to_string(wx) + "mm_min_ywidth_";
     name += to_string(wy) + "mm";
     // Code to print things
-    /*for (auto x=data->xnoms.begin(); x!=data->xnoms.end(); x++)
+    for (auto x=data->xnoms.begin(); x!=data->xnoms.end(); x++)
         cout << *x << ' ';
     cout << "\n\n";
     for (auto x=xs.begin(); x!=xs.end(); x++)
@@ -179,9 +182,9 @@ Binning::Binning(XRayData* data, Int_t wx, Int_t wy,
     cout << "\n\n";
     for (auto y=ys.begin(); y!=ys.end(); y++)
         cout << *y << ' ';
-    cout << "\n\n";*/
+    cout << "\n\n";
 
-}
+}*/
 
 void Binning::DefineXRayBin(Float_t q, Float_t qmin, Float_t qmax,
                              Int_t width, string xOrY) {
@@ -194,7 +197,7 @@ void Binning::DefineXRayBin(Float_t q, Float_t qmin, Float_t qmax,
     }
     Float_t binLimLow, binLimHigh;
     // Defining and adding lower bin limit
-    binLimLow = q - width/2;
+    binLimLow = q - width/2.0;
     // If low limit is out of range, don't add it to Edges vector
     // Note: because of averaging x-ray points nearby,
     // don't have to deal with case where pt lower boundary < 
@@ -213,7 +216,7 @@ void Binning::DefineXRayBin(Float_t q, Float_t qmin, Float_t qmax,
     }*/
 
     // Defining and adding upper bin limit
-    binLimHigh = q + width/2;
+    binLimHigh = q + width/2.0;
     // Similarly to lower limit,
     if (binLimHigh < qmax) {
         // Add to Edges

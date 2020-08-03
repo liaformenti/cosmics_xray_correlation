@@ -39,7 +39,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     // Vector to store calculated residuals
     vector<Residual> residuals;
 
-    cout << "Processing input data...\n\n";
+    cout << "Tracking and calculating residuals...\n\n";
 
     // initializeUncertaintyHistograms(pm);
     // Replace i<x=nEntries eventually
@@ -55,9 +55,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
 
         // for each permutation of two layers
         // la < lb and treated first always
-        for (Int_t la=1; la<=4; la++) {
-        // for (UShort_t la=3; la<=3; la++) {
-            for (Int_t lb=(la+1); lb<=4; lb++) {
+        for (UShort_t la=1; la<=4; la++) {
+        // for (UShort_t la=1; la <=1; la++) {
+            for (UShort_t lb=(la+1); lb<=4; lb++) {
+            // for (UShort_t lb=4; lb<=4; lb++) {
 
                 if (MissingHitsOnFixedLayers(la, lb, 
                    trackX, trackYGaussian))
@@ -95,14 +96,62 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     } // end event loop
 
     cout << "Analyzing results...\n\n";
-
     // printUncertaintyHistograms(pm);
     
     // Get xray data
-    XRayData data("results.db", cosmicsInfo, myInfo);
-    data.PlotPositions();
-    data.WriteOutXRayData();
+    XRayData xData("results.db", cosmicsInfo, myInfo, pm);
+    xData.PlotPositions();
+    xData.WriteOutXRayData();
 
+    // Main offset vs mean difference analysis
+    // Will hold pairs of layers to take offset difference
+    vector<pair<UShort_t, UShort_t>> layers;
+    Int_t xWidth = 37;
+    Int_t yWidth = 25;
+    CombinedData data;
+    TH1I* hist;
+    TCanvas * c = new TCanvas();
+    string drawOutFileName = myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf";
+    c->Print((drawOutFileName + "[").c_str());
+    ofstream tableOut;
+    string tableOutFileName = myInfo->outpath + myInfo->quadname + "_compare_mean_and_offset_differences_table.csv";
+    tableOut.open(tableOutFileName);
+
+    for (auto xrayPt=xData.pointVec.begin(); 
+              xrayPt!=xData.pointVec.end(); xrayPt++) {
+        // Get pairs of layers on which there is data to do differences
+        layers = xrayPt->GetDiffCombos();
+
+        for (auto lp=layers.begin(); lp!=layers.end(); lp++) {
+            // Process xray and residuals data
+            data = CombinedData(*xrayPt, lp->first, lp->second, 
+                                &residuals, g, pm);
+            data.DefineRectangularROI(xWidth, yWidth);
+            data.FillROIsWithResiduals();
+            data.CreateResidualHistograms();
+            data.FitGaussian();
+            data.CalculateMeanDifference();
+            data.AppendCombinedDataToTable(tableOut);
+
+            // Draw layerA histogram
+            hist = (TH1I*)pm->Get(data.layerData.at(lp->first).histName);
+            if (hist->GetEntries() != 0) {
+                hist->Draw();
+                c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
+            }
+            // Draw layerB histogram
+            hist = (TH1I*)pm->Get(data.layerData.at(lp->second).histName);
+            if (hist->GetEntries() != 0) {
+                hist->Draw();
+                c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
+            }
+
+        } // end layers loop
+    } // end xray point loop
+
+    c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf]").c_str());
+
+    /*
     // Create ResPlots for XRayData
     Binning xRayBins(&data, 36, 20, g);
     // Make xray data binned plots
@@ -112,9 +161,11 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     xRayPlots.CreatePosBinnedFitResultTH2Fs();
     xRayPlots.PrintNumEntriesTH2Is(myInfo->outpath + myInfo->quadname + "_3100V_num_entries_binning_" + xRayBins.name + ".pdf");
     xRayPlots.PrintPosBinnedResPlots(myInfo->outpath + myInfo->quadname + "_3100V_residual_fits_binning_" + xRayBins.name + ".pdf");
-    xRayPlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + myInfo->quadname + "_3100V_fit_results_binning_" + xRayBins.name + ".pdf");
+    xRayPlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + myInfo->quadname + "_3100V_fit_results_binning_" + xRayBins.name + ".pdf");*/
 
     cout << "Finishing analysis...\n\n";
+    delete c;
+    tableOut.close();
     return;
 }
 

@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <fstream>
 
 // Root includes
 #include <TTree.h>
@@ -26,6 +27,7 @@
 #include "Binning.h"
 #include "ResPlots.h"
 #include "XRayData.h"
+#include "CombinedData.h"
 
 void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, DetectorGeometry* g, InputInfo* myInfo);
 

@@ -73,7 +73,6 @@ void ResPlots::PrintNumEntriesTH2Is(string filename) {
 
 // Names of position binned residual plots based on x and y position 
 // bin number. Starts from lowest coord value with bin number 1 and increments in both directions.
-// NEED TO ADD NAMEBASE HERE IF YOU WANT TO USE WITH MULTIPLE BINNINGS
 void ResPlots::InitializePosBinnedResPlots() {
     string name;
     string title;
@@ -204,6 +203,9 @@ void ResPlots::InitializePosBinnedFitResultTH2Fs() {
 
 }
 
+// Note: You can also add fits to plot manager so that you could do
+// fit in CreatePosBinnedResPlots, but access it here explicitly
+// instead of doing it here
 void ResPlots::CreatePosBinnedFitResultTH2Fs() {
     InitializePosBinnedFitResultTH2Fs();
     vector<Combination> comboVec = combinationVector();

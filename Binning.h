@@ -26,8 +26,8 @@ class Binning {
     Binning(Int_t xWidth, Int_t yWidth, DetectorGeometry* _g);
     // To bin a rectangle around xray points, with specified
     // x and y widths
-    Binning(XRayData* data, Int_t xWidth, Int_t yWidth,
-            DetectorGeometry* _g);
+    // Binning(XRayData* data, Int_t xWidth, Int_t yWidth,
+    //        DetectorGeometry* _g);
     ~Binning(){};
 
     // Members

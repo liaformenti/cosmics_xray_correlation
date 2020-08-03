@@ -21,31 +21,45 @@
 
 // tgc_analysis includes
 #include "AnalysisInfo.h"
+#include "PlotManager.h"
 
 // My includes
 #include "Helper.h"
+
+struct XRayPt {
+    Int_t num; // Unique identifying number for xray point, start at 0
+    Double_t xnom;
+    // Note: my ynom = y_jigcmm_holdercmm in xray data
+    Double_t ynom; 
+    std::map<UShort_t, std::string> dqFlags;
+    // Keys are layers
+    std::map<UShort_t, Double_t> offsets;
+    std::map<UShort_t, Double_t> offsetErrors;
+    std::vector<std::pair<UShort_t, UShort_t>> GetDiffCombos();
+};
 
 class XRayData {
   public:
     // Constructors
     XRayData(){};
     XRayData(std::string databaseName, AnalysisInfo* _cinfo,
-             InputInfo* _myInfo); 
+            InputInfo* _myInfo, PlotManager* _pm); 
     ~XRayData(){};
 
     // Members
-    // Following three are ordered by distinct xray data positions
-    std::vector<Double_t> xnoms;
-    std::vector<Double_t> ynoms;
-    std::vector<std::map<UShort_t, Double_t>> offsets; // layer to offset map
-   // Methods
-   // Plot ynoms vs xnoms, nominal xray positions
-   void PlotPositions();
-   void WriteOutXRayData();
+    std::vector<XRayPt> pointVec;
+
+    // Methods
+    // Plot ynoms vs xnoms, nominal xray positions
+    void PlotPositions();
+    // Writes out positions and offsets for each available layer
+    void WriteOutXRayData();
+    // For an offsets entry, return all combinations of layers which
+    // have an offset for further processing
 
   private:
     AnalysisInfo* cinfo = nullptr;
     InputInfo* myInfo = nullptr;
-    //parseRunID(string runId);
+    PlotManager* pm = nullptr;
 };
 #endif

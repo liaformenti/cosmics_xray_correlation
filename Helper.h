@@ -1,7 +1,7 @@
 #ifndef Helper_h
 #define Helper_h
 
-// Useful functions not belonging to any clas
+// Useful functions not belonging to any class
 
 // C++ includes
 #include <iostream>
