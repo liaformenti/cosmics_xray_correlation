@@ -53,6 +53,10 @@ struct PtLayerData {
     // Maybe add: Bool_t ROIOutOfRange
 };
 
+// Note that the methods should be called in order of appearance to
+// perform the analysis. If this is done, relevant members will be 
+// populated at each step.
+
 class CombinedData {
   public:
     // Constructors
@@ -88,13 +92,21 @@ class CombinedData {
    
     // Methods
     // To define a specified width of rectangle around the x ray pt
-    // Widths are in mm
+    // Widths are in mm. Residuals made from tracks falling in the ROI
+    // will be used to calculate the residual mean difference.
     void DefineRectangularROI(Double_t xWidth, Double_t yWidth);
     // Loop residuals and add those in ROIs to residualsInROIs members
     // of PtLayerData
     void FillROIsWithResiduals();
+    // Create the histograms in PlotManager
+    // Histograms names are made unique using xray point index and
+    // x and y widths of region of interest
     void CreateResidualHistograms();
+    // Fit Gaussians to histograms
     void FitGaussian();
+    // Use gaus fit parameters to calculate residual mean difference
+    void CalculateMeanDifference();
+    void AppendCombinedDataToTable(std::string filename);
   private:
     std::vector<Residual>* resData = nullptr;
     DetectorGeometry* g = nullptr;

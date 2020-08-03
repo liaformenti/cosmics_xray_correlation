@@ -41,7 +41,7 @@ CombinedData::CombinedData(XRayPt xPt, UShort_t layerA,
     first.offset = xPt.offsets.at(la);
     first.offsetError = xPt.offsetErrors.at(la);
     second.offset = xPt.offsets.at(lb);
-    second.offset = xPt.offsetErrors.at(lb);
+    second.offsetError = xPt.offsetErrors.at(lb);
 
     // Placeholder initialization.
     first.residualsInROI = {}, second.residualsInROI = {};
@@ -63,7 +63,6 @@ CombinedData::CombinedData(XRayPt xPt, UShort_t layerA,
     offDiff = layerData.at(la).offset - layerData.at(lb).offset;
     offDiffError = sqrt(pow(layerData.at(la).offsetError, 2) +
                         pow(layerData.at(lb).offsetError, 2));
-
     // Init residual mean difference to zero
     meanDiff = 0;
     meanDiffError = 0;
@@ -121,7 +120,6 @@ void CombinedData::CreateResidualHistograms() {
         name = "residuals_around_xray_point_" + to_string(xPtIndex);
         name += "_width_in_x_" +Tools::CStr(xROI.second-xROI.first, 2);        name += "_width_in_y_" +Tools::CStr(yROI.second-yROI.first, 2);
         name += "_" + combo.String();
-        cout << name << "\n\n";
         title = "Layer: " + to_string(combo.layer) +", Fixed Layers: ";
         title += to_string(combo.fixed1) + to_string(combo.fixed2);
         title += ", x#in["+Tools::CStr(xROI.first,2) + ",";
@@ -143,7 +141,7 @@ void CombinedData::CreateResidualHistograms() {
             cout << "point, " << xPtIndex << ", on layer, ";
             cout << pld->first << ", is empty. Are you calling the ";
             cout << "FillROIsWithResiduals method ";
-            cout << "(CombinedData::CreateResidualHistograms)?";
+            cout << "(CombinedData::CreateResidualHistograms)?\n\n";
         }
         // Fill
         for (auto res=pld->second.residualsInROI.begin();
@@ -190,4 +188,11 @@ void CombinedData::FitGaussian() {
         }
     } 
     return;    
+}
+
+void CombinedData::CalculateMeanDifference() {
+    meanDiff = layerData.at(la).mean - layerData.at(lb).mean;
+    meanDiffError = sqrt(pow(layerData.at(la).meanError,2) +
+                         pow(layerData.at(lb).meanError,2));
+    return;
 }
