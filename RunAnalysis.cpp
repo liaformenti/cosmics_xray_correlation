@@ -55,10 +55,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
 
         // for each permutation of two layers
         // la < lb and treated first always
-        // for (UShort_t la=1; la<=4; la++) {
-        for (UShort_t la=1; la <=1; la++) {
-            // for (UShort_t lb=(la+1); lb<=4; lb++) {
-            for (UShort_t lb=4; lb<=4; lb++) {
+        for (UShort_t la=1; la<=4; la++) {
+        // for (UShort_t la=1; la <=1; la++) {
+            for (UShort_t lb=(la+1); lb<=4; lb++) {
+            // for (UShort_t lb=4; lb<=4; lb++) {
 
                 if (MissingHitsOnFixedLayers(la, lb, 
                    trackX, trackYGaussian))
@@ -100,30 +100,30 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
 
     // Get xray data
     XRayData xData("results.db", cosmicsInfo, myInfo, pm);
-    // xData.PlotPositions();
-    // xData.WriteOutXRayData();
+    xData.PlotPositions();
+    xData.WriteOutXRayData();
 
     // Main offset vs mean difference analysis
     // Will hold pairs of layers to take offset difference
     vector<pair<UShort_t, UShort_t>> layers;
     Int_t xWidth = 37;
     Int_t yWidth = 25;
-    // UShort_t la, lb;
     CombinedData data;
-    string nameBase;
     TH1I* hist;
     TCanvas * c = new TCanvas();
-    c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf[").c_str());
-    // c->Print("test_pm_TF1.pdf[");
+    string drawOutFileName = myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf";
+    c->Print((drawOutFileName + "[").c_str());
     ofstream tableOut;
-    tableOut.open(myInfo->outpath + myInfo->quadname + "_compare_mean_and_offset_differences_table.csv");
-    // CombinedData test(xData.pointVec.at(10), 1, 2, &residuals, g, pm);
+    string tableOutFileName = myInfo->outpath + myInfo->quadname + "_compare_mean_and_offset_differences_table.csv";
+    tableOut.open(tableOutFileName);
+
     for (auto xrayPt=xData.pointVec.begin(); 
               xrayPt!=xData.pointVec.end(); xrayPt++) {
         // Get pairs of layers on which there is data to do differences
         layers = xrayPt->GetDiffCombos();
+
         for (auto lp=layers.begin(); lp!=layers.end(); lp++) {
-            // if ((lp->first != 2) && (lp->second != 3)) continue;
+            // Process xray and residuals data
             data = CombinedData(*xrayPt, lp->first, lp->second, 
                                 &residuals, g, pm);
             data.DefineRectangularROI(xWidth, yWidth);
@@ -132,6 +132,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
             data.FitGaussian();
             data.CalculateMeanDifference();
             data.AppendCombinedDataToTable(tableOut);
+
             // Draw layerA histogram
             hist = (TH1I*)pm->Get(data.layerData.at(lp->first).histName);
             if (hist->GetEntries() != 0) {
@@ -145,36 +146,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
                 c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
             }
 
-        }
-    }
-    /*for (UShort_t i = 0; i<xData.xnoms.size(); i++) {
-    // Just looking at a single xray pt:
-    // for (UShort_t i = 3; i<4; i++) {
-        layers = xData.GetDiffCombos(xData.offsets.at(i));
-        for (auto ls=layers.begin(); ls!=layers.end(); ls++) {
-            cout << i << ' ' << ls->first << ' ' << ls->second << '\n';
-            data = CombinedData(xWidth, yWidth, i, xData.xnoms.at(i), 
-                xData.ynoms.at(i), ls->first, ls->second, 
-                xData.offsets.at(i).at(ls->first),
-                xData.offsets.at(i).at(ls->second),
-                &residuals, g, pm);
-            getOtherLayers(ls->first, ls->second, &la, &lb);
-            nameBase = "residuals_around_xray_pt_" + to_string(i);
-            nameBase += "_width_in_x_" + to_string(xWidth);
-            nameBase += "_width_in_y_" + to_string(yWidth) + "_";
-            hist = (TH1I*)pm->GetTH1I(nameBase + Combination(ls->first, la, lb).String());
-            hist->Draw();             
-            c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
-            hist = (TH1I*)pm->GetTH1I(nameBase + Combination(ls->second, la, lb).String()); 
-            hist->Draw();             
-            c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf").c_str());
-            data.PrintClassDataToFile(tableOut);
-        }
-        cout << '\n';
-    }*/
-    c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf]").c_str());
-    tableOut.close();
+        } // end layers loop
+    } // end xray point loop
 
+    c->Print((myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt.pdf]").c_str());
 
     /*
     // Create ResPlots for XRayData
@@ -190,6 +165,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
 
     cout << "Finishing analysis...\n\n";
     delete c;
+    tableOut.close();
     return;
 }
 
