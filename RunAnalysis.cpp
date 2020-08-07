@@ -9,6 +9,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     Int_t nEntries;
     Int_t eventnumber;
 
+    Bool_t makePlots = false; // Whether to make plots in tracking loop
+
     map<UShort_t, Double_t> trackX;
     map<UShort_t, Double_t>* trackXPtr;
     trackXPtr = &trackX;
@@ -41,10 +43,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
 
     cout << "Tracking and calculating residuals...\n\n";
 
-    // initializeUncertaintyHistograms(pm);
-    // Replace i<x=nEntries eventually
-    // 3 events ensures you get one that passes cut 
-    // with testCA_qs3p7.root with L3 and L4 fixed
+    if (makePlots) initializeUncertaintyHistograms(pm);
+    if (makePlots) initializeTrackAngleHistograms(pm);
     for (Int_t i=0; i<nEntries; i++) {
         trksTree.GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
@@ -68,18 +68,22 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
                 Tracking myTrack(g, pm, trackX, uncertX, trackYGaussian, sigma, la, lb);
 
                 myTrack.Fit();
+                if (makePlots) {
+                    pm->Fill("track_angle_x_fixed_layers_" + to_string(la) + to_string(lb), tan(myTrack.resultX->Value(1)));
+                    pm->Fill("track_angle_y_fixed_layers_" + to_string(la) + to_string(lb), tan(myTrack.resultY->Value(1)));
+                }
                 // Check if hit exists on unfixed layers
                 // If so evaluate and calculate residual
                 Residual res;
                 if (myTrack.hitsY.find(lc) != myTrack.hitsY.end()) {
                     myTrack.EvaluateAt(lc);
-                    // pm->Fill("uncertainty_y_evaluations_" + Combination(lc, la, lb).String(), myTrack.fitYUncerts.at(lc));
+                    if (makePlots) pm->Fill("uncertainty_y_evaluations_" + Combination(lc, la, lb).String(), myTrack.fitYUncerts.at(lc));
                     res = Residual(myTrack, lc);
                     residuals.push_back(res);
                 }
                 if (myTrack.hitsY.find(ld) != myTrack.hitsY.end()) {
                     myTrack.EvaluateAt(ld);
-                    // pm->Fill("uncertainty_y_evaluations_" + Combination(ld, la, lb).String(), myTrack.fitYUncerts.at(ld));
+                    if (makePlots) pm->Fill("uncertainty_y_evaluations_" + Combination(ld, la, lb).String(), myTrack.fitYUncerts.at(ld));
                     res = Residual(myTrack, ld);
                     residuals.push_back(res);
                 }
@@ -96,7 +100,9 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     } // end event loop
 
     cout << "Analyzing results...\n\n";
-    // printUncertaintyHistograms(pm);
+    
+    if (makePlots) printUncertaintyHistograms(pm, myInfo);
+    if (makePlots) printTrackAngleHistograms(pm, myInfo);
 
     // Get xray data
     XRayData xData("results.db", cosmicsInfo, myInfo, pm);
@@ -106,8 +112,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     // Main offset vs mean difference analysis
     // Will hold pairs of layers to take offset difference
     vector<pair<UShort_t, UShort_t>> layers;
-    Int_t xWidth = 37;
-    Int_t yWidth = 35;
+    Int_t xWidth = 40;
+    Int_t yWidth = 40;
     CombinedData data;
     TH1I* hist;
     TCanvas * c = new TCanvas();
@@ -151,6 +157,9 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
 
     c->Print((drawOutFileName + "]").c_str());
 
+    delete c;
+    tableOut.close();
+
     /*
     // Create ResPlots for XRayData
     Binning xRayBins(&data, 36, 20, g);
@@ -164,8 +173,6 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     xRayPlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + myInfo->quadname + "_3100V_fit_results_binning_" + xRayBins.name + ".pdf");*/
 
     cout << "Finishing analysis...\n\n";
-    delete c;
-    tableOut.close();
     return;
 }
 
@@ -184,20 +191,57 @@ void initializeUncertaintyHistograms(PlotManager* pm) {
     string headerY = "uncertainty_y_evaluations_";
     for (auto v=combVec.begin(); v!=combVec.end(); v++) {
         // Just try the bin number and limits for now
-        pm->Add(headerY + v->String(), headerY + v->String(),
-                60, 0, 20, myTH1F);
+        pm->Add(headerY + v->String(), "Layer: " + to_string(v->layer) + ", Fixed layers: " + to_string(v->fixed1) + to_string(v->fixed2) + " y-track fit uncertainty;Uncertainty [mm];Tracks;", 60, 0, 20, myTH1F);
     }
 }
 
-void printUncertaintyHistograms(PlotManager* pm) {
+void printUncertaintyHistograms(PlotManager* pm, InputInfo* myInf) {
     TCanvas *c = new TCanvas();
-    c->Print("y_evaluation_uncertainties.pdf[");
+    string outName = myInf->outpath + "y_evaluation_uncertainties.pdf";
+    c->Print((outName + "[").c_str());
     vector<Combination> combVec = combinationVector();
     for (auto comb=combVec.begin(); comb!=combVec.end(); comb++) {
         TH1F* uyhist = (TH1F*)pm->GetTH1F("uncertainty_y_evaluations_" + comb->String());
         uyhist->Draw();
-        c->Print("y_evaluation_uncertainties.pdf");
+        c->Print(outName.c_str());
     }
-    c->Print("y_evaluation_uncertainties.pdf]");
+    c->Print((outName + "]").c_str());
     delete c;
+}
+
+void initializeTrackAngleHistograms(PlotManager* pm) {
+    // One hist for each fixed layer combination for x and for y
+  string name, title;
+  string coord[2] = {"x", "y"};
+  for (UShort_t la=1; la<=4; la++) {
+    for (UShort_t lb=(la+1); lb<=4; lb++) {
+        for (UShort_t i=0; i<2; i++) {
+         name = "track_angle_" + coord[i] + "_fixed_layers_"; 
+         name += to_string(la) + to_string(lb);             
+         title = "Fixed layers: " + to_string(la) + to_string(lb);
+         title += " " + coord[i] + "-track angles;Angle [rads];Tracks";
+         pm->Add(name, title, 120, -3.14/2, 3.14/2, myTH1I);
+       }
+     }
+   }
+   return;
+}
+
+void printTrackAngleHistograms(PlotManager* pm, InputInfo* myInf) {
+  TCanvas *c = new TCanvas();
+  string outName = myInf->outpath + "track_angle_hists.pdf";
+  c->Print((outName + "[").c_str());
+  string coord[2] = {"x", "y"};
+
+  for (UShort_t i=0; i<2; i++) {
+    for (UShort_t la=1; la<=4; la++) {
+      for (UShort_t lb=(la+1); lb<=4; lb++) {
+        TH1I* anghist = (TH1I*)pm->GetTH1I("track_angle_" + coord[i] + "_fixed_layers_" + to_string(la) + to_string(lb));             
+        anghist->Draw();
+        c->Print(outName.c_str());
+      }
+    }
+  }
+  c->Print((outName + "]").c_str());
+  delete c;
 }

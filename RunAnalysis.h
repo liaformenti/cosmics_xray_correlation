@@ -34,5 +34,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
 // Helper fcn for RunAnalysis
 Bool_t MissingHitsOnFixedLayers(UShort_t fixed1, UShort_t fixed2, std::map<UShort_t, Double_t> &xTrack, std::map<UShort_t, Double_t> &yTrack); 
 void initializeUncertaintyHistograms(PlotManager* pm);
-void printUncertaintyHistograms(PlotManager* pm);
+void printUncertaintyHistograms(PlotManager* pm, InputInfo* myInf);
+void initializeTrackAngleHistograms(PlotManager* pm);
+void printTrackAngleHistograms(PlotManager* pm, InputInfo* myInf);
 #endif
