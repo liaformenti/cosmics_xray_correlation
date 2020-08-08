@@ -14,6 +14,8 @@
 #include <TTreeReaderValue.h>
 #include <TTreeReaderArray.h>
 #include <TCanvas.h>
+#include <TGraphErrors.h>
+#include <TMultiGraph.h>
 
 // tgc_analysis includes
 #include "AnalysisInfo.h"

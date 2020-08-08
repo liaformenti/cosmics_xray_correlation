@@ -111,11 +111,27 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     CombinedData data;
     TH1I* hist;
     TCanvas * c = new TCanvas();
-    string drawOutFileName = myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt_xROI_" + to_string(xWidth) + "mm_width_yROI_" + to_string(yWidth) + "mm_width.pdf";
-    c->Print((drawOutFileName + "[").c_str());
+    string fitOutFileName = myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt_xROI_" + to_string(xWidth) + "mm_width_yROI_" + to_string(yWidth) + "mm_width.pdf";
+    c->Print((fitOutFileName + "[").c_str());
     ofstream tableOut;
     string tableOutFileName = myInfo->outpath + myInfo->quadname + "_compare_mean_and_offset_differences_table_xROI_" + to_string(xWidth) + "mm_width_yROI_" + to_string(yWidth) + "mm_width.csv";
     tableOut.open(tableOutFileName);
+    // Add TGraphErrors to pm (for comparing differences)
+    // Mean res diff vs xray diff
+    TGraphErrors* diffScatter = new TGraphErrors(); 
+    diffScatter->SetTitle(";X-ray offset difference [mm];Mean residual difference [mm]");
+    // Compare differences vs point num - draw these on one graph
+    // For xray point series
+    TGraphErrors* diffCompX = new TGraphErrors(); 
+    diffCompX->SetName("X-ray differences");
+    diffCompX->SetMarkerStyle(20); // Circle
+    diffCompX->SetMarkerColor(46); // Muted red
+    TGraphErrors* diffCompRes = new TGraphErrors(); // For mean res point series 
+    diffCompRes->SetName("Mean residual differences");
+    diffCompRes->SetMarkerStyle(21); // Square
+    diffCompRes->SetMarkerColor(38); // Muted blue
+    // For TGraphs out file
+    string drawOutFileName = myInfo->outpath + myInfo->quadname + "_compare_differences_xROI_" + to_string(xWidth) + "mm_yROI_" + to_string(yWidth) + "mm.pdf";
 
     for (auto xrayPt=xData.pointVec.begin(); 
               xrayPt!=xData.pointVec.end(); xrayPt++) {
@@ -133,6 +149,13 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
             data.CalculateMeanDifference();
             data.AppendCombinedDataToTable(tableOut);
 
+            // Fill plots
+            diffScatter->SetPoint(diffScatter->GetN(), data.offDiff, data.meanDiff);
+            diffScatter->SetPointError(diffScatter->GetN()-1, data.offDiffError, data.meanDiffError);
+            diffCompX->SetPoint(diffCompX->GetN(), diffCompX->GetN()+1, data.offDiff);
+            diffCompX->SetPointError(diffCompX->GetN()-1, 0, data.offDiffError);
+            diffCompRes->SetPoint(diffCompRes->GetN(), diffCompRes->GetN()+1, data.meanDiff);
+            diffCompRes->SetPointError(diffCompRes->GetN()-1, 0, data.meanDiffError);
             // Draw layerA histogram
             hist = (TH1I*)pm->Get(data.layerData.at(lp->first).histName);
             if (hist->GetEntries() != 0) {
@@ -151,6 +174,16 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
 
     c->Print((drawOutFileName + "]").c_str());
 
+    c->Clear();
+    diffScatter->Draw("AP");
+    c->Print((drawOutFileName + "(").c_str());
+    TMultiGraph* mg = new TMultiGraph;
+    mg->Add(diffCompX, "P");
+    mg->Add(diffCompRes, "P");
+    mg->SetTitle(";Arbitrary point number;Difference [mm]");
+    mg->Draw("A");
+    c->BuildLegend();
+    c->Print((drawOutFileName + ")").c_str());
     /*
     // Create ResPlots for XRayData
     Binning xRayBins(&data, 36, 20, g);
