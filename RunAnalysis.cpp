@@ -38,6 +38,12 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
 
     UShort_t lc = 0; UShort_t ld = 0;
 
+    // y-track angle cut leq (rads)
+    // abs(y-track angle) < angleCut
+    Bool_t cutAngle = true;
+    Int_t angleCutDeg = 5;
+    Double_t angleCut = angleCutDeg*3.1415/180; // in rads
+
     // Vector to store calculated residuals
     vector<Residual> residuals;
 
@@ -73,6 +79,13 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
                     pm->Fill("track_angle_x_fixed_layers_" + to_string(la) + to_string(lb), tan(myTrack.resultX->Value(1)));
                     pm->Fill("track_angle_y_fixed_layers_" + to_string(la) + to_string(lb), tan(myTrack.resultY->Value(1)));
                 }
+
+                // y-track angle cut
+                if (cutAngle && 
+                   (abs(tan(myTrack.resultY->Value(1))) > angleCut)) {
+                    continue; 
+                }
+
                 // Check if hit exists on unfixed layers
                 // If so evaluate and calculate residual
                 Residual res;
@@ -113,16 +126,29 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     // Main offset vs mean difference analysis
     // Will hold pairs of layers to take offset difference
     vector<pair<UShort_t, UShort_t>> layers;
-    Int_t xWidth = 40;
-    Int_t yWidth = 40;
+    Int_t xWidth = 30;
+    Int_t yWidth = 72;
     CombinedData data;
     TH1I* hist;
+
     TCanvas * c = new TCanvas();
-    string fitOutFileName = myInfo->outpath + myInfo->quadname + "_fits_per_xray_pt_xROI_" + to_string(xWidth) + "mm_width_yROI_" + to_string(yWidth) + "mm_width.pdf";
+
+    string fitOutFileName = myInfo->outpath + myInfo->quadname;
+    fitOutFileName += "_fits_per_xray_pt_xROI_" + to_string(xWidth);
+    fitOutFileName += "mm_width_yROI_" + to_string(yWidth);
+    fitOutFileName += "mm_width_angle_cut_" + to_string(angleCutDeg);
+    fitOutFileName += ".pdf";
     c->Print((fitOutFileName + "[").c_str());
+
+    // Output table of results
     ofstream tableOut;
-    string tableOutFileName = myInfo->outpath + myInfo->quadname + "_compare_mean_and_offset_differences_table_xROI_" + to_string(xWidth) + "mm_width_yROI_" + to_string(yWidth) + "mm_width.csv";
+    string tableOutFileName = myInfo->outpath + myInfo->quadname;
+    tableOutFileName += "_compare_mean_and_offset_differences_table_xROI_"; 
+    tableOutFileName += to_string(xWidth) + "mm_width_yROI_";
+    tableOutFileName += to_string(yWidth) + "mm_width_angle_cut_";
+    tableOutFileName += to_string(angleCutDeg) + ".csv";
     tableOut.open(tableOutFileName);
+
     // Add TGraphErrors to pm (for comparing differences)
     // Mean res diff vs xray diff
     TGraphErrors* diffScatter = new TGraphErrors(); 
@@ -130,15 +156,16 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     // Compare differences vs point num - draw these on one graph
     // For xray point series
     TGraphErrors* diffCompX = new TGraphErrors(); 
-    diffCompX->SetName("X-ray differences");
+    diffCompX->SetName("X-ray differences"); // For BuildLegend
     diffCompX->SetMarkerStyle(20); // Circle
     diffCompX->SetMarkerColor(46); // Muted red
     TGraphErrors* diffCompRes = new TGraphErrors(); // For mean res point series 
     diffCompRes->SetName("Mean residual differences");
     diffCompRes->SetMarkerStyle(21); // Square
     diffCompRes->SetMarkerColor(38); // Muted blue
+
     // For TGraphs out file
-    string drawOutFileName = myInfo->outpath + myInfo->quadname + "_compare_differences_xROI_" + to_string(xWidth) + "mm_yROI_" + to_string(yWidth) + "mm.pdf";
+    string drawOutFileName = myInfo->outpath + myInfo->quadname + "_compare_differences_xROI_" + to_string(xWidth) + "mm_yROI_" + to_string(yWidth) + "mm_angle_cut_" + to_string(angleCutDeg) + ".pdf";
 
     for (auto xrayPt=xData.pointVec.begin(); 
               xrayPt!=xData.pointVec.end(); xrayPt++) {
@@ -157,29 +184,36 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
             data.AppendCombinedDataToTable(tableOut);
 
             // Fill plots
-            diffScatter->SetPoint(diffScatter->GetN(), data.offDiff, data.meanDiff);
-            diffScatter->SetPointError(diffScatter->GetN()-1, data.offDiffError, data.meanDiffError);
-            diffCompX->SetPoint(diffCompX->GetN(), diffCompX->GetN()+1, data.offDiff);
-            diffCompX->SetPointError(diffCompX->GetN()-1, 0, data.offDiffError);
-            diffCompRes->SetPoint(diffCompRes->GetN(), diffCompRes->GetN()+1, data.meanDiff);
-            diffCompRes->SetPointError(diffCompRes->GetN()-1, 0, data.meanDiffError);
+            diffScatter->SetPoint(diffScatter->GetN(), data.offDiff, 
+                data.meanDiff);
+            diffScatter->SetPointError(diffScatter->GetN()-1, 
+                data.offDiffError, data.meanDiffError);
+            diffCompX->SetPoint(diffCompX->GetN(), diffCompX->GetN()+1,
+                data.offDiff);
+            diffCompX->SetPointError(diffCompX->GetN()-1, 0,
+                data.offDiffError);
+            diffCompRes->SetPoint(diffCompRes->GetN(), 
+                diffCompRes->GetN()+1, data.meanDiff);
+            diffCompRes->SetPointError(diffCompRes->GetN()-1, 0, 
+                data.meanDiffError);
+
             // Draw layerA histogram
             hist = (TH1I*)pm->Get(data.layerData.at(lp->first).histName);
             if (hist->GetEntries() != 0) {
                 hist->Draw();
-                c->Print(drawOutFileName.c_str());
+                c->Print(fitOutFileName.c_str());
             }
             // Draw layerB histogram
             hist = (TH1I*)pm->Get(data.layerData.at(lp->second).histName);
             if (hist->GetEntries() != 0) {
                 hist->Draw();
-                c->Print(drawOutFileName.c_str());
+                c->Print(fitOutFileName.c_str());
             }
 
         } // end layers loop
     } // end xray point loop
 
-    c->Print((drawOutFileName + "]").c_str());
+    c->Print((fitOutFileName + "]").c_str());
 
     c->Clear();
     diffScatter->Draw("AP");
@@ -189,7 +223,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     mg->Add(diffCompRes, "P");
     mg->SetTitle(";Arbitrary point number;Difference [mm]");
     mg->Draw("A");
-    c->BuildLegend();
+    Float_t x = 0.3, y = 0.11;
+    c->BuildLegend(x,y,x,y, "", "P");
     c->Print((drawOutFileName + ")").c_str());
     delete c;
     tableOut.close();
@@ -207,6 +242,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     xRayPlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + myInfo->quadname + "_3100V_fit_results_binning_" + xRayBins.name + ".pdf");*/
 
     cout << "Finishing analysis...\n\n";
+    delete mg;
+    delete diffScatter;
     return;
 }
 
