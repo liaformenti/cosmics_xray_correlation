@@ -39,10 +39,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     UShort_t lc = 0; UShort_t ld = 0;
 
     // y-track angle cut leq (rads)
-    // abs(y-track angle) < angleCut
-    Bool_t cutAngle = true;
-    Int_t angleCutDeg = 5;
-    Double_t angleCut = angleCutDeg*3.1415/180; // in rads
+    // skip track if abs(y-track angle) > angleCut
+    /*Bool_t cutAngle = true;
+    Int_t angleCutDeg = 90;
+    Double_t angleCut = angleCutDeg*3.1415/180; // in rads*/
 
     // Vector to store calculated residuals
     vector<Residual> residuals;
@@ -81,10 +81,10 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
                 }
 
                 // y-track angle cut
-                if (cutAngle && 
+                /*if (cutAngle && 
                    (abs(tan(myTrack.resultY->Value(1))) > angleCut)) {
                     continue; 
-                }
+                }*/
 
                 // Check if hit exists on unfixed layers
                 // If so evaluate and calculate residual
@@ -126,8 +126,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     // Main offset vs mean difference analysis
     // Will hold pairs of layers to take offset difference
     vector<pair<UShort_t, UShort_t>> layers;
-    Int_t xWidth = 30;
-    Int_t yWidth = 72;
+    Int_t xWidth = 72;
+    Int_t yWidth = 30;
     CombinedData data;
     TH1I* hist;
 
@@ -136,7 +136,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     string fitOutFileName = myInfo->outpath + myInfo->quadname;
     fitOutFileName += "_fits_per_xray_pt_xROI_" + to_string(xWidth);
     fitOutFileName += "mm_width_yROI_" + to_string(yWidth);
-    fitOutFileName += "mm_width_angle_cut_" + to_string(angleCutDeg);
+    fitOutFileName += "mm_width"; //_angle_cut_" + to_string(angleCutDeg);
     fitOutFileName += ".pdf";
     c->Print((fitOutFileName + "[").c_str());
 
@@ -145,8 +145,9 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     string tableOutFileName = myInfo->outpath + myInfo->quadname;
     tableOutFileName += "_compare_mean_and_offset_differences_table_xROI_"; 
     tableOutFileName += to_string(xWidth) + "mm_width_yROI_";
-    tableOutFileName += to_string(yWidth) + "mm_width_angle_cut_";
-    tableOutFileName += to_string(angleCutDeg) + ".csv";
+    tableOutFileName += to_string(yWidth) + "mm_width"; // _angle_cut_";
+    // tableOutFileName += to_string(angleCutDeg) 
+    tableOutFileName += ".csv";
     tableOut.open(tableOutFileName);
 
     // Add TGraphErrors to pm (for comparing differences)
@@ -165,7 +166,8 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     diffCompRes->SetMarkerColor(38); // Muted blue
 
     // For TGraphs out file
-    string drawOutFileName = myInfo->outpath + myInfo->quadname + "_compare_differences_xROI_" + to_string(xWidth) + "mm_yROI_" + to_string(yWidth) + "mm_angle_cut_" + to_string(angleCutDeg) + ".pdf";
+    string drawOutFileName = myInfo->outpath + myInfo->quadname + "_compare_differences_xROI_" + to_string(xWidth) + "mm_yROI_" + to_string(yWidth) + "mm"; // _angle_cut_" + to_string(angleCutDeg);
+    drawOutFileName += ".pdf";
 
     for (auto xrayPt=xData.pointVec.begin(); 
               xrayPt!=xData.pointVec.end(); xrayPt++) {
@@ -229,17 +231,17 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     delete c;
     tableOut.close();
 
-    /*
+    
     // Create ResPlots for XRayData
-    Binning xRayBins(&data, 36, 20, g);
+    Binning widthBins(xWidth, yWidth, g);
     // Make xray data binned plots
-    ResPlots xRayPlots(&residuals, &xRayBins, xRayBins.name, cosmicsInfo, g, pm, myInfo);
+    ResPlots xRayPlots(&residuals, &widthBins, widthBins.name, cosmicsInfo, g, pm, myInfo);
     xRayPlots.CreateNumEntriesTH2Is();
     xRayPlots.CreatePosBinnedResPlots();
     xRayPlots.CreatePosBinnedFitResultTH2Fs();
-    xRayPlots.PrintNumEntriesTH2Is(myInfo->outpath + myInfo->quadname + "_3100V_num_entries_binning_" + xRayBins.name + ".pdf");
-    xRayPlots.PrintPosBinnedResPlots(myInfo->outpath + myInfo->quadname + "_3100V_residual_fits_binning_" + xRayBins.name + ".pdf");
-    xRayPlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + myInfo->quadname + "_3100V_fit_results_binning_" + xRayBins.name + ".pdf");*/
+    xRayPlots.PrintNumEntriesTH2Is(myInfo->outpath + myInfo->quadname + "_3100V_num_entries_binning_" + widthBins.name + ".pdf");
+    xRayPlots.PrintPosBinnedResPlots(myInfo->outpath + myInfo->quadname + "_3100V_residual_fits_binning_" + widthBins.name + ".pdf");
+    xRayPlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + myInfo->quadname + "_3100V_fit_results_binning_" + widthBins.name + ".pdf");
 
     cout << "Finishing analysis...\n\n";
     delete mg;
@@ -316,3 +318,4 @@ void printTrackAngleHistograms(PlotManager* pm, InputInfo* myInf) {
   c->Print((outName + "]").c_str());
   delete c;
 }
+
