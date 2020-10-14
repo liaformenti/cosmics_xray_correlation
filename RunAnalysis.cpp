@@ -52,7 +52,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     if (makePlots) initializeUncertaintyHistograms(pm);
     if (makePlots) initializeTrackAngleHistograms(pm);
 
-    for (Int_t i=0; i<nEntries; i++) {
+    for (Int_t i=0; i<10; i++) {
         trksTree.GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
         // Assumes uniform position distribution of hit across group
@@ -133,7 +133,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
 
     TCanvas * c = new TCanvas();
 
-    string fitOutFileName = myInfo->outpath + myInfo->quadname;
+    string fitOutFileName = myInfo->outpath + myInfo->tag + myInfo->quadname;
     fitOutFileName += "_fits_per_xray_pt_xROI_" + to_string(xWidth);
     fitOutFileName += "mm_width_yROI_" + to_string(yWidth);
     fitOutFileName += "mm_width"; //_angle_cut_" + to_string(angleCutDeg);
@@ -142,7 +142,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
 
     // Output table of results
     ofstream tableOut;
-    string tableOutFileName = myInfo->outpath + myInfo->quadname;
+    string tableOutFileName = myInfo->outpath + myInfo->tag + myInfo->quadname;
     tableOutFileName += "_compare_mean_and_offset_differences_table_xROI_"; 
     tableOutFileName += to_string(xWidth) + "mm_width_yROI_";
     tableOutFileName += to_string(yWidth) + "mm_width"; // _angle_cut_";
@@ -166,7 +166,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     diffCompRes->SetMarkerColor(38); // Muted blue
 
     // For TGraphs out file
-    string drawOutFileName = myInfo->outpath + myInfo->quadname + "_compare_differences_xROI_" + to_string(xWidth) + "mm_yROI_" + to_string(yWidth) + "mm"; // _angle_cut_" + to_string(angleCutDeg);
+    string drawOutFileName = myInfo->outpath + myInfo->tag + myInfo->quadname + "_compare_differences_xROI_" + to_string(xWidth) + "mm_yROI_" + to_string(yWidth) + "mm"; // _angle_cut_" + to_string(angleCutDeg);
     drawOutFileName += ".pdf";
 
     for (auto xrayPt=xData.pointVec.begin(); 
@@ -238,9 +238,9 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     xRayPlots.CreateNumEntriesTH2Is();
     xRayPlots.CreatePosBinnedResPlots();
     xRayPlots.CreatePosBinnedFitResultTH2Fs();
-    xRayPlots.PrintNumEntriesTH2Is(myInfo->outpath + myInfo->quadname + "_3100V_num_entries_binning_" + widthBins.name + ".pdf");
-    xRayPlots.PrintPosBinnedResPlots(myInfo->outpath + myInfo->quadname + "_3100V_residual_fits_binning_" + widthBins.name + ".pdf");
-    xRayPlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + myInfo->quadname + "_3100V_fit_results_binning_" + widthBins.name + ".pdf");
+    xRayPlots.PrintNumEntriesTH2Is(myInfo->outpath + myInfo->tag + myInfo->quadname + "_num_entries_binning_" + widthBins.name + ".pdf");
+    xRayPlots.PrintPosBinnedResPlots(myInfo->outpath + myInfo->tag + myInfo->quadname + "_residual_fits_binning_" + widthBins.name + ".pdf");
+    xRayPlots.PrintPosBinnedFitResultTH2Fs(myInfo->outpath + myInfo->tag + myInfo->quadname + "_fit_results_binning_" + widthBins.name + ".pdf");
 
     cout << "Finishing analysis...\n\n";
     delete mg;

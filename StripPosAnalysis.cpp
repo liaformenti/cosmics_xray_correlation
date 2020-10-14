@@ -30,8 +30,8 @@ int main(int argc, char* argv[]) {
     // cout << "You commented out SetAnalysisStyle\n\n";
     
     // Check arguments
-    if (argc != 4) 
-        throw runtime_error("Please specify the file to analyse, the quadruplet name, and the output directory path.");
+    if (argc != 5) 
+        throw runtime_error("Please specify the file to analyse, the quadruplet name, a run-identifier tag, and the output directory path.");
 
     // Check quad name - need name to compare with xray data
     if (argv[2][0] != 'Q') {
@@ -39,11 +39,11 @@ int main(int argc, char* argv[]) {
     } 
    
     // Check that output directory exists
-    if (gSystem->AccessPathName(argv[3]))
+    if (gSystem->AccessPathName(argv[4]))
         throw runtime_error("Output directory does not exist.");
 
     // Fill InputInfo struct
-    InputInfo myInfo(argv[2], argv[3]);
+    InputInfo myInfo(argv[2], argv[4], argv[3]);
 
     // Check input file
     if (gSystem->AccessPathName(argv[1]))

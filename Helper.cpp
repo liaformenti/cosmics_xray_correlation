@@ -28,8 +28,8 @@ vector<Combination> combinationVector() {
 // Input info constructor
 // Based on quadname, fills wedge id with the ID string of the wedge
 // that quad is a part of
-InputInfo::InputInfo(string theQuadName, string theOutPath) :
-                     quadname(theQuadName), outpath(theOutPath) {
+InputInfo::InputInfo(string theQuadName, string theOutPath, string theTag) :
+                     quadname(theQuadName), outpath(theOutPath), tag(theTag) {
     // Map where quadname string is key and value is MTF (wedge) string
     // Must be updated as wedges are assembled and
     // as you run over more quads

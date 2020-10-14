@@ -30,10 +30,11 @@ std::vector<Combination> combinationVector();
 // the quadname and the run voltage of the input datafile. 
 struct InputInfo { 
   InputInfo(){};
-  InputInfo(std::string theQuadName, std::string theOutPath);
+  InputInfo(std::string theQuadName, std::string theOutPath, std::string theTag);
   std::string quadname;
   std::string wedgeid;
   std::string outpath;
+  std::string tag; // used to name files
 };
 
 std::string quadToWedge(InputInfo* info);
