@@ -52,7 +52,7 @@ void RunAnalysis(TTree &trksTree, AnalysisInfo* cosmicsInfo, PlotManager* pm, De
     if (makePlots) initializeUncertaintyHistograms(pm);
     if (makePlots) initializeTrackAngleHistograms(pm);
 
-    for (Int_t i=0; i<10; i++) {
+    for (Int_t i=0; i<nEntries; i++) {
         trksTree.GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
         // Assumes uniform position distribution of hit across group
