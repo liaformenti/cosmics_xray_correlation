@@ -28,6 +28,10 @@ class Binning {
     // x and y widths
     // Binning(XRayData* data, Int_t xWidth, Int_t yWidth,
     //        DetectorGeometry* _g);
+    // Creates rectangular bins of width yWidth [mm] in y and a given fraction of
+    // the wire group width in x; centered around the wire groups. 
+    // Still gotta figure this out and code it . . . 
+    // Binning(Float_t xFrac, Int_t yWidth, DetectorGeometry* _g);
     ~Binning(){};
 
     // Members
