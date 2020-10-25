@@ -18,7 +18,8 @@
 #include "AnalysisStyle.h"
 
 // My includes
-#include "RunAnalysis.h"
+// #include "RunAnalysis.h"
+#include "CosmicsRetracking.h"
 #include "GetAnalysisInfo.h"
 
 using namespace std;
@@ -26,8 +27,8 @@ using namespace std;
 int main(int argc, char* argv[]) {
 
     // Set style
-    SetAnalysisStyle();
-    // cout << "You commented out SetAnalysisStyle\n\n";
+    // SetAnalysisStyle();
+    cout << "You commented out SetAnalysisStyle\n\n";
     
     // Check arguments
     if (argc != 5) 
@@ -71,8 +72,10 @@ int main(int argc, char* argv[]) {
 
     PlotManager* plotManager = new PlotManager();    
 
-    cout << "Running analysis...\n\n";
-    RunAnalysis(*tracksTree, cosmicsInfo, plotManager, geom, &myInfo);
+    cout << "Re-tracking cosmics...\n\n";
+    // RunAnalysis(*tracksTree, cosmicsInfo, plotManager, geom, &myInfo);
+    CosmicsRetracking cosmicsTracks(tracksTree, cosmicsInfo, &myInfo, plotManager, geom);
+    cosmicsTracks.Retrack();
     // cout << "You commented out call to RunAnalysis\n\n";
 
     cout << "Finishing up...\n\n"; 
