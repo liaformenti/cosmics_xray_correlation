@@ -36,6 +36,73 @@ void CosmicsRetracking::Retrack() {
     trksTree->SetBranchAddress("trackYGaussian", &trackYGaussianPtr);
     trksTree->SetBranchAddress("sigma", &sigmaPtr);
 
+    InitializeTrackUncertaintyHistograms();
+    InitializeTrackAngleHistograms();
+
+    // For each entry, do retracking for each set of fixed layers
+    for (Int_t i=0; i<nEntries; i++) {
+        trksTree->GetEntry(i);
+        // Uncertainty in x is width of wire group / sqrt(12)
+        // Assumes uniform position distribution of hit across group
+        // Some edge wires groups have less wires - later correction
+        for (auto itX=trackX.begin(); itX!=trackX.end(); itX++)
+            uncertX[itX->first] = 1.8*20/sqrt(12.0); // mm
+
+        // for each permutation of two layers
+        // la < lb and la is treated first always
+        // la and lb are private members
+        for (la=1; la<=4; la++) {
+        // for (la=1; la <=1; la++) {
+            for (lb=(la+1); lb<=4; lb++) {
+            // for (lb=4; lb<=4; lb++) {
+
+               if (MissingHitsOnFixedLayers(trackX, trackYGaussian))
+                   continue;
+
+                getOtherLayers(la, lb, &lc, &ld);
+                Tracking myTrack(g, pm, trackX, uncertX, trackYGaussian, sigma, la, lb);
+
+                myTrack.Fit();
+
+                // y-track angle cut
+                /*if (cutAngle && 
+                   (abs(tan(myTrack.resultY->Value(1))) > angleCut)) {
+                    continue; 
+                }*/
+
+                // Check if hit exists on unfixed layers
+                // If so evaluate and calculate residual
+                Residual res;
+                if (myTrack.hitsY.find(lc) != myTrack.hitsY.end()) {
+                    myTrack.EvaluateAt(lc);
+                    pm->Fill("uncertainty_y_evaluations_" + Combination(lc, la, lb).String(), 
+                             myTrack.fitYUncerts.at(lc));
+                    pm->Fill("track_y_angle_" + Combination(lc, la, lb).String(), 
+                             tan(myTrack.resultY->Value(1)));
+                    res = Residual(myTrack, lc);
+                    residuals.push_back(res);
+                }
+                if (myTrack.hitsY.find(ld) != myTrack.hitsY.end()) {
+                    myTrack.EvaluateAt(ld);
+                    pm->Fill("uncertainty_y_evaluations_" + Combination(ld, la, lb).String(), 
+                             myTrack.fitYUncerts.at(ld));
+                    pm->Fill("track_y_angle_" + Combination(ld, la, lb).String(), 
+                             tan(myTrack.resultY->Value(1)));
+                    res = Residual(myTrack, ld);
+                    residuals.push_back(res);
+                }
+                // Plot linear fit
+                /*if (i==0) {
+                    myTrack.PlotFit("fits_event_" + to_string(eventnumber) + "_fixed_layers_" + to_string(la) + "_" + to_string(lb) + ".pdf");
+                }*/
+            } // end ld loop
+        } // end lc loop
+        // Count iterations
+        /*if (i%1000==0) {
+            cout << "Iteration " << i << " of " <<  nEntries << '\n';
+        }*/
+    } // end event loop
+
     return;
 }
 
@@ -63,7 +130,7 @@ void CosmicsRetracking::InitializeTrackUncertaintyHistograms() {
 
 void CosmicsRetracking::PrintTrackUncertaintyHistograms() {
     TCanvas *c = new TCanvas();
-    string outName = myInfo->outpath + "y_evaluation_uncertainties.pdf";
+    string outName = myInfo->outpath + myInfo->tag + "y_evaluation_uncertainties.pdf";
     c->Print((outName + "[").c_str());
     vector<Combination> combVec = combinationVector();
     for (auto comb=combVec.begin(); comb!=combVec.end(); comb++) {
@@ -76,43 +143,31 @@ void CosmicsRetracking::PrintTrackUncertaintyHistograms() {
     return;
 }
 
-// CHANGED LA LB to L1 L2 (SINCE LA LB ARE PRIVATE MEMBERS)
 void CosmicsRetracking::InitializeTrackAngleHistograms() {
-    // One hist for each fixed l1yer combination for x and for y
-  string name, title;
-  string coord[2] = {"x", "y"};
-  for (UShort_t l1=1; l1<=4; l1++) {
-    for (UShort_t l2=(l1+1); l2<=4; l2++) {
-        for (UShort_t i=0; i<2; i++) {
-         name = "track_angle_" + coord[i] + "_fixed_l1yers_"; 
-         name += to_string(l1) + to_string(l2);             
-         title = "Fixed l1yers: " + to_string(l1) + to_string(l2);
-         title += " " + coord[i] + "-track angles;Angle [rads];Tracks";
-         pm->Add(name, title, 120, -3.14/2, 3.14/2, myTH1I);
-       }
-     }
-   }
-   return;
+    vector<Combination> combVec = combinationVector(); 
+    string name, title;
+    string headerY = "track_y_angle_";
+    for (auto v=combVec.begin(); v!=combVec.end(); v++) { 
+        name = headerY + v->String();
+        title = "Layer: " + to_string(v->layer) + ", Fixed layers: " + to_string(v->fixed1); 
+        title+= to_string(v->fixed2) + " - y-track angles;Angle [rads];Tracks";
+        pm->Add(name, title, 120, -3.14/2, 3.14/2, myTH1I);
+    }
+    return;
 }
 
-// CHANGED LA LB to L1 L2 (SINCE LA LB ARE PRIVATE MEMBERS)
 void CosmicsRetracking::PrintTrackAngleHistograms() {
-  TCanvas *c = new TCanvas();
-  string outName = myInfo->outpath + "track_angle_hists.pdf";
-  c->Print((outName + "[").c_str());
-  string coord[2] = {"x", "y"};
-
-  for (UShort_t i=0; i<2; i++) {
-    for (UShort_t l1=1; l1<=4; l1++) {
-      for (UShort_t l2=(l1+1); l2<=4; l2++) {
-        TH1I* anghist = (TH1I*)pm->GetTH1I("track_angle_" + coord[i] + "_fixed_l1yers_" + to_string(l1) + to_string(l2));             
+    TCanvas *c = new TCanvas();
+    string outName = myInfo->outpath + myInfo->tag + "track_y_angle_hists.pdf";
+    c->Print((outName + "[").c_str());
+    vector<Combination> combVec = combinationVector();
+    for (auto v=combVec.begin(); v!=combVec.end(); v++) {
+        TH1I* anghist = (TH1I*)pm->GetTH1I("track_y_angle_" + v->String());             
         anghist->Draw();
         c->Print(outName.c_str());
-      }
     }
-  }
-  c->Print((outName + "]").c_str());
-  delete c;
-  return;
+    c->Print((outName + "]").c_str());
+    delete c;
+    return;
 }
 

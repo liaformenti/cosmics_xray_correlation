@@ -48,9 +48,7 @@ class CosmicsRetracking {
     // Use private la lb members
     Bool_t MissingHitsOnFixedLayers(std::map<UShort_t, Double_t> &xTrack, 
                                     std::map<UShort_t, Double_t> &yTrack);
-    void InitializeTrackUncertaintyHistograms();
     void PrintTrackUncertaintyHistograms();
-    void InitializeTrackAngleHistograms();
     void PrintTrackAngleHistograms();
 
   private:
@@ -61,6 +59,8 @@ class CosmicsRetracking {
     DetectorGeometry* g = nullptr;
     UShort_t la=0, lb=0; // store fixed layers for a given track
     UShort_t lc=0, ld=0; // store layers to evaluate to for a given track
+    void InitializeTrackUncertaintyHistograms();
+    void InitializeTrackAngleHistograms();
 };
 
 #endif

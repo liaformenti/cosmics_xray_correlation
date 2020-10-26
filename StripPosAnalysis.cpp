@@ -76,6 +76,7 @@ int main(int argc, char* argv[]) {
     // RunAnalysis(*tracksTree, cosmicsInfo, plotManager, geom, &myInfo);
     CosmicsRetracking cosmicsTracks(tracksTree, cosmicsInfo, &myInfo, plotManager, geom);
     cosmicsTracks.Retrack();
+    cosmicsTracks.PrintTrackAngleHistograms();
     // cout << "You commented out call to RunAnalysis\n\n";
 
     cout << "Finishing up...\n\n"; 
