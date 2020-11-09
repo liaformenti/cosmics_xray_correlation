@@ -28,10 +28,10 @@
 
 struct XRayPt {
     Int_t num; // Unique identifying number for xray point, start at 0
-    Double_t xnom;
-    // Note: my ynom = y_jigcmm_holdercmm in xray data
-    Double_t ynom; 
-    std::map<UShort_t, std::string> dqFlags;
+    Double_t xbeam;
+    // Note: my ybeam = y_jigcmm_holdercmm in xray data
+    Double_t ybeam; 
+    // std::map<UShort_t, std::string> dqFlags;
     // Keys are layers
     std::map<UShort_t, Double_t> offsets;
     std::map<UShort_t, Double_t> offsetErrors;
@@ -50,7 +50,7 @@ class XRayData {
     std::vector<XRayPt> pointVec;
 
     // Methods
-    // Plot ynoms vs xnoms, nominal xray positions
+    // Plot ybeams vs xbeams, nominal xray positions
     void PlotPositions();
     // Writes out positions and offsets for each available layer
     void WriteOutXRayData();

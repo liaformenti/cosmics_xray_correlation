@@ -24,8 +24,8 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     // mtf is to check you have the correct wedge for the quad
     // gv is gasvolume == layer
     // Take dq_flags 'OK', 'LARGEOFFSET' and 'WARNING_*'
-    // my xnom = xray database xnom
-    // my ynom = xray database y_jigcmm_holdercmm
+    // my xbeam = xray database xbeam
+    // my ybeam = xray database y_jigcmm_holdercmm
     // y_meas is used to calculate offset
     string sql = "SELECT run_id, mtf, quad_type, gv, dq_flag, x_nom, ";
     sql += "y_jigcmm_holdercmm, y_meas, y_meas_error ";
@@ -34,6 +34,7 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     sql += "'WARNING_LARGEOFFSET', 'WARNING_NEAR_WIRE_SUPPORT')";
     sql += "AND quad_type = \'" + cinfo->detectortype + "\' ";
     sql += "ORDER BY x_nom"; 
+    //*** GET RID OF NOMs here
     // Order by ascending x_nom necessary so only unique nominal
     // positions are recorded in ptVec (vector of XRayPt's)
 
@@ -51,7 +52,7 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     // Temp var names match xray data database
     string run_id, mtf, dq_flag;
     UShort_t gv; 
-    Double_t xnom, y_jigcmm_holdercmm, y_meas, y_meas_error; 
+    Double_t xbeam, y_jigcmm_holdercmm, y_meas, y_meas_error; 
     Double_t offset, offsetError;
     // For indexing xray points
     // Each time an XRayPt is added to the ptVec, for EACH TIME THE 
@@ -73,14 +74,14 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
         // Get column values
         gv = (UShort_t)(sqlite3_column_int(stmt, 3));
         dq_flag = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
-        xnom = (Double_t)(sqlite3_column_double(stmt, 5));
+        xbeam = (Double_t)(sqlite3_column_double(stmt, 5));
         y_jigcmm_holdercmm = (Double_t)(sqlite3_column_double(stmt, 6));
         y_meas = (Double_t)(sqlite3_column_double(stmt, 7));
         y_meas_error = (Double_t)(sqlite3_column_double(stmt, 8));
         offset = y_jigcmm_holdercmm - y_meas;
         offsetError = y_meas_error; // Adding 1 error in quadrature
 
-        // cout << run_id << ' ' << mtf << ' ' << gv << ' ' << dq_flag << ' ' << xnom << ' ' << y_jigcmm_holdercmm << ' ' << y_meas << ' ' << y_meas_error << ' ' << offset << ' ' << offsetError << '\n';
+        // cout << run_id << ' ' << mtf << ' ' << gv << ' ' << dq_flag << ' ' << xbeam << ' ' << y_jigcmm_holdercmm << ' ' << y_meas << ' ' << y_meas_error << ' ' << offset << ' ' << offsetError << '\n';
        
         // If position is new, add point entry to pointVec
         // Deal with 1st entry separately to prevent seg fault
@@ -88,8 +89,8 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
         if (pointVec.size() == 0) {
             // Initialize point with column values
             point.num = num;
-            point.xnom = xnom;
-            point.ynom = y_jigcmm_holdercmm;
+            point.xbeam = xbeam;
+            point.ybeam = y_jigcmm_holdercmm;
             point.dqFlags.insert(pair<UShort_t, string>(gv, dq_flag));
             point.offsets.insert(pair<UShort_t, Double_t>(gv, offset));
             point.offsetErrors.insert(
@@ -100,12 +101,12 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
         }
         // If last x and y position are different, initialize new point
         // and push_back. This is same procedure as for first point.
-        else if ((abs(xnom - pointVec.back().xnom) > 0.1) || 
-             (abs(y_jigcmm_holdercmm - pointVec.back().ynom) > 0.1)) {
+        else if ((abs(xbeam - pointVec.back().xbeam) > 0.1) || 
+             (abs(y_jigcmm_holdercmm - pointVec.back().ybeam) > 0.1)) {
             // Initialize point
             point.num = num;
-            point.xnom = xnom; 
-            point.ynom = y_jigcmm_holdercmm;
+            point.xbeam = xbeam; 
+            point.ybeam = y_jigcmm_holdercmm;
             point.dqFlags.insert(pair<UShort_t, string>(gv, dq_flag));
             point.offsets.insert(pair<UShort_t, Double_t>(gv, offset));
             point.offsetErrors.insert(
@@ -115,11 +116,11 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
             num++;
         }
         else {
-            // Looking at data for same xnom, ynom
+            // Looking at data for same xbeam, ybeam
             // Add new gv data to maps of last pushed point
-            // This works because you ordered rows by xnom in SELECT,
-            // so last point pushed back is always of same xnom, ynom
-            // since you handled the case of unique xnoms and ynoms
+            // This works because you ordered rows by xbeam in SELECT,
+            // so last point pushed back is always of same xbeam, ybeam
+            // since you handled the case of unique xbeams and ybeams
             // already.
             // If gv key DNE, add new gv offset to map
             // else, print warning and do not overwrite
@@ -136,7 +137,7 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
                 cout << "Warning: found duplicate row for xray data\n";
                 cout << run_id << ' ' << mtf << ' ' << gv << ' '; 
                 cout << y_meas << ' ' << y_meas_error << ' ';
-                cout << dq_flag << ' ' << xnom << ' ';
+                cout << dq_flag << ' ' << xbeam << ' ';
                 cout << y_jigcmm_holdercmm << "\n\n";
             }
         }
@@ -157,8 +158,8 @@ void XRayData::PlotPositions() {
     Double_t x[pointVec.size()];
     Double_t y[pointVec.size()];
     for (UInt_t i=0; i<pointVec.size(); i++) {
-        x[i] = pointVec.at(i).xnom;
-        y[i] = pointVec.at(i).ynom;
+        x[i] = pointVec.at(i).xbeam;
+        y[i] = pointVec.at(i).ybeam;
     }
     // Initialize plot
     pm->Add("xray_positions_" + myInfo->quadname, 
@@ -181,10 +182,10 @@ void XRayData::WriteOutXRayData() {
     // the same length (shouldn't happen, controlled in constructor)
     ofstream f;
     f.open(myInfo->outpath + myInfo->quadname + "_xray_data_offsets.txt");
-    f << "Point number, nominal x position, nominal y position, ";
+    f << "Point number, beam x position, beam y position, ";
     f << "layer, dq flag, offset, offset error (as exists, in mm)\n";
     for (auto p=pointVec.begin(); p!=pointVec.end(); p++) {
-        f << p->num << ' ' << p->xnom << ' ' << p->ynom << ' ';
+        f << p->num << ' ' << p->xbeam << ' ' << p->ybeam << ' ';
         for (auto off=p->offsets.begin(); off!=p->offsets.end(); off++)
         {
             f << off->first << ' ' << p->dqFlags.at(off->first) << ' ';
