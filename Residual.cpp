@@ -4,6 +4,7 @@
 
 using namespace std;
 
+// Should do hit - track
 Residual::Residual(Double_t residual, UShort_t layer,
                    Double_t xpos, Double_t ypos,
                    UShort_t fixedLayer1, UShort_t fixedLayer2) {
@@ -22,7 +23,7 @@ Residual::Residual(Tracking &trackInfo, UShort_t layer) {
     y = trackInfo.fitYPos[l];
     la = trackInfo.la;
     lb = trackInfo.lb;
-    res = trackInfo.fitYPos[l] - trackInfo.hitsY[l];
+    res = trackInfo.hitsY[l] - trackInfo.fitYPos[l];
     // cout << "Constr.2 " << res << ' ' << l << ' ' << x << ' ' << y << ' ' << la << ' ' << lb << '\n';
 }
 // Returns combination struct based on conditions in which residual
