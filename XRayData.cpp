@@ -6,37 +6,17 @@ using namespace std;
 XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
                    InputInfo* _myInfo, PlotManager* _pm) : 
 cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
-    // Check if there is xray data for quad
-    // Do so by checking if wedgeid was filled
-    if (myInfo->wedgeid == "") {
-        cout << "No xray data available for quadruplet ";
-        cout << myInfo->quadname << ". XRayData object not filled ";
-        cout << "(XRayData constructor).\n\n";
-        return;
-    }
-    
+
     // Get relevant data from database
     sqlite3* db;
     sqlite3_stmt *stmt;
     int rc;
     sqlite3_open(databaseName.c_str(), &db);
-    // run_id is to check run0 vs run1 (gun angle bias)
-    // mtf is to check you have the correct wedge for the quad
     // gv is gasvolume == layer
-    // Take dq_flags 'OK', 'LARGEOFFSET' and 'WARNING_*'
-    // my xbeam = xray database xbeam
-    // my ybeam = xray database y_jigcmm_holdercmm
-    // y_meas is used to calculate offset
-    string sql = "SELECT run_id, mtf, quad_type, gv, dq_flag, x_nom, ";
-    sql += "y_jigcmm_holdercmm, y_meas, y_meas_error ";
-    sql += "FROM results "; // assumes table name is results!
-    sql += "WHERE dq_flag in ('OK', 'LARGEOFFSET', 'WARNING_VMMEDGE',";
-    sql += "'WARNING_LARGEOFFSET', 'WARNING_NEAR_WIRE_SUPPORT')";
-    sql += "AND quad_type = \'" + cinfo->detectortype + "\' ";
-    sql += "ORDER BY x_nom"; 
-    //*** GET RID OF NOMs here
-    // Order by ascending x_nom necessary so only unique nominal
-    // positions are recorded in ptVec (vector of XRayPt's)
+    string sql = "SELECT quad_name, gv, x_beam, y_beam, offset, offset_error";
+    sql += " FROM xraydata WHERE quad_name='" + myInfo->quadname + "' ORDER BY x_beam;";
+    // Order by ascending x_beam necessary so only unique beam
+    // positions are recorded in ptVec (vector of XRayPt's with each point's layer data)
 
     // Prepare query
     rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
@@ -48,69 +28,60 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
         return;
     }
 
-    // Vars to hold column entries and calculated offset
+    // Vars to hold column entries 
     // Temp var names match xray data database
-    string run_id, mtf, dq_flag;
+    string quad_name;
     UShort_t gv; 
-    Double_t xbeam, y_jigcmm_holdercmm, y_meas, y_meas_error; 
-    Double_t offset, offsetError;
+    Double_t x_beam, y_beam, offset, offset_error;
     // For indexing xray points
-    // Each time an XRayPt is added to the ptVec, for EACH TIME THE 
-    // CONSTRUCTOR IS CALLED, num is incremented.
+    // Each time an XRayPt is added to the ptVec, for each time the
+    // constructor is called, num is incremented.
     static Int_t num = 0; 
 
     // For all selected rows
+    Int_t rowCount = 0;
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
-        // Get and check row data
-        run_id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-        mtf = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-        // If wrong wedge or run1 instead of run0, skip
-        // Note that you could have done mtf cut with SELECT statement
-        if ((mtf != myInfo->wedgeid) || 
-            (run_id.substr(run_id.size() - 4) != "run0")) {
-            continue;
-        }
 
         // Get column values
-        gv = (UShort_t)(sqlite3_column_int(stmt, 3));
-        dq_flag = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
-        xbeam = (Double_t)(sqlite3_column_double(stmt, 5));
-        y_jigcmm_holdercmm = (Double_t)(sqlite3_column_double(stmt, 6));
-        y_meas = (Double_t)(sqlite3_column_double(stmt, 7));
-        y_meas_error = (Double_t)(sqlite3_column_double(stmt, 8));
-        offset = y_jigcmm_holdercmm - y_meas;
-        offsetError = y_meas_error; // Adding 1 error in quadrature
+        gv = (UShort_t)(sqlite3_column_int(stmt, 1));
+        x_beam = (Double_t)(sqlite3_column_double(stmt, 2));
+        y_beam = (Double_t)(sqlite3_column_double(stmt, 3));
+        offset = (Double_t)(sqlite3_column_double(stmt, 4));
+        offset_error = (Double_t)(sqlite3_column_double(stmt, 5));
 
-        // cout << run_id << ' ' << mtf << ' ' << gv << ' ' << dq_flag << ' ' << xbeam << ' ' << y_jigcmm_holdercmm << ' ' << y_meas << ' ' << y_meas_error << ' ' << offset << ' ' << offsetError << '\n';
-       
         // If position is new, add point entry to pointVec
         // Deal with 1st entry separately to prevent seg fault
         XRayPt point;
         if (pointVec.size() == 0) {
             // Initialize point with column values
             point.num = num;
-            point.xbeam = xbeam;
-            point.ybeam = y_jigcmm_holdercmm;
-            point.dqFlags.insert(pair<UShort_t, string>(gv, dq_flag));
+            point.xbeam = x_beam;
+            point.ybeam = y_beam;
             point.offsets.insert(pair<UShort_t, Double_t>(gv, offset));
             point.offsetErrors.insert(
-                pair<UShort_t, Double_t>(gv, offsetError));
+                pair<UShort_t, Double_t>(gv, offset_error));
             // Add to member vector
             pointVec.push_back(point);
             num++; // Increment num for indexing
         }
         // If last x and y position are different, initialize new point
         // and push_back. This is same procedure as for first point.
-        else if ((abs(xbeam - pointVec.back().xbeam) > 0.1) || 
-             (abs(y_jigcmm_holdercmm - pointVec.back().ybeam) > 0.1)) {
+        // ******* UNTIL YOU CONFIRM THERE IS A Y_BEAM CORRECTION
+        // ******* PER LAYER, THE CONDITION FOR "DIFFERENT XRAY POINT"
+        // ******* MAY CHANGE.
+        // ******* 0.1MM FOR X WAS BASED ON APRIL RESULTS QS3P06
+        // ******* 3MM FOR Y WAS BASED ON OCT RESULTS FOR QL2P06
+        // ******* Could also preprocess run_id to get which platform
+        // ******* and which ball
+        else if ((abs(x_beam - pointVec.back().xbeam) > 0.1) || 
+             (abs(y_beam - pointVec.back().ybeam) > 3)) {
             // Initialize point
             point.num = num;
-            point.xbeam = xbeam; 
-            point.ybeam = y_jigcmm_holdercmm;
-            point.dqFlags.insert(pair<UShort_t, string>(gv, dq_flag));
+            point.xbeam = x_beam; 
+            point.ybeam = y_beam;
             point.offsets.insert(pair<UShort_t, Double_t>(gv, offset));
             point.offsetErrors.insert(
-                pair<UShort_t, Double_t>(gv, offsetError));
+                pair<UShort_t, Double_t>(gv, offset_error));
             // Add member to vector
             pointVec.push_back(point);
             num++;
@@ -125,25 +96,29 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
             // If gv key DNE, add new gv offset to map
             // else, print warning and do not overwrite
             if (pointVec.back().offsets.find(gv) == 
-                pointVec.back().offsets.end()) {
-                pointVec.back().dqFlags.insert(pair<UShort_t, string>
-                    (gv, dq_flag));
+               pointVec.back().offsets.end()) {
                 pointVec.back().offsets.insert(pair<UShort_t, Double_t>
                     (gv, offset));
                 pointVec.back().offsetErrors.insert(
-                    pair<UShort_t, Double_t>(gv, offsetError));
+                    pair<UShort_t, Double_t>(gv, offset_error));
             }
             else {
                 cout << "Warning: found duplicate row for xray data\n";
-                cout << run_id << ' ' << mtf << ' ' << gv << ' '; 
-                cout << y_meas << ' ' << y_meas_error << ' ';
-                cout << dq_flag << ' ' << xbeam << ' ';
-                cout << y_jigcmm_holdercmm << "\n\n";
+                cout << gv << ' ' << x_beam << ' ' << y_beam << "\n\n"; 
             }
-        }
+        } 
+        rowCount += 1;
+    } // End row loop 
+
+    // Print a warning if no rows were returned
+    if (rowCount == 0) {
+        cout << "Warning: no rows were returned from query.";
+        cout << " Check that you entered the quarduplet name";
+        cout << "  and database name were entered correctly\n\n";
     }
+
     sqlite3_finalize(stmt);
-    sqlite3_close(db);
+    sqlite3_close(db); 
     return;
 }
 
@@ -183,14 +158,13 @@ void XRayData::WriteOutXRayData() {
     ofstream f;
     f.open(myInfo->outpath + myInfo->quadname + "_xray_data_offsets.txt");
     f << "Point number, beam x position, beam y position, ";
-    f << "layer, dq flag, offset, offset error (as exists, in mm)\n";
+    f << "layer, offset, offset error (as exists, in mm)\n";
     for (auto p=pointVec.begin(); p!=pointVec.end(); p++) {
         f << p->num << ' ' << p->xbeam << ' ' << p->ybeam << ' ';
         for (auto off=p->offsets.begin(); off!=p->offsets.end(); off++)
         {
-            f << off->first << ' ' << p->dqFlags.at(off->first) << ' ';
-            f << off->second << ' ' << p->offsetErrors.at(off->first);
-            f << ' ';
+            f << off->first << ' ' << off->second << ' ';
+            f << p->offsetErrors.at(off->first) << ' ';
         }
         f << '\n';
     }

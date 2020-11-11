@@ -21,6 +21,7 @@
 // #include "RunAnalysis.h"
 #include "CosmicsRetracking.h"
 #include "GetAnalysisInfo.h"
+#include "XRayData.h"
 
 using namespace std;
 
@@ -72,11 +73,17 @@ int main(int argc, char* argv[]) {
 
     PlotManager* plotManager = new PlotManager();    
 
-    cout << "Re-tracking cosmics...\n\n";
+    // Get xray data
+    XRayData xData("results_2020-10-28.db", cosmicsInfo, &myInfo, plotManager);
+    xData.WriteOutXRayData();
+    xData.PlotPositions();
+
+    // cout << "Re-tracking cosmics...\n\n";
+    cout << "Not retracking cosmics.\n\n";
     // RunAnalysis(*tracksTree, cosmicsInfo, plotManager, geom, &myInfo);
-    CosmicsRetracking cosmicsTracks(tracksTree, cosmicsInfo, &myInfo, plotManager, geom);
-    cosmicsTracks.Retrack();
-    cosmicsTracks.PrintTrackAngleHistograms();
+    // CosmicsRetracking cosmicsTracks(tracksTree, cosmicsInfo, &myInfo, plotManager, geom);
+    // cosmicsTracks.Retrack();
+    // cosmicsTracks.PrintTrackAngleHistograms();
     // cout << "You commented out call to RunAnalysis\n\n";
 
     cout << "Finishing up...\n\n"; 
