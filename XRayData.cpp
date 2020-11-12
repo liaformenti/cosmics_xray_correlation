@@ -3,7 +3,7 @@
 
 using namespace std;
 
-XRayData::XRayData(string databaseName, AnalysisInfo* _cinfo,
+XRayData::XRayData(AnalysisInfo* _cinfo,
                    InputInfo* _myInfo, PlotManager* _pm) : 
 cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
 
@@ -11,7 +11,7 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     sqlite3* db;
     sqlite3_stmt *stmt;
     int rc;
-    sqlite3_open(databaseName.c_str(), &db);
+    sqlite3_open(myInfo->database.c_str(), &db);
     // gv is gasvolume == layer
     string sql = "SELECT quad_name, gv, x_beam, y_beam, offset, offset_error";
     sql += " FROM xraydata WHERE quad_name='" + myInfo->quadname + "' ORDER BY x_beam;";

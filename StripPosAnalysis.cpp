@@ -32,20 +32,27 @@ int main(int argc, char* argv[]) {
     cout << "You commented out SetAnalysisStyle\n\n";
     
     // Check arguments
-    if (argc != 5) 
-        throw runtime_error("Please specify the file to analyse, the quadruplet name, a run-identifier tag, and the output directory path.");
+    // This should be upgraded to a config file and better cmd line argument format.
+    // Also right now you must provide a tag. 
+    if (argc != 6) 
+        throw runtime_error("Usage example: ./StripPosAnalysis input_CosmicsAnalysis.root QUADNAME input_xray.db outpath/ tag_\n Quadruplet name format, eg. QL2P06.\n\n");
 
     // Check quad name - need name to compare with xray data
     if (argv[2][0] != 'Q') {
-        throw runtime_error("The second argument should be the quadruplet name, matching the format, QS3P07");
+        throw runtime_error("Second argument must be quadruplet name in format, eg. QL2P06");
     } 
    
+    // Check that database exists
+    if (gSystem->AccessPathName(argv[3]))
+        throw runtime_error("Database does not exist.");
+
     // Check that output directory exists
     if (gSystem->AccessPathName(argv[4]))
         throw runtime_error("Output directory does not exist.");
 
     // Fill InputInfo struct
-    InputInfo myInfo(argv[2], argv[4], argv[3]);
+    InputInfo myInfo(argv[2], argv[3], argv[4], argv[5]);
+    // cout << myInfo.quadname << ' ' << myInfo.database << ' ' << myInfo.outpath << ' ' << myInfo.tag << "\n\n";
 
     // Check input file
     if (gSystem->AccessPathName(argv[1]))
@@ -74,17 +81,15 @@ int main(int argc, char* argv[]) {
     PlotManager* plotManager = new PlotManager();    
 
     // Get xray data
-    XRayData xData("results_2020-10-28.db", cosmicsInfo, &myInfo, plotManager);
+    XRayData xData(cosmicsInfo, &myInfo, plotManager);
     xData.WriteOutXRayData();
     xData.PlotPositions();
 
-    // cout << "Re-tracking cosmics...\n\n";
-    cout << "Not retracking cosmics.\n\n";
-    // RunAnalysis(*tracksTree, cosmicsInfo, plotManager, geom, &myInfo);
-    // CosmicsRetracking cosmicsTracks(tracksTree, cosmicsInfo, &myInfo, plotManager, geom);
-    // cosmicsTracks.Retrack();
+    cout << "Re-tracking cosmics...\n\n";
+    // cout << "Not retracking cosmics.\n\n";
+    CosmicsRetracking cosmicsTracks(tracksTree, cosmicsInfo, &myInfo, plotManager, geom);
+    cosmicsTracks.Retrack();
     // cosmicsTracks.PrintTrackAngleHistograms();
-    // cout << "You commented out call to RunAnalysis\n\n";
 
     cout << "Finishing up...\n\n"; 
     delete plotManager;

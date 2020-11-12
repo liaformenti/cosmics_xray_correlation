@@ -42,8 +42,7 @@ class XRayData {
   public:
     // Constructors
     XRayData(){};
-    XRayData(std::string databaseName, AnalysisInfo* _cinfo,
-            InputInfo* _myInfo, PlotManager* _pm); 
+    XRayData(AnalysisInfo* _cinfo, InputInfo* _myInfo, PlotManager* _pm); 
     ~XRayData(){};
 
     // Members

@@ -28,26 +28,8 @@ vector<Combination> combinationVector() {
 // Input info constructor
 // Based on quadname, fills wedge id with the ID string of the wedge
 // that quad is a part of
-InputInfo::InputInfo(string theQuadName, string theOutPath, string theTag) :
-                     quadname(theQuadName), outpath(theOutPath), tag(theTag) {
-    // Map where quadname string is key and value is MTF (wedge) string
-    // Must be updated as wedges are assembled and
-    // as you run over more quads
-    // Currently only contains QS3Ps that have x-ray data in results.db
-    // ***** Can probably delete this. Was assigning mtf to quadname. But now sql db has this info ****
-    /*unordered_map<string, string> quadToWedge; 
-    quadToWedge.insert(pair<string, string>("QS3P06", 
-                                            "20MNIWSAP00002"));
-    quadToWedge.insert(pair<string, string>("QS3P10", 
-                                            "20MNIWSAP00008"));
-    // wedgeid = quadToWedge.at(quadname);
-    if (quadToWedge.find(quadname) != quadToWedge.end()) 
-        wedgeid = quadToWedge.at(quadname);
-    else {
-        cout << "Warning: quadruplet does not have x-ray data.\nIf it does, add the quadname and the MTF to the quadToWedge map in Helper.cpp (InputInfo constructor).\n\n";
-        wedgeid = ""; // Empty string for no wedge
-    }*/
-}
+InputInfo::InputInfo(string theQuadName, string theDatabase, string theOutPath, string theTag) : 
+quadname(theQuadName), database(theDatabase), outpath(theOutPath), tag(theTag) {};
 
 void getOtherLayers(UShort_t la, UShort_t lb, UShort_t* lc, UShort_t* ld) {
     string throwStatement = "Invalid layer numbers: " + to_string(la);
