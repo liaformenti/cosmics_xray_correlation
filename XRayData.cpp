@@ -13,8 +13,11 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     int rc;
     sqlite3_open(myInfo->database.c_str(), &db);
     // gv is gasvolume == layer
-    string sql = "SELECT quad_name, gv, x_beam, y_beam, offset, offset_error";
-    sql += " FROM xraydata WHERE quad_name='" + myInfo->quadname + "' ORDER BY x_beam;";
+    // Select statement chooses desired quadruplet and groups layer data by gun position.
+    string sql = "SELECT quad_name, gv, x_beam, y_beam, offset, offset_error, platform_id, ";
+    sql += "position_number FROM xraydata WHERE quad_name='" + myInfo->quadname; 
+    sql += "' ORDER BY platform_id, position_number;";
+    // cout << sql << '\n';
     // Order by ascending x_beam necessary so only unique beam
     // positions are recorded in ptVec (vector of XRayPt's with each point's layer data)
 
@@ -30,13 +33,14 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
 
     // Vars to hold column entries 
     // Temp var names match xray data database
-    string quad_name;
+    string quad_name, position_number;
     UShort_t gv; 
+    Int_t platform_id;
     Double_t x_beam, y_beam, offset, offset_error;
     // For indexing xray points
     // Each time an XRayPt is added to the ptVec, for each time the
     // constructor is called, num is incremented.
-    static Int_t num = 0; 
+    // static Int_t num = 0; 
 
     // For all selected rows
     Int_t rowCount = 0;
@@ -48,59 +52,61 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
         y_beam = (Double_t)(sqlite3_column_double(stmt, 3));
         offset = (Double_t)(sqlite3_column_double(stmt, 4));
         offset_error = (Double_t)(sqlite3_column_double(stmt, 5));
+        platform_id = (Int_t)(sqlite3_column_int(stmt, 6));
+        position_number = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
+        cout << gv << ' ' << x_beam << ' ' << y_beam << ' ' << offset << ' ' << offset_error;
+        cout << ' ' << platform_id << ' ' << position_number << '\n';
 
         // If position is new, add point entry to pointVec
         // Deal with 1st entry separately to prevent seg fault
+        // ************ CHANGE XBEAM, YBEAM TO MAPS ******************* //
         XRayPt point;
         if (pointVec.size() == 0) {
             // Initialize point with column values
-            point.num = num;
-            point.xbeam = x_beam;
-            point.ybeam = y_beam;
+            // point.num = num;
+            point.platformID = platform_id;
+            point.positionNumber = position_number;
+            // point.xbeam = x_beam;
+            // point.ybeam = y_beam;
+            point.xbeams.insert(pair<UShort_t, Double_t>(gv, x_beam));
+            point.ybeams.insert(pair<UShort_t, Double_t>(gv, y_beam));
             point.offsets.insert(pair<UShort_t, Double_t>(gv, offset));
             point.offsetErrors.insert(
                 pair<UShort_t, Double_t>(gv, offset_error));
             // Add to member vector
             pointVec.push_back(point);
-            num++; // Increment num for indexing
         }
-        // If last x and y position are different, initialize new point
-        // and push_back. This is same procedure as for first point.
-        // ******* UNTIL YOU CONFIRM THERE IS A Y_BEAM CORRECTION
-        // ******* PER LAYER, THE CONDITION FOR "DIFFERENT XRAY POINT"
-        // ******* MAY CHANGE.
-        // ******* 0.1MM FOR X WAS BASED ON APRIL RESULTS QS3P06
-        // ******* 3MM FOR Y WAS BASED ON OCT RESULTS FOR QL2P06
-        // ******* Could also preprocess run_id to get which platform
-        // ******* and which ball
-        else if ((abs(x_beam - pointVec.back().xbeam) > 0.1) || 
-             (abs(y_beam - pointVec.back().ybeam) > 3)) {
+        // If we're at a new gun position (platform ID and position number),
+        else if (platform_id != pointVec.back().platformID or 
+                 position_number != pointVec.back().positionNumber) {
             // Initialize point
-            point.num = num;
-            point.xbeam = x_beam; 
-            point.ybeam = y_beam;
+            // point.num = num;
+            point.platformID = platform_id;
+            point.positionNumber = position_number;
+            // point.xbeam = x_beam; 
+            // point.ybeam = y_beam;
+            point.xbeams.insert(pair<UShort_t, Double_t>(gv, x_beam));
+            point.ybeams.insert(pair<UShort_t, Double_t>(gv, y_beam));
             point.offsets.insert(pair<UShort_t, Double_t>(gv, offset));
             point.offsetErrors.insert(
                 pair<UShort_t, Double_t>(gv, offset_error));
             // Add member to vector
             pointVec.push_back(point);
-            num++;
+            // num++;
         }
         else {
-            // Looking at data for same xbeam, ybeam
+            // Looking at data for same gun position
             // Add new gv data to maps of last pushed point
-            // This works because you ordered rows by xbeam in SELECT,
-            // so last point pushed back is always of same xbeam, ybeam
-            // since you handled the case of unique xbeams and ybeams
-            // already.
+            // This works because you ordered rows by platform id and position number in SELECT,
+            // so last point pushed back is always from the same gun position.
+            // You handled the case of new gun positions above.
             // If gv key DNE, add new gv offset to map
             // else, print warning and do not overwrite
-            if (pointVec.back().offsets.find(gv) == 
-               pointVec.back().offsets.end()) {
-                pointVec.back().offsets.insert(pair<UShort_t, Double_t>
-                    (gv, offset));
-                pointVec.back().offsetErrors.insert(
-                    pair<UShort_t, Double_t>(gv, offset_error));
+            if (pointVec.back().offsets.find(gv) == pointVec.back().offsets.end()) {
+                pointVec.back().xbeams.insert(pair<UShort_t, Double_t>(gv, x_beam));
+                pointVec.back().ybeams.insert(pair<UShort_t, Double_t>(gv, y_beam));
+                pointVec.back().offsets.insert(pair<UShort_t, Double_t>(gv, offset));
+                pointVec.back().offsetErrors.insert(pair<UShort_t, Double_t>(gv, offset_error));
             }
             else {
                 cout << "Warning: found duplicate row for xray data\n";
@@ -119,12 +125,24 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
 
     sqlite3_finalize(stmt);
     sqlite3_close(db); 
+
+    // Check
+    cout << "CHECK\n";
+    for (auto point=pointVec.begin(); point!=pointVec.end(); point++) {
+        for (auto off=point->offsets.begin(); off!=point->offsets.end(); off++) {
+        cout << point->platformID << ' ' << point->positionNumber << ' '<< point->xbeams.at(off->first) << ' ' << point->ybeams.at(off->first) << ' ' << off->first << ' ' << off->second << ' ' << point->offsetErrors.at(off->first) << '\n';
+        }
+        cout << '\n';
+    }
     return;
 }
 
 // Plots the positions of all the xray point in pointVec
+// Uses the average beam position across all four layers.
 // Should add this to plot manager (need to send in plot manager)
-void XRayData::PlotPositions() {
+// *************** FIX THIS ********************//
+// **** Think maybe that looking pointVec.at(i).xbeams is not working because something is a pointer
+void XRayData::PlotAverageBeamPositions() {
     if (pointVec.size() == 0) {
         cout << "Warning: no xray data positions. Position plots not created (XRayData::PlotPositions).\n\n";
         return;
@@ -133,8 +151,21 @@ void XRayData::PlotPositions() {
     Double_t x[pointVec.size()];
     Double_t y[pointVec.size()];
     for (UInt_t i=0; i<pointVec.size(); i++) {
-        x[i] = pointVec.at(i).xbeam;
-        y[i] = pointVec.at(i).ybeam;
+    // CHANGE THIS TO AVG X AND YBEAM ********************
+        // x[i] = pointVec.at(i).xbeams.at(1);
+        // y[i] = pointVec.at(i).ybeams.at(1);
+        Double_t avgX = 0;
+        for (auto x=pointVec.at(i).xbeams.begin(); x!=pointVec.at(i).xbeams.end(); x++) {
+            avgX += x;
+        }
+        avgX /= pointVec.at(i).xbeams.size();
+        x[i] = avgX;
+        Double_t avgY = 0;
+        for (auto y=pointVec.at(i).ybeams.begin(); y!=pointVec.at(i).ybeams.end(); y++) {
+            avgY += y;
+        }
+        avgY /= pointVec.at(i).ybeams.size();
+        y[i] = avgY;
     }
     // Initialize plot
     pm->Add("xray_positions_" + myInfo->quadname, 
@@ -160,7 +191,8 @@ void XRayData::WriteOutXRayData() {
     f << "Point number, beam x position, beam y position, ";
     f << "layer, offset, offset error (as exists, in mm)\n";
     for (auto p=pointVec.begin(); p!=pointVec.end(); p++) {
-        f << p->num << ' ' << p->xbeam << ' ' << p->ybeam << ' ';
+        /********* ADD PLATID and POSNUM to output ***********/
+        // f << ' ' << p->xbeam << ' ' << p->ybeam << ' ';
         for (auto off=p->offsets.begin(); off!=p->offsets.end(); off++)
         {
             f << off->first << ' ' << off->second << ' ';

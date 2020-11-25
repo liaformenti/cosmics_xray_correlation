@@ -27,12 +27,11 @@
 #include "Helper.h"
 
 struct XRayPt {
-    Int_t num; // Unique identifying number for xray point, start at 0
-    Double_t xbeam;
-    // Note: my ybeam = y_jigcmm_holdercmm in xray data
-    Double_t ybeam; 
-    // std::map<UShort_t, std::string> dqFlags;
+    Int_t platformID;
+    std::string positionNumber;
     // Keys are layers
+    std::map<UShort_t, Double_t> xbeams;
+    std::map<UShort_t, Double_t> ybeams;
     std::map<UShort_t, Double_t> offsets;
     std::map<UShort_t, Double_t> offsetErrors;
     std::vector<std::pair<UShort_t, UShort_t>> GetDiffCombos();
@@ -50,7 +49,8 @@ class XRayData {
 
     // Methods
     // Plot ybeams vs xbeams, nominal xray positions
-    void PlotPositions();
+    // Take average of position over available layers.
+    void PlotAverageBeamPositions();
     // Writes out positions and offsets for each available layer
     void WriteOutXRayData();
     // For an offsets entry, return all combinations of layers which
