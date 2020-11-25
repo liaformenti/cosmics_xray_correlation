@@ -54,12 +54,11 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
         offset_error = (Double_t)(sqlite3_column_double(stmt, 5));
         platform_id = (Int_t)(sqlite3_column_int(stmt, 6));
         position_number = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
-        cout << gv << ' ' << x_beam << ' ' << y_beam << ' ' << offset << ' ' << offset_error;
-        cout << ' ' << platform_id << ' ' << position_number << '\n';
+        // cout << gv << ' ' << x_beam << ' ' << y_beam << ' ' << offset << ' ';
+        // cout << offset_error << ' ' << platform_id << ' ' << position_number << '\n';
 
         // If position is new, add point entry to pointVec
         // Deal with 1st entry separately to prevent seg fault
-        // ************ CHANGE XBEAM, YBEAM TO MAPS ******************* //
         XRayPt point;
         if (pointVec.size() == 0) {
             // Initialize point with column values
@@ -140,8 +139,6 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
 // Plots the positions of all the xray point in pointVec
 // Uses the average beam position across all four layers.
 // Should add this to plot manager (need to send in plot manager)
-// *************** FIX THIS ********************//
-// **** Think maybe that looking pointVec.at(i).xbeams is not working because something is a pointer
 void XRayData::PlotAverageBeamPositions() {
     if (pointVec.size() == 0) {
         cout << "Warning: no xray data positions. Position plots not created (XRayData::PlotPositions).\n\n";
@@ -151,25 +148,22 @@ void XRayData::PlotAverageBeamPositions() {
     Double_t x[pointVec.size()];
     Double_t y[pointVec.size()];
     for (UInt_t i=0; i<pointVec.size(); i++) {
-    // CHANGE THIS TO AVG X AND YBEAM ********************
-        // x[i] = pointVec.at(i).xbeams.at(1);
-        // y[i] = pointVec.at(i).ybeams.at(1);
         Double_t avgX = 0;
         for (auto x=pointVec.at(i).xbeams.begin(); x!=pointVec.at(i).xbeams.end(); x++) {
-            avgX += x;
+            avgX += x->second;
         }
         avgX /= pointVec.at(i).xbeams.size();
         x[i] = avgX;
         Double_t avgY = 0;
         for (auto y=pointVec.at(i).ybeams.begin(); y!=pointVec.at(i).ybeams.end(); y++) {
-            avgY += y;
+            avgY += y->second;
         }
         avgY /= pointVec.at(i).ybeams.size();
         y[i] = avgY;
     }
     // Initialize plot
     pm->Add("xray_positions_" + myInfo->quadname, 
-            "X-ray positions for" + myInfo->quadname +";x [mm];y [mm]",
+            "X-ray gun positions for " + myInfo->quadname +";x [mm];y [mm]",
             pointVec.size(), x, y, myTGraph);
     // Draw
     TCanvas* c = new TCanvas();
@@ -188,15 +182,14 @@ void XRayData::WriteOutXRayData() {
     // the same length (shouldn't happen, controlled in constructor)
     ofstream f;
     f.open(myInfo->outpath + myInfo->quadname + "_xray_data_offsets.txt");
-    f << "Point number, beam x position, beam y position, ";
-    f << "layer, offset, offset error (as exists, in mm)\n";
+    f << "Platform ID, position number, layer, beam x position, beam y position, ";
+    f << "offset, offset error\n";
     for (auto p=pointVec.begin(); p!=pointVec.end(); p++) {
-        /********* ADD PLATID and POSNUM to output ***********/
-        // f << ' ' << p->xbeam << ' ' << p->ybeam << ' ';
-        for (auto off=p->offsets.begin(); off!=p->offsets.end(); off++)
-        {
-            f << off->first << ' ' << off->second << ' ';
-            f << p->offsetErrors.at(off->first) << ' ';
+        for (auto off=p->offsets.begin(); off!=p->offsets.end(); off++) { 
+            f << p->platformID << ' ' << p->positionNumber << ' ' << off->first << ' '; 
+            f << p->xbeams.at(off->first) << ' ' << p->ybeams.at(off->first) << ' ';
+            f << off->second << ' ' << p->offsetErrors.at(off->first);
+            f << '\n';
         }
         f << '\n';
     }
