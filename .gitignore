@@ -14,4 +14,4 @@ StripPosAnalysis
 out*
 
 # x-ray data
-results.db
+*.db
