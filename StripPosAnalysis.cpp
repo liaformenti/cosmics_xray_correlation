@@ -22,6 +22,7 @@
 #include "CosmicsRetracking.h"
 #include "GetAnalysisInfo.h"
 #include "XRayData.h"
+#include "XRayRetracking.h"
 
 using namespace std;
 
@@ -83,12 +84,16 @@ int main(int argc, char* argv[]) {
     // Get xray data
     XRayData xData(cosmicsInfo, &myInfo, plotManager);
     xData.WriteOutXRayData();
-    xData.PlotPositions();
+    xData.PlotAverageBeamPositions();
 
+    cout << "Re-tracking x-ray data...\n\n";
+    // cout "Not re-tracking x-ray data\n\n";
+    XRayRetracking xrayTracks(&xData, cosmicsInfo, &myInfo, plotManager, geom);
+    
     cout << "Re-tracking cosmics...\n\n";
-    // cout << "Not retracking cosmics.\n\n";
-    CosmicsRetracking cosmicsTracks(tracksTree, cosmicsInfo, &myInfo, plotManager, geom);
-    cosmicsTracks.Retrack();
+    cout << "Not retracking cosmics.\n\n";
+    // CosmicsRetracking cosmicsTracks(tracksTree, cosmicsInfo, &myInfo, plotManager, geom);
+    // cosmicsTracks.Retrack();
     // cosmicsTracks.PrintTrackAngleHistograms();
 
     cout << "Finishing up...\n\n"; 
