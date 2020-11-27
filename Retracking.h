@@ -21,9 +21,9 @@
 class Retracking {
   public:
     Retracking(){};
-    // Retracking(TTree* _trksTree, AnalysisInfo* _cInfo, InputInfo* _myInfo, 
-    //                   PlotManager* _pm, DetectorGeometry* _g);
-    virtual ~Retracking() = 0;
+    Retracking(AnalysisInfo* _cInfo, InputInfo* _myInfo, 
+               PlotManager* _pm, DetectorGeometry* _g);
+    ~Retracking(){};
     
     // Members
     Int_t nEntries; 
@@ -36,7 +36,7 @@ class Retracking {
     Bool_t MissingHitsOnFixedLayers(std::map<UShort_t, Double_t> &xTrack, 
                                     std::map<UShort_t, Double_t> &yTrack);
 
-  private:
+  protected:
     AnalysisInfo* cInfo = nullptr;
     InputInfo* myInfo = nullptr;
     PlotManager* pm = nullptr;

@@ -3,9 +3,14 @@
 
 using namespace std;
 
+/*CosmicsRetracking::CosmicsRetracking(TTree* _trksTree, AnalysisInfo* _cInfo, InputInfo* _myInfo,
+                                     PlotManager* _pm, DetectorGeometry* _g) : trksTree(_trksTree) {
+    nEntries = trksTree->GetEntries();
+}*/
+
 CosmicsRetracking::CosmicsRetracking(TTree* _trksTree, AnalysisInfo* _cInfo, InputInfo* _myInfo,
-                                     PlotManager* _pm, DetectorGeometry* _g) : trksTree(_trksTree),
-                                     cInfo(_cInfo), myInfo(_myInfo), pm(_pm), g(_g) {
+                                     PlotManager* _pm, DetectorGeometry* _g) : Retracking(_cInfo, _myInfo, _pm, _g), trksTree(_trksTree) {
+    // trksTree = _trksTree;
     nEntries = trksTree->GetEntries();
 }
              
@@ -40,6 +45,7 @@ void CosmicsRetracking::Retrack() {
     InitializeTrackAngleHistograms();
 
     // For each entry, do retracking for each set of fixed layers
+    // cout << "5 ENTRIES ONLY (CosmicsRetracking)\n\n";
     for (Int_t i=0; i<nEntries; i++) {
         trksTree->GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
@@ -98,16 +104,16 @@ void CosmicsRetracking::Retrack() {
             } // end ld loop
         } // end lc loop
         // Count iterations
-        /*if (i%1000==0) {
+        if (i%1000==0) {
             cout << "Iteration " << i << " of " <<  nEntries << '\n';
-        }*/
+        }
     } // end event loop
 
     return;
 }
 
 // CHANGED FIXED1/2 TO PRIVATE LA LB MEMBERS
-Bool_t CosmicsRetracking::MissingHitsOnFixedLayers(map<UShort_t, Double_t> &xTrack, 
+/*Bool_t CosmicsRetracking::MissingHitsOnFixedLayers(map<UShort_t, Double_t> &xTrack, 
                                                    map<UShort_t, Double_t> &yTrack) {
     // If one or more of the fixed layers is missing a hit in x or y,
     // return true, else return false
@@ -116,7 +122,7 @@ Bool_t CosmicsRetracking::MissingHitsOnFixedLayers(map<UShort_t, Double_t> &xTra
                                (yTrack.find(la) != yTrack.end()) && 
                                (yTrack.find(lb) != yTrack.end()) ) );
     return missingHit;
-}
+}*/
 
 void CosmicsRetracking::InitializeTrackUncertaintyHistograms() {
     vector<Combination> combVec = combinationVector();
