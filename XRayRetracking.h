@@ -1,4 +1,5 @@
 // Tracks xray offset / x beam profile across layers of sTGC
+// Inherits from Retracking class
 // Records the residuals (Residual Class)
 // Nov 26, 2020
 
@@ -22,27 +23,19 @@
 #include "Residual.h"
 #include "Helper.h"
 #include "XRayData.h"
+#include "Retracking.h"
 
-class XRayRetracking {
+class XRayRetracking : public Retracking {
   public:
     XRayRetracking(){};
     XRayRetracking(XRayData* _xData, AnalysisInfo* _cInfo, InputInfo* _myInfo, PlotManager* _pm, 
                    DetectorGeometry* _g);
     ~XRayRetracking(){};
 
-    // Members
-    std::vector<Tracking> xTracks;
-    std::vector<Tracking> yTracks;
-    std::vector<Residual> residuals;
-
     void Retrack(); // Actually does the retrackign and applies any cuts. Fills residuals vector
 
   private:
     XRayData* xData = nullptr;
-    AnalysisInfo* cInfo = nullptr;
-    InputInfo* myInfo = nullptr;
-    PlotManager* pm = nullptr;
-    DetectorGeometry* g = nullptr;
 };
 
 #endif
