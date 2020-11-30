@@ -3,11 +3,6 @@
 
 using namespace std;
 
-/*CosmicsRetracking::CosmicsRetracking(TTree* _trksTree, AnalysisInfo* _cInfo, InputInfo* _myInfo,
-                                     PlotManager* _pm, DetectorGeometry* _g) : trksTree(_trksTree) {
-    nEntries = trksTree->GetEntries();
-}*/
-
 CosmicsRetracking::CosmicsRetracking(TTree* _trksTree, AnalysisInfo* _cInfo, InputInfo* _myInfo,
                                      PlotManager* _pm, DetectorGeometry* _g) : Retracking(_cInfo, _myInfo, _pm, _g), trksTree(_trksTree) {
     // trksTree = _trksTree;
@@ -21,10 +16,6 @@ void CosmicsRetracking::Retrack() {
     map<UShort_t, Double_t> trackX;
     map<UShort_t, Double_t>* trackXPtr;
     trackXPtr = &trackX;
-    
-    // Uncertainty in x hits
-    // Initialized in loop to only have entries on layers with hits
-    map<UShort_t, Double_t> uncertX;
     
     map<UShort_t, Double_t> trackYGaussian;
     map<UShort_t, Double_t>* trackYGaussianPtr;
@@ -45,12 +36,13 @@ void CosmicsRetracking::Retrack() {
     InitializeTrackAngleHistograms();
 
     // For each entry, do retracking for each set of fixed layers
-    // cout << "5 ENTRIES ONLY (CosmicsRetracking)\n\n";
+    // cout << "FEW ENTRIES ONLY (CosmicsRetracking)\n\n";
     for (Int_t i=0; i<nEntries; i++) {
         trksTree->GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)
         // Assumes uniform position distribution of hit across group
         // Some edge wires groups have less wires - later correction
+        map<UShort_t, Double_t> uncertX;
         for (auto itX=trackX.begin(); itX!=trackX.end(); itX++)
             uncertX[itX->first] = 1.8*20/sqrt(12.0); // mm
 
@@ -99,12 +91,12 @@ void CosmicsRetracking::Retrack() {
                 }
                 // Plot linear fit
                 /*if (i==0) {
-                    myTrack.PlotFit("fits_event_" + to_string(eventnumber) + "_fixed_layers_" + to_string(la) + "_" + to_string(lb) + ".pdf");
+                    myTrack.PlotFit(myInfo->outpath + "fits_event_" + to_string(eventnumber) + "_fixed_layers_" + to_string(la) + "_" + to_string(lb) + ".pdf");
                 }*/
             } // end ld loop
         } // end lc loop
         // Count iterations
-        if (i%1000==0) {
+        if (i%10000==0) {
             cout << "Iteration " << i << " of " <<  nEntries << '\n';
         }
     } // end event loop
