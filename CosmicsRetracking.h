@@ -1,5 +1,6 @@
 // Takes in tracks TTree from cosmics and recreates tracks based on hits from two fixed layers,
 // for all permutations.
+// Inherits from Retracking class
 // Records the residuals (Residual class)
 // Oct 25, 2020
 
@@ -27,14 +28,10 @@
 #include "Residual.h"
 #include "Helper.h"
 #include "Retracking.h"
-// #include "Binning.h"
-// #include "ResPlots.h"
-// #include "XRayData.h"
-// #include "CombinedData.h"
 
 class CosmicsRetracking : public Retracking {
   public:
-    // CosmicsRetracking(){};
+    CosmicsRetracking(){};
     CosmicsRetracking(TTree* _trksTree, AnalysisInfo* _cInfo, InputInfo* _myInfo, 
                       PlotManager* _pm, DetectorGeometry* _g);
     ~CosmicsRetracking(){};
@@ -54,12 +51,6 @@ class CosmicsRetracking : public Retracking {
 
   private:
     TTree* trksTree = nullptr;
-    // AnalysisInfo* cInfo = nullptr;
-    // InputInfo* myInfo = nullptr;
-    // PlotManager* pm = nullptr;
-    // DetectorGeometry* g = nullptr;
-    // UShort_t la=0, lb=0; // store fixed layers for a given track
-    // UShort_t lc=0, ld=0; // store layers to evaluate to for a given track
     void InitializeTrackUncertaintyHistograms();
     void InitializeTrackAngleHistograms();
 };

@@ -126,13 +126,13 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     sqlite3_close(db); 
 
     // Check
-    cout << "CHECK\n";
+    /*cout << "CHECK\n";
     for (auto point=pointVec.begin(); point!=pointVec.end(); point++) {
         for (auto off=point->offsets.begin(); off!=point->offsets.end(); off++) {
         cout << point->platformID << ' ' << point->positionNumber << ' '<< point->xbeams.at(off->first) << ' ' << point->ybeams.at(off->first) << ' ' << off->first << ' ' << off->second << ' ' << point->offsetErrors.at(off->first) << '\n';
         }
         cout << '\n';
-    }
+    }*/
     return;
 }
 

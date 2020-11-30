@@ -23,6 +23,7 @@
 #include "GetAnalysisInfo.h"
 #include "XRayData.h"
 #include "XRayRetracking.h"
+#include "Residual.h"
 
 using namespace std;
 
@@ -82,20 +83,22 @@ int main(int argc, char* argv[]) {
     PlotManager* plotManager = new PlotManager();    
 
     // Get xray data
+    cout << "Getting x-ray data...\n\n";
     XRayData xData(cosmicsInfo, &myInfo, plotManager);
-    xData.WriteOutXRayData();
-    xData.PlotAverageBeamPositions();
+    // xData.WriteOutXRayData();
+    // xData.PlotAverageBeamPositions();
 
-    cout << "Re-tracking x-ray data...\n\n";
     // cout "Not re-tracking x-ray data\n\n";
-    // XRayRetracking xrayTracks(&xData, cosmicsInfo, &myInfo, plotManager, geom);
-    
-    cout << "Re-tracking cosmics...\n\n";
+    cout << "Re-tracking x-ray data...\n\n";
+    XRayRetracking xrayTracks(&xData, cosmicsInfo, &myInfo, plotManager, geom);
+    xrayTracks.Retrack();
+
     // cout << "Not retracking cosmics.\n\n";
+    cout << "Re-tracking cosmics...\n\n";
     CosmicsRetracking cosmicsTracks(tracksTree, cosmicsInfo, &myInfo, plotManager, geom);
     cosmicsTracks.Retrack();
-    cosmicsTracks.PrintTrackAngleHistograms();
-
+    // cosmicsTracks.PrintTrackAngleHistograms();
+    
     cout << "Finishing up...\n\n"; 
     delete plotManager;
     cosmicsAnalysis->Close();
