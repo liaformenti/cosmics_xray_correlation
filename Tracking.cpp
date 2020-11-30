@@ -24,12 +24,12 @@ Tracking::Tracking(DetectorGeometry* _g,
     la = fixedLayer1;
     lb = fixedLayer2;
     //Fill X track and Y track with fixed layer data
-    fitXPos[la] = hitsX[la]; fitXPos[lb] = hitsX[lb];
-    fitXUncerts[la] = hitsXUncerts[la]; 
-    fitXUncerts[lb] = hitsXUncerts[lb];
-    fitYPos[la] = hitsY[la]; fitYPos[lb] = hitsY[lb];
-    fitYUncerts[la] = hitsYUncerts[la]; 
-    fitYUncerts[lb] = hitsYUncerts[lb];
+    fitXPos[la] = hitsX.at(la); fitXPos[lb] = hitsX.at(lb);
+    fitXUncerts[la] = hitsXUncerts.at(la); 
+    fitXUncerts[lb] = hitsXUncerts.at(lb);
+    fitYPos[la] = hitsY.at(la); fitYPos[lb] = hitsY.at(lb);
+    fitYUncerts[la] = hitsYUncerts.at(la); 
+    fitYUncerts[lb] = hitsYUncerts.at(lb);
 } 
 
 void Tracking::Fit() {
