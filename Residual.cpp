@@ -31,3 +31,9 @@ Residual::Residual(Tracking &trackInfo, UShort_t layer) {
 Combination Residual::GetCombo() {
     return Combination(l, la, lb);
 }
+
+void Residual::PrintResidual() {
+    cout << "Layer: " << l << ", fixed layers: " << la << lb << ", at x = " << x << " mm, y = " << y;
+    cout << " mm, residual: " << res << '\n';
+    return;
+}

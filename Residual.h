@@ -33,5 +33,6 @@ class Residual {
     UShort_t la;
     UShort_t lb;
     Combination GetCombo();
+    void PrintResidual();
 };
 #endif
