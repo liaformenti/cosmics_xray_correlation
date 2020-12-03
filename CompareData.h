@@ -30,17 +30,21 @@ class LocalData {
     //Constructors
     LocalData(){};
     // Constructor to set a fixed bin width for region of interest around local
-    LocalData(Residual xrayResidual, Double_t xBinWidth, Double_t yBinWidth); 
+    LocalData(Residual xrayResidual);
     ~LocalData(){};
    
     // Methods
     // Set regions of interest around xray points which define which cosmics residuals go into
     // calculation of mean residual. Units are mm.
+    // Must set the ROIs somehow before grouping cosmics in them.
     void SetRectangularROIs(Double_t xWidth, Double_t yWidth); 
+    // Loops throug the cosmics residuals and puts those within the ROI in the
+    // cosmicsResiduals vector
+    void GroupCosmicResiduals(const std::vector<Residual>& allCosmicResiduals);
 
   private:
     Residual xRes; // The xray residual at this point
-    std::vector<Residual> cosmicsResiduals; // Fill with residuals that fall in ROI with correct combo
+    std::vector<Residual> cosmicResidualsInROI; // Fill with residuals that fall in ROI with correct combo
     std::pair<Double_t, Double_t> xROI, yROI; // Regions of interest around xray point
     // Some sort of fit data struct for cosmics Fit
 };
