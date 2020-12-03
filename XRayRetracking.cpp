@@ -41,12 +41,14 @@ void XRayRetracking::Retrack() {
             // Construct residual manually since in tracking y values were offsets
             res = Residual(myTrack.hitsY.at(lc) - myTrack.fitYPos.at(lc), lc, xPt->xbeams.at(lc), 
                            xPt->ybeams.at(lc), la, lb);
+            res.tag = to_string(xPt->platformID) + xPt->positionNumber;
             residuals.push_back(res);
         }
         if (myTrack.hitsY.find(ld) != myTrack.hitsY.end()) {
             myTrack.EvaluateAt(ld);
             res = Residual(myTrack.hitsY.at(ld) - myTrack.fitYPos.at(ld), ld, xPt->xbeams.at(ld), 
                            xPt->ybeams.at(ld), la, lb);
+            res.tag = to_string(xPt->platformID) + xPt->positionNumber;
             residuals.push_back(res);
         }
         

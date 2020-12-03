@@ -32,6 +32,8 @@ class Residual {
     Double_t y;
     UShort_t la;
     UShort_t lb;
+    // Can be used to hold identifying information, such at platform ID and position number of xray pt
+    std::string tag = ""; 
     Combination GetCombo();
     void PrintResidual();
 };

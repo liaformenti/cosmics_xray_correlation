@@ -34,6 +34,6 @@ Combination Residual::GetCombo() {
 
 void Residual::PrintResidual() {
     cout << "Layer: " << l << ", fixed layers: " << la << lb << ", at x = " << x << " mm, y = " << y;
-    cout << " mm, residual: " << res << '\n';
+    cout << " mm, residual: " << res << ' ' << tag << '\n';
     return;
 }
