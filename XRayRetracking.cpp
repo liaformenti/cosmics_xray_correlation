@@ -13,8 +13,6 @@ void XRayRetracking::Retrack() {
   // x-track values are xbeams
   // z values are layers z positions
   
-  Bool_t beans = 1;
-  
   for (auto xPt=xData->pointVec.begin(); xPt!=xData->pointVec.end(); xPt++) {
 
     // xbeams do not have errors so create a map of zeros for them
@@ -51,11 +49,6 @@ void XRayRetracking::Retrack() {
             res.tag = to_string(xPt->platformID) + xPt->positionNumber;
             residuals.push_back(res);
         }
-        
-        if(beans) {
-          myTrack.PlotFit("out/test_fit_2.pdf");
-        }
-        beans = 0;
       }
     } // End fixed layer combinations loop
   } // End xray point loop 
