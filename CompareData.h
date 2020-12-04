@@ -30,9 +30,20 @@ class LocalData {
     //Constructors
     LocalData(){};
     // Constructor to set a fixed bin width for region of interest around local
-    LocalData(Residual xrayResidual);
-    ~LocalData(){};
-   
+    LocalData(Residual xrayResidual, PlotManager* _pm);
+    ~LocalData();
+
+    // Members
+    // You should probably make these private with access methods . . . 
+    Residual xRes; // The xray residual at this point, also contains the combination information
+    std::pair<Double_t, Double_t> xROI, yROI; // Regions of interest around xray point
+    // Some sort of fit data struct for cosmics Fit
+    // At some point you'll make a constructor where you can send in the param'ed fit fcn
+    // and the name of it and init this pointer with it. 
+    // The rule will be that the meanCosmicResidual extracted from the fit fcn must be parameter 0.
+    TF1* fitFcn; 
+    TFitResultPtr fitResult;
+
     // Methods
     // Set regions of interest around xray points which define which cosmics residuals go into
     // calculation of mean residual. Units are mm.
@@ -41,12 +52,12 @@ class LocalData {
     // Loops throug the cosmics residuals and puts those within the ROI in the
     // cosmicsResiduals vector
     void GroupCosmicResiduals(const std::vector<Residual>& allCosmicResiduals);
+    void DoCosmicResidualsFit();
 
   private:
-    Residual xRes; // The xray residual at this point
-    std::vector<Residual> cosmicResidualsInROI; // Fill with residuals that fall in ROI with correct combo
-    std::pair<Double_t, Double_t> xROI, yROI; // Regions of interest around xray point
-    // Some sort of fit data struct for cosmics Fit
+    // Fill with residuals that fall in ROI with correct combo
+    std::vector<Double_t> cosmicResidualsInROI; 
+    PlotManager* pm = nullptr;
 };
 
 class CompareData {
@@ -69,7 +80,7 @@ class CompareData {
     // Vector holding local data for each xray point required to do comparison between xray and cosmics 
     // data
     std::vector<LocalData> localDataVec; 
-
+    
     // Methods
     // Does main loop to group cResiduals about xray ponits, do fits, and store residual comparisons
     // in compPointVec
