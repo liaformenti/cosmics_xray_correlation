@@ -13,11 +13,11 @@ LocalData::LocalData(Residual xrayResidual, PlotManager* _pm) :
     yROI.second = 0;
 
     // Default fit fcn is Gaussian
-    fitFcn = new TF1("gaussian", "[2]*TMath::Gaus(x, [0], [1])", -10, 10);
+    // Use ROOT's predefined gaus fit fcn
+    // fitFcn = new TF1("gaussian", "[2]*TMath::Gaus(x, [0], [1])", -10, 10);
 }
 
 LocalData::~LocalData() {
-    delete fitFcn;
 }
 
 // Must set the ROI somehow before grouping cosmics.
@@ -76,15 +76,50 @@ void LocalData::DoCosmicResidualsFit() {
     // Get histogram
     TH1I* hist = pm->GetTH1I(name);
 
-    cout << hist->GetEntries() << '\n';
+    if (hist->GetEntries() < 1) {
+        cout << "Warning: histogram of cosmic residuals in ROI is empty."; 
+        cout << "Are your bin widths too small?\n\n";
+        nFitParams = 0;
+        return;
+    }
 
     // Fit histogram
-    // *** YOUR CUSTOM FIT FCN DOES NOT WORK - HAVE TO PUT ESTIMATES FOR PARAMS. NOT SURE HOW
-    // *** TO DO THIS EQUITABLY
-    // *** PROBABLY FCN POINTERS ARE THE WAY TO GO HERE
-    // fitResult = hist->Fit(fitFcn, "S"); // Proably want to add Q = quiet option here eventually ******
     fitResult = hist->Fit("gaus", "S");
+
+    // Get results
+    if (fitResult != 0) {
+        cout << "Warning: fit failed. ";
+        xRes.PrintResidual();
+        nFitParams = 0;
+        return;
+    } 
+
+    fitFcn = (TF1*)hist->GetFunction("gaus");
+    nFitParams = fitFcn->GetNpar();
     
+    // Put fit paramter names and values in member vectors
+    for (Int_t i=0; i<nFitParams; i++) {
+        fitParamNames.push_back(fitFcn->GetParName(i));
+        fitParamValues.push_back(fitResult->Parameter(i));
+    }
+
+    // Get mean cosmics residual
+    // Find out which param is "Mean"
+    Int_t meanParamIndex = -1;
+    for (Int_t i=0; i<nFitParams; i++) {
+        if (fitParamNames.at(i) == "Mean") {
+            meanParamIndex = i;
+            break;
+        }
+    } 
+       
+    // If you didn't find a parameter called "Mean", something is wrong with the supplied fit fcn
+    if (meanParamIndex == -1)
+        throw invalid_argument("Unable to find a parameter called \"Mean\" in the fit function. The fit function supplied must have a \"Mean\" to know which parameter to extract (LocalData::DoCosmicResidualsFit)\n\n");
+
+    // AND THE RESULT!
+    meanCosmicsResidual = fitParamValues.at(meanParamIndex);
+   
     return;
 }
 
@@ -97,14 +132,16 @@ CompareData::CompareData(Double_t xBinWidth, Double_t yBinWidth, vector<Residual
     yWidth = yBinWidth;
 };
 
+// Initializes localDataVec with comparison data
 void CompareData::DoComparison(){
   for (auto xr=xResiduals->begin(); xr!=xResiduals->end(); xr++) {
       LocalData currentPoint(*xr, pm);  
-      cout << xr->tag << '\n';
+      xr->PrintResidual();
       currentPoint.SetRectangularROIs(xWidth, yWidth);
       currentPoint.GroupCosmicResiduals(*cResiduals);
       currentPoint.DoCosmicResidualsFit();
-      break; // ***** REMOVE THIS TO DO ALL XRAY POINTS
+      localDataVec.push_back(currentPoint);
+      cout << '\n';
   }
 };
 

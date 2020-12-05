@@ -43,6 +43,15 @@ class LocalData {
     // The rule will be that the meanCosmicResidual extracted from the fit fcn must be parameter 0.
     TF1* fitFcn; 
     TFitResultPtr fitResult;
+    // Number of fit parameters
+    Int_t nFitParams; 
+    // These vectors store the names and values of the fit parameters.
+    // Their index is their parameter number
+    std::vector<std::string> fitParamNames;
+    std::vector<Double_t> fitParamValues;
+    // The mean cosmics residual MUST ALWAYS BE THE FIT PARAMETER WITH NAME "Mean"!
+    // This is how it is extracted.
+    Double_t meanCosmicsResidual;
 
     // Methods
     // Set regions of interest around xray points which define which cosmics residuals go into
