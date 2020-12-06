@@ -20,6 +20,9 @@ struct Combination {
   UShort_t fixed1;
   UShort_t fixed2;
   std::string String() const;
+  bool operator==(const Combination& c) const {
+    return ( (layer == c.layer) && (fixed1 == c.fixed1) && (fixed2 == c.fixed2) );
+  }
 };
 
 std::vector<Combination> combinationVector(); 
@@ -40,4 +43,16 @@ void getOtherLayers(UShort_t la, UShort_t lb, UShort_t* lc, UShort_t* ld);
 // for creating strings of the form:
 // header_layerC_fixedLayersAB_footer
 // string getPermPlotName(string header, string footer, UShort_t layer, UShort_t fixedLayer1, UShort_t fixedLayer2);
+
+// A fit result struct based on Gaussian parameters, but should be good if you want to store
+// double gauss. Might not end up using this.
+/*struct myFitResult {
+    Bool_t success;
+    Double_t mean;
+    Double_t meanError;
+    Double_t sigma;
+    Double_t sigmaError;
+    Double_t amplitude;
+};*/
 #endif
+
