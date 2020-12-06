@@ -24,6 +24,7 @@
 #include "XRayData.h"
 #include "XRayRetracking.h"
 #include "Residual.h"
+#include "CompareData.h"
 
 using namespace std;
 
@@ -85,21 +86,32 @@ int main(int argc, char* argv[]) {
     // Get xray data
     cout << "Getting x-ray data...\n\n";
     XRayData xData(cosmicsInfo, &myInfo, plotManager);
-    // xData.WriteOutXRayData();
-    // xData.PlotAverageBeamPositions();
+    xData.WriteOutXRayData();
+    xData.PlotAverageBeamPositions();
 
-    // cout "Not re-tracking x-ray data\n\n";
+    // cout << "Not re-tracking x-ray data\n\n";
     cout << "Re-tracking x-ray data...\n\n";
     XRayRetracking xrayTracks(&xData, cosmicsInfo, &myInfo, plotManager, geom);
     xrayTracks.Retrack();
 
     // cout << "Not retracking cosmics.\n\n";
     cout << "Re-tracking cosmics...\n\n";
-    CosmicsRetracking cosmicsTracks(tracksTree, cosmicsInfo, &myInfo, plotManager, geom);
-    cosmicsTracks.Retrack();
-    // cosmicsTracks.PrintTrackAngleHistograms();
+    CosmicsRetracking cosmicTracks(tracksTree, cosmicsInfo, &myInfo, plotManager, geom);
+    cosmicTracks.Retrack();
+    // cosmicTracks.PrintTrackAngleHistograms();
     
+    // cout << "Not comparing cosmics and x-ray data.\n\n";
+    cout << "Comparing cosmics and x-ray data...\n\n";
+    CompareData comp(1000, 1000, &xrayTracks.residuals, &cosmicTracks.residuals, &myInfo, plotManager, 
+                     geom);
+    comp.DoComparison();
+
     cout << "Finishing up...\n\n"; 
+    // Dump all objects to root file
+    TFile* outRoot = new TFile((myInfo.outpath + myInfo.tag + "strip_position_analysis.root").c_str(), 
+                               "RECREATE");
+    plotManager->Write(outRoot);
+    delete outRoot;
     delete plotManager;
     cosmicsAnalysis->Close();
     delete cosmicsAnalysis;
