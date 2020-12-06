@@ -49,9 +49,11 @@ class LocalData {
     // Their index is their parameter number
     std::vector<std::string> fitParamNames;
     std::vector<Double_t> fitParamValues;
+    std::vector<Double_t> fitParamErrors;
     // The mean cosmics residual MUST ALWAYS BE THE FIT PARAMETER WITH NAME "Mean"!
     // This is how it is extracted.
     Double_t meanCosmicsResidual;
+    Double_t meanCosmicsResidualError;
 
     // Methods
     // Set regions of interest around xray points which define which cosmics residuals go into

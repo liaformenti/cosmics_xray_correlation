@@ -101,6 +101,7 @@ void LocalData::DoCosmicResidualsFit() {
     for (Int_t i=0; i<nFitParams; i++) {
         fitParamNames.push_back(fitFcn->GetParName(i));
         fitParamValues.push_back(fitResult->Parameter(i));
+        fitParamErrors.push_back(fitResult->ParError(i));
     }
 
     // Get mean cosmics residual
@@ -119,7 +120,7 @@ void LocalData::DoCosmicResidualsFit() {
 
     // AND THE RESULT!
     meanCosmicsResidual = fitParamValues.at(meanParamIndex);
-   
+    meanCosmicsResidualError = fitParamErrors.at(meanParamIndex);
     return;
 }
 
@@ -158,7 +159,6 @@ void CompareData::DoComparison() {
           c->Clear();
       }
       cout << '\n';
-
   }
 
   c->Print((filename + "]").c_str());
@@ -166,4 +166,49 @@ void CompareData::DoComparison() {
   return;
 }
 
-void CompareData::MakeScatterPlot(){};
+void CompareData::MakeScatterPlot(){
+    // Prep canvas and pdf
+    TCanvas* c = new TCanvas();   
+    string filename = myInfo->outpath + myInfo->tag; 
+    filename += "local_mean_cosmics_residual_vs_xray_residual_scatter.pdf";
+    c->Print((filename + "[").c_str());
+
+    // On x axis: xray residual
+    // On y axis: mean cosmics residual in ROI around xray point
+    // First, put all combinations' residuals on one plot
+    vector<Double_t> X, Y, eX, eY;
+    for (auto ld=localDataVec.begin(); ld!=localDataVec.end(); ld++) {
+        X.push_back(ld->xRes.res);
+        eX.push_back(0); // Currently don't have errors on xray residuals *************
+        Y.push_back(ld->meanCosmicsResidual);
+        eY.push_back(ld->meanCosmicsResidualError);
+    }
+    string theName = "local_cosmic_and_xray_residuals_scatter"; 
+    string theTitle = "Comparing residuals - all tracking combinations;";
+    theTitle += "Exclusive residual from x-ray data [mm];";
+    theTitle += "Mean local exclusive residual from cosmics [mm];";
+    // Create TGraphErrors
+    pm->Add(theName, theTitle, X, Y, eX, eY, myTGraphErrors);
+    // Get TGraphErrors 
+    TGraphErrors* allLocalDataGraph = (TGraphErrors*)pm->Get(theName);
+    allLocalDataGraph->SetMarkerStyle(kCircle);
+    allLocalDataGraph->Draw("AP");
+    c->Print(filename.c_str());
+
+    // Now make combinaton-specific plots
+    vector<Combination> combVec = combinationVector();
+    for (auto comb=combVec.begin(); comb!=combVec.end(); comb++) {
+        vector<Double_t> x, y, ex, ey;        
+        for (auto ld=localDataVec.begin(); ld!=localDataVec.end(); ld++) {
+            if (*comb == ld->xRes.GetCombo()) { //******** TEST THIS
+                cout << comb->layer << ' ' << comb->fixed1 << ' ' << comb->fixed2 << '\n';
+                cout << ld->xRes.GetCombo().layer << ' ' << ld->xRes.GetCombo().fixed1 << ' ' << ld->xRes.GetCombo.fixed2 << '\n';
+            }
+        }
+        break //************* REMOVE THIS
+    } 
+
+    c->Print((filename + "]").c_str());
+    delete c; 
+    return;
+}
