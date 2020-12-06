@@ -133,16 +133,37 @@ CompareData::CompareData(Double_t xBinWidth, Double_t yBinWidth, vector<Residual
 };
 
 // Initializes localDataVec with comparison data
-void CompareData::DoComparison(){
+void CompareData::DoComparison() {
+
+  // Prepare pdf file to print to
+  TCanvas* c = new TCanvas();
+  string filename = myInfo->outpath + myInfo->tag + "cosmic_residuals_in_ROIs.pdf";
+  c->Print((filename + "[").c_str());
+
   for (auto xr=xResiduals->begin(); xr!=xResiduals->end(); xr++) {
+
       LocalData currentPoint(*xr, pm);  
       xr->PrintResidual();
       currentPoint.SetRectangularROIs(xWidth, yWidth);
       currentPoint.GroupCosmicResiduals(*cResiduals);
       currentPoint.DoCosmicResidualsFit();
       localDataVec.push_back(currentPoint);
+
+      // Print hist and fit to PDF
+      string name = "cosmic_residuals_around_xray_point_" + xr->tag + "_" + xr->GetCombo().String();
+      TH1I* hist = pm->GetTH1I(name);
+      if (hist->GetEntries() != 0) {
+          hist->Draw();
+          c->Print(filename.c_str());
+          c->Clear();
+      }
       cout << '\n';
+
   }
-};
+
+  c->Print((filename + "]").c_str());
+  delete c;
+  return;
+}
 
 void CompareData::MakeScatterPlot(){};
