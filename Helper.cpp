@@ -13,6 +13,16 @@ void Combination::Print() {
     return;
 }
 
+bool Combination::operator==(const Combination& c) const {
+    return ( (layer == c.layer) && (fixed1 == c.fixed1) && (fixed2 == c.fixed2) );
+}
+
+bool Combination::operator!=(const Combination& c) const {
+    return ( (layer != c.layer) || (fixed1 != c.fixed1) || (fixed2 != c.fixed2) );
+}
+
+
+
 vector<Combination> combinationVector() {
     vector<Combination> vComb;
     vComb.push_back(Combination(3, 1, 2));

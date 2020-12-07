@@ -21,9 +21,8 @@ struct Combination {
   UShort_t fixed2;
   std::string String() const;
   void Print();
-  bool operator==(const Combination& c) const {
-    return ( (layer == c.layer) && (fixed1 == c.fixed1) && (fixed2 == c.fixed2) );
-  }
+  bool operator==(const Combination& c) const; 
+  bool operator!=(const Combination& c) const;
 };
 
 std::vector<Combination> combinationVector(); 
@@ -55,5 +54,6 @@ void getOtherLayers(UShort_t la, UShort_t lb, UShort_t* lc, UShort_t* ld);
     Double_t sigmaError;
     Double_t amplitude;
 };*/
+
 #endif
 
