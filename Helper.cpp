@@ -8,6 +8,11 @@ string Combination::String() const {
     return s;
 }
 
+void Combination::Print() {
+    cout << "Layer: " << layer << ", Fixed Layers: " << fixed1 << fixed2 << '\n';
+    return;
+}
+
 vector<Combination> combinationVector() {
     vector<Combination> vComb;
     vComb.push_back(Combination(3, 1, 2));

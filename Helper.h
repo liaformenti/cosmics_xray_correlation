@@ -20,6 +20,7 @@ struct Combination {
   UShort_t fixed1;
   UShort_t fixed2;
   std::string String() const;
+  void Print();
   bool operator==(const Combination& c) const {
     return ( (layer == c.layer) && (fixed1 == c.fixed1) && (fixed2 == c.fixed2) );
   }
