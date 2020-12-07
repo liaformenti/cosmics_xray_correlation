@@ -84,7 +84,7 @@ void LocalData::DoCosmicResidualsFit() {
     }
 
     // Fit histogram
-    fitResult = hist->Fit("gaus", "S");
+    fitResult = hist->Fit("gaus", "SQ");
 
     // Get results
     if (fitResult != 0) {
@@ -173,8 +173,12 @@ void CompareData::MakeScatterPlot(){
     filename += "local_mean_cosmics_residual_vs_xray_residual_scatter.pdf";
     c->Print((filename + "[").c_str());
 
+    // Print (linear) fit results on plot
+    gStyle->SetOptFit(1111);
+
     // On x axis: xray residual
     // On y axis: mean cosmics residual in ROI around xray point
+
     // First, put all combinations' residuals on one plot
     vector<Double_t> X, Y, eX, eY;
     for (auto ld=localDataVec.begin(); ld!=localDataVec.end(); ld++) {
@@ -191,21 +195,45 @@ void CompareData::MakeScatterPlot(){
     pm->Add(theName, theTitle, X, Y, eX, eY, myTGraphErrors);
     // Get TGraphErrors 
     TGraphErrors* allLocalDataGraph = (TGraphErrors*)pm->Get(theName);
-    allLocalDataGraph->SetMarkerStyle(kCircle);
+    // allLocalDataGraph->SetMarkerStyle(kCircle);
+    if (allLocalDataGraph->GetN() == 0) {
+        cout << "Warning: no association between x-ray retracking combinations and local cosmics data";
+        cout << " (CompareData::MakeScatterPlot)\n\n";
+        return;
+    }
     allLocalDataGraph->Draw("AP");
+    allLocalDataGraph->Fit("pol1", "QF");
     c->Print(filename.c_str());
+    c->Clear();
 
-    // Now make combinaton-specific plots
+    // Now make tracking layer specific combinaton-specific plots
     vector<Combination> combVec = combinationVector();
     for (auto comb=combVec.begin(); comb!=combVec.end(); comb++) {
         vector<Double_t> x, y, ex, ey;        
         for (auto ld=localDataVec.begin(); ld!=localDataVec.end(); ld++) {
-            if (*comb == ld->xRes.GetCombo()) { //******** TEST THIS
-                cout << comb->layer << ' ' << comb->fixed1 << ' ' << comb->fixed2 << '\n';
-                cout << ld->xRes.GetCombo().layer << ' ' << ld->xRes.GetCombo().fixed1 << ' ' << ld->xRes.GetCombo.fixed2 << '\n';
-            }
+            // Skip data points with wrong combination
+            if (*comb != ld->xRes.GetCombo()) continue;
+            // For correct combination, add data to vectors
+            x.push_back(ld->xRes.res);
+            ex.push_back(0); // Currently don't have errors on xray residuals *************
+            y.push_back(ld->meanCosmicsResidual);
+            ey.push_back(ld->meanCosmicsResidualError);
         }
-        break //************* REMOVE THIS
+        // Create combination specific TGraphErrors
+        string name = "local_cosmic_and_xray_residuals_scatter_" + comb->String();
+        string title = "Comparing residuals - layer: " + to_string(comb->layer) + ", fixed layers: ";
+        title += to_string(comb->fixed1) + to_string(comb->fixed2);
+        title += ";Exclusive residual from x-ray data [mm];";
+        title += "Mean local exclusive residual from cosmics [mm];";
+        pm->Add(name, title, x, y, ex, ey, myTGraphErrors); 
+        // Get TGraphErrors
+        TGraphErrors* localDataGraph = (TGraphErrors*)pm->Get(name);
+        if (localDataGraph->GetN() != 0) {
+            localDataGraph->Fit("pol1", "QF");
+            localDataGraph->Draw("AP");
+            c->Print(filename.c_str());
+            c->Clear();
+        }
     } 
 
     c->Print((filename + "]").c_str());

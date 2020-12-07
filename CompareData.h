@@ -15,6 +15,9 @@
 #include <string>
 #include <sstream>
 
+// Root includes
+#include "TStyle.h"
+
 // tgc_analysis includes
 #include "Tools.h"
 
