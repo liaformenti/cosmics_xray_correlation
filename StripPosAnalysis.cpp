@@ -25,14 +25,16 @@
 #include "XRayRetracking.h"
 #include "Residual.h"
 #include "CompareData.h"
+#include "Binning.h"
+#include "ResPlots.h"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
 
     // Set style
-    // SetAnalysisStyle();
-    cout << "You commented out SetAnalysisStyle\n\n";
+    SetAnalysisStyle();
+    // cout << "You commented out SetAnalysisStyle\n\n";
     
     // Check arguments
     // This should be upgraded to a config file and better cmd line argument format.
@@ -102,9 +104,21 @@ int main(int argc, char* argv[]) {
     
     // cout << "Not comparing cosmics and x-ray data.\n\n";
     cout << "Comparing cosmics and x-ray data...\n\n";
-    CompareData comp(1000, 1000, &xrayTracks.residuals, &cosmicTracks.residuals, &myInfo, plotManager, 
+    CompareData comp(72, 50, &xrayTracks.residuals, &cosmicTracks.residuals, &myInfo, plotManager, 
                      geom);
     comp.DoComparison();
+    comp.MakeScatterPlot();
+    comp.OutputLocalDataToCSV();
+
+    // TH2s
+    /*Binning widthBins(72, 50, geom);
+    ResPlots th2s(&cosmicTracks.residuals, &widthBins, widthBins.name, cosmicsInfo, geom, plotManager, &myInfo);
+    th2s.CreateNumEntriesTH2Is();
+    th2s.CreatePosBinnedResPlots();
+    th2s.CreatePosBinnedFitResultTH2Fs();
+    th2s.PrintNumEntriesTH2Is(myInfo.outpath + myInfo.tag + myInfo.quadname + "_num_entries_binning_" + widthBins.name + ".pdf");
+    th2s.PrintPosBinnedResPlots(myInfo.outpath + myInfo.tag + myInfo.quadname + "_residual_fits_binning_" + widthBins.name + ".pdf");
+    th2s.PrintPosBinnedFitResultTH2Fs(myInfo.outpath + myInfo.tag + myInfo.quadname + "_fit_results_binning_" + widthBins.name + ".pdf");*/
 
     cout << "Finishing up...\n\n"; 
     // Dump all objects to root file
