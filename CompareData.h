@@ -40,7 +40,7 @@ class LocalData {
     // You should probably make these private with access methods . . . 
     Residual xRes; // The xray residual at this point, also contains the combination information
     std::pair<Double_t, Double_t> xROI, yROI; // Regions of interest around xray point
-    // Some sort of fit data struct for cosmics Fit
+    Int_t nEntries; // Number of track entries in this local data's cosmic residual histogram 
     // At some point you'll make a constructor where you can send in the param'ed fit fcn
     // and the name of it and init this pointer with it. 
     // The rule will be that the meanCosmicResidual extracted from the fit fcn must be parameter 0.
@@ -101,6 +101,8 @@ class CompareData {
     void DoComparison();
     // Make mean cosmics exclusive residual vs x ray data residual
     void MakeScatterPlot();
+    // Output local data to csv
+    void OutputLocalDataToCSV();
     
   private:
     std::vector<Residual>* xResiduals = nullptr;

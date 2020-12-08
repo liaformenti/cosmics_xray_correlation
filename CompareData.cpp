@@ -80,8 +80,12 @@ void LocalData::DoCosmicResidualsFit() {
         cout << "Warning: histogram of cosmic residuals in ROI is empty."; 
         cout << "Are your bin widths too small?\n\n";
         nFitParams = 0;
+        nEntries = 0;
         return;
     }
+
+    nEntries = hist->GetEntries();
+    cout << "nEntries " << nEntries << '\n';
 
     // Fit histogram
     fitResult = hist->Fit("gaus", "SQ");
@@ -136,7 +140,7 @@ CompareData::CompareData(Double_t xBinWidth, Double_t yBinWidth, vector<Residual
 // Initializes localDataVec with comparison data
 void CompareData::DoComparison() {
 
-  // Prepare pdf file to print to
+  // Prepare pdf file to print fits to
   TCanvas* c = new TCanvas();
   string filename = myInfo->outpath + myInfo->tag + "cosmic_residuals_in_ROIs.pdf";
   c->Print((filename + "[").c_str());
@@ -158,6 +162,8 @@ void CompareData::DoComparison() {
           c->Print(filename.c_str());
           c->Clear();
       }
+
+      // Print local data info to file
       cout << '\n';
   }
 
@@ -189,6 +195,7 @@ void CompareData::MakeScatterPlot(){
     }
     string theName = "local_cosmic_and_xray_residuals_scatter"; 
     string theTitle = "Comparing residuals - all tracking combinations;";
+    // string theTitle = ";";
     theTitle += "Exclusive residual from x-ray data [mm];";
     theTitle += "Mean local exclusive residual from cosmics [mm];";
     // Create TGraphErrors
@@ -222,6 +229,7 @@ void CompareData::MakeScatterPlot(){
         // Create combination specific TGraphErrors
         string name = "local_cosmic_and_xray_residuals_scatter_" + comb->String();
         string title = "Comparing residuals - layer: " + to_string(comb->layer) + ", fixed layers: ";
+        // string title = ";";
         title += to_string(comb->fixed1) + to_string(comb->fixed2);
         title += ";Exclusive residual from x-ray data [mm];";
         title += "Mean local exclusive residual from cosmics [mm];";
@@ -239,4 +247,49 @@ void CompareData::MakeScatterPlot(){
     c->Print((filename + "]").c_str());
     delete c; 
     return;
+}
+
+void CompareData::OutputLocalDataToCSV() {
+    
+  // Prepare csv file to print numerical results to
+  ofstream f;
+  f.open(myInfo->outpath + myInfo->tag + "local_cosmic_and_xray_data.csv");
+  f << "X-ray pt id,Layer,Fixed layer 1,Fixed layer 2,x,y,x low,x high,y low,y high,x-ray residual,";
+  f << "fit result,nEntries,";
+
+  // Get header
+  for (auto ld=localDataVec.begin(); ld!=localDataVec.end(); ld++) {
+      // If the fit result failed, the headers won't have been init'ed for this ld, so skip it.
+      if (ld->fitResult != 0) continue;
+      for (auto name=ld->fitParamNames.begin(); name!=ld->fitParamNames.end(); name++) {
+          f << *name << ',' << *name << " error,"; 
+      }
+      break; // Only need header printed once
+  }
+  f << '\n';
+
+  // Now ouput fit data to file
+  for (auto ld=localDataVec.begin(); ld!=localDataVec.end(); ld++) {
+    f << ld->xRes.tag << ',' << ld->xRes.l << ',' << ld->xRes.la << ',' << ld->xRes.lb;
+    f << ',' << ld->xRes.x << ',' << ld->xRes.y << ',' << ld->xROI.first << ',' << ld->xROI.second;
+    f << ',' << ld->yROI.first << ',' << ld->yROI.second << ',' << ld->xRes.res << ',';
+    f << ld->fitResult << ',' << ld->nEntries << ',';
+    
+    // If fit failed, or there are no entries
+    if (ld->fitResult != 0 || ld->nEntries == 0) {
+      for (Int_t i=0; i<ld->nFitParams; i++) {
+          f << "NA,NA,";
+      }
+      f << '\n';
+    } 
+    else { // if fit was successful,
+      for (Int_t i=0; i<ld->nFitParams; i++) {
+        f << ld->fitParamValues.at(i) << ',' << ld->fitParamErrors.at(i) << ',';
+      }
+      f << '\n';
+    }
+  }
+  
+  f.close();
+  return;
 }
