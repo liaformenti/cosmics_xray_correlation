@@ -2,6 +2,8 @@
 // Loops through xray points and combinations. Takes the cosmics residuals within a width of
 // the xray points and calculates the mean residual (Gaussian fit for now). Compares the mean cosmics
 // residual to the xray residual.
+// Stores both the xray residual and the mean cosmics residual in the 
+// region of interest.
 // Nov 30, 2020
 
 #ifndef CompareData_h

@@ -36,7 +36,7 @@ void CosmicsRetracking::Retrack() {
     InitializeTrackAngleHistograms();
 
     // For each entry, do retracking for each set of fixed layers
-    // cout << "FEW ENTRIES ONLY (CosmicsRetracking)\n\n";
+    // cout << "FEW TRACKS ONLY (CosmicsRetracking)\n";
     for (Int_t i=0; i<nEntries; i++) {
         trksTree->GetEntry(i);
         // Uncertainty in x is width of wire group / sqrt(12)

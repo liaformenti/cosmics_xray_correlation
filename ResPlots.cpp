@@ -219,6 +219,8 @@ void ResPlots::CreatePosBinnedFitResultTH2Fs() {
     for (auto combo=comboVec.begin(); combo!=comboVec.end(); combo++){
         for (Int_t i=0; i<binning->xBinEdges.size()-1; i++) {
             for (Int_t j=0; j<binning->yBinEdges.size()-1; j++) {
+                // For each bin and combination do fit
+                // ****** Want to be able to select fit
                 name = nameBase + "_residuals_xbin_" + to_string(i+1);
                 name += "_ybin_" + to_string(j+1) + "_"; 
                 name += combo->String();
