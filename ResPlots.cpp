@@ -257,8 +257,8 @@ void ResPlots:: PrintPosBinnedFitResultTH2Fs(string filename) {
         hist = (TH2F*)pm->Get(nameBase + "_means_" + combo->String());  
         if (hist->GetEntries() != 0) { // If plot is not empty,
             // These max and min values should go in config
-            hist->SetMaximum(10)
-            hist->SetMinimum(-10)
+            hist->SetMaximum(0.5);
+            hist->SetMinimum(-0.5);
             hist->Draw("Colz");
             c->Print(filename.c_str());
             c->Clear();
@@ -267,8 +267,9 @@ void ResPlots:: PrintPosBinnedFitResultTH2Fs(string filename) {
         hist = (TH2F*)pm->Get(nameBase + "_sigmas_" + combo->String()); 
         if (hist->GetEntries() != 0) {
             // These max and min values should go in config
-            hist->SetMaximum(5)
-            hist->SetMinimum(0)
+            hist->SetMaximum(0.5);
+            hist->SetMinimum(0);
+            
             hist->Draw("Colz");
             c->Print(filename.c_str());
             c->Clear();
