@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
     PlotManager* plotManager = new PlotManager();    
 
     // Get xray data
-    cout << "Getting x-ray data...\n\n";
+    /*cout << "Getting x-ray data...\n\n";
     XRayData xData(cosmicsInfo, &myInfo, plotManager);
     xData.WriteOutXRayData();
     xData.PlotAverageBeamPositions();
@@ -94,24 +94,24 @@ int main(int argc, char* argv[]) {
     // cout << "Not re-tracking x-ray data\n\n";
     cout << "Re-tracking x-ray data...\n\n";
     XRayRetracking xrayTracks(&xData, cosmicsInfo, &myInfo, plotManager, geom);
-    xrayTracks.Retrack();
+    xrayTracks.Retrack();*/
 
     // cout << "Not retracking cosmics.\n\n";
     cout << "Re-tracking cosmics...\n\n";
     CosmicsRetracking cosmicTracks(tracksTree, cosmicsInfo, &myInfo, plotManager, geom);
     cosmicTracks.Retrack();
-    // cosmicTracks.PrintTrackAngleHistograms();
+    cosmicTracks.PrintTrackAngleHistograms();
     
     // cout << "Not comparing cosmics and x-ray data.\n\n";
-    cout << "Comparing cosmics and x-ray data...\n\n";
+    /*cout << "Comparing cosmics and x-ray data...\n\n";
     CompareData comp(72, 50, &xrayTracks.residuals, &cosmicTracks.residuals, &myInfo, plotManager, 
                      geom);
     comp.DoComparison();
     comp.MakeScatterPlot();
-    comp.OutputLocalDataToCSV();
+    comp.OutputLocalDataToCSV();*/
 
     // TH2s
-    Binning widthBins(72, 50, geom);
+    Binning widthBins(100, 100, geom);
     ResPlots th2s(&cosmicTracks.residuals, &widthBins, widthBins.name, cosmicsInfo, geom, plotManager, &myInfo);
     th2s.CreateNumEntriesTH2Is();
     th2s.CreatePosBinnedResPlots();
