@@ -207,6 +207,9 @@ void ResPlots::InitializePosBinnedFitResultTH2Fs() {
 // fit in CreatePosBinnedResPlots, but access it here explicitly
 // instead of doing it here
 void ResPlots::CreatePosBinnedFitResultTH2Fs() {
+    // should be in config
+    Float_t invalidNum = -100;
+    Float_t invalidErr = 0;
     InitializePosBinnedFitResultTH2Fs();
     vector<Combination> comboVec = combinationVector();
     string name;
@@ -225,6 +228,20 @@ void ResPlots::CreatePosBinnedFitResultTH2Fs() {
                 name += "_ybin_" + to_string(j+1) + "_"; 
                 name += combo->String();
                 hist = (TH1I*)pm->Get(name);
+                // If residual histogram has less that a min no. entries,
+                // Fill bin with invalid value
+                // Should be in config
+                if (hist->GetEntries() < 50) {
+                    name = nameBase + "_means_" + combo->String();
+                    th2F = (TH2F*)pm->GetTH2F(name);
+                    th2F->SetBinContent(i+1, j+1, invalidNum);
+                    th2F->SetBinError(i+1, j+1, invalidErr);
+                    name = nameBase + "_sigmas_" + combo->String();
+                    th2F = (TH2F*)pm->GetTH2F(name);
+                    th2F->SetBinContent(i+1, j+1, invalidNum);
+                    th2F->SetBinError(i+1, j+1, invalidErr);
+                    continue;
+                }
                 status = hist->Fit("gaus", "SQ");
                 if (status==0) { // Fit was success, fill TH2Fs
                     theFit = (TF1*)hist->GetFunction("gaus");     
@@ -242,6 +259,16 @@ void ResPlots::CreatePosBinnedFitResultTH2Fs() {
                     th2F->SetBinContent(i+1, j+1, sigma);
                     th2F->SetBinError(i+1, j+1, sigmaErr);
                 }
+                else { // if the fit fails, fill bin with invalid
+                    name = nameBase + "_means_" + combo->String();
+                    th2F = (TH2F*)pm->GetTH2F(name);
+                    th2F->SetBinContent(i+1, j+1, invalidNum);
+                    th2F->SetBinError(i+1, j+1, invalidErr);
+                    name = nameBase + "_sigmas_" + combo->String();
+                    th2F = (TH2F*)pm->GetTH2F(name);
+                    th2F->SetBinContent(i+1, j+1, invalidNum);
+                    th2F->SetBinError(i+1, j+1, invalidErr);
+                }
             } // end y bin loop
         } // end x bin loop
     }  // end combo loop
@@ -257,8 +284,8 @@ void ResPlots:: PrintPosBinnedFitResultTH2Fs(string filename) {
         hist = (TH2F*)pm->Get(nameBase + "_means_" + combo->String());  
         if (hist->GetEntries() != 0) { // If plot is not empty,
             // These max and min values should go in config
-            hist->SetMaximum(0.5);
-            hist->SetMinimum(-0.5);
+            // hist->SetMaximum(0.5);
+            // hist->SetMinimum(-0.5);
             hist->Draw("Colz");
             c->Print(filename.c_str());
             c->Clear();
@@ -267,8 +294,8 @@ void ResPlots:: PrintPosBinnedFitResultTH2Fs(string filename) {
         hist = (TH2F*)pm->Get(nameBase + "_sigmas_" + combo->String()); 
         if (hist->GetEntries() != 0) {
             // These max and min values should go in config
-            hist->SetMaximum(0.5);
-            hist->SetMinimum(0);
+            // hist->SetMaximum(0.5);
+            // hist->SetMinimum(0);
             hist->Draw("Colz");
             c->Print(filename.c_str());
             c->Clear();
