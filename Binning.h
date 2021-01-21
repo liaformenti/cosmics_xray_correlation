@@ -3,6 +3,7 @@
 
 // C++ includes
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <string.h>
 #include <algorithm>
@@ -43,6 +44,11 @@ class Binning {
     Int_t nBinsX;
     Int_t nBinsY; 
     std::string name; // holds a string describing the binning, useful for naming schemes
+
+    // Methods
+    void PrintBinEdges(std::string outpath);
+    void PrintBinCenters(std::string outpath);
+
   private:
     // Members
     DetectorGeometry* g=nullptr;

@@ -186,6 +186,38 @@ Binning::Binning(Int_t wx, Int_t wy, DetectorGeometry* _g) :
 
 }*/
 
+void Binning::PrintBinEdges(string outpath) {
+    ofstream outFileX;
+    outFileX.open(outpath + "x_bin_edges.txt");
+    for (auto x=xBinEdges.begin(); x!=xBinEdges.end(); x++) {
+        outFileX << *x << '\n';
+    }
+    outFileX.close();
+    ofstream outFileY;
+    outFileY.open(outpath + "y_bin_edges.txt");
+    for (auto y=yBinEdges.begin(); y!=yBinEdges.end(); y++) {
+        outFileY << *y << '\n';
+    }
+    outFileY.close();
+    return;
+}
+
+void Binning::PrintBinCenters(string outpath) { 
+    ofstream out;
+    out.open(outpath + "bin_centers.txt");
+    Float_t xCenter, yCenter;
+    // Start at first edge
+    for (Int_t y=1; y<(nBinsY+1); y++) {
+        for (Int_t x=1; x<(nBinsX+1); x++) {
+            xCenter = ((xBinEdges.at(x)-xBinEdges.at(x-1))/2.0) + xBinEdges.at(x-1);
+            yCenter = ((yBinEdges.at(y)-yBinEdges.at(y-1))/2.0) + yBinEdges.at(y-1);
+            out << xCenter << ' ' << yCenter << '\n';
+        } 
+    }
+    out.close();
+    return;
+}
+
 void Binning::DefineXRayBin(Float_t q, Float_t qmin, Float_t qmax,
                              Int_t width, string xOrY) {
     if ((xOrY != "x") && (xOrY != "y")) {
