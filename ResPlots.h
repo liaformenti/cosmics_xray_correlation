@@ -17,12 +17,15 @@
 #include <TH1F.h>
 #include <TH1I.h>
 #include <TH2I.h>
+#include <TFitResultPtr.h>
+#include <TFitResult.h>
 
 // tgc_analysis includes
 #include "AnalysisInfo.h"
 #include "DetectorGeometry.h"
 #include "PlotManager.h"
 #include "Tools.h"
+#include "FitTools.h"
 
 // My includes
 #include "Residual.h"
