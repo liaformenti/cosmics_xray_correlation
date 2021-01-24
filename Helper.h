@@ -12,6 +12,9 @@
 // Root includes
 #include <TROOT.h>
 
+// tgc_analysis includes
+#include "FitTools.h"
+
 // A "Combination" is 2 fixed layers and the layer of interest
 struct Combination {
   Combination(){};
@@ -54,6 +57,22 @@ void getOtherLayers(UShort_t la, UShort_t lb, UShort_t* lc, UShort_t* ld);
     Double_t sigmaError;
     Double_t amplitude;
 };*/
+
+// From tgc_analysis FinalizeAnalysis.h
+// For fitting residuals histograms with double gaus fit in ResPlots
+struct DoubGausFitResult{
+  FitResult fitResult = fUNKNOWNFIT;
+  Double_t mean;
+  Double_t meanError;
+  Double_t amplitudeSignal;
+  Double_t amplitudeSignalError;
+  Double_t sigmaSignal;
+  Double_t sigmaSignalError;
+  Double_t amplitudeBackground;
+  Double_t amplitudeBackgroundError;
+  Double_t sigmaBackground;
+  Double_t sigmaBackgroundError;
+};
 
 #endif
 
