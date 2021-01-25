@@ -53,7 +53,10 @@ class ResPlots {
     void CreateNumEntriesTH2Is();
     void PrintNumEntriesTH2Is(std::string filename);
     void CreatePosBinnedResPlots();
-    void PrintPosBinnedResPlots(std::string filename);
+    // opt is a string that sets plot printing options. 
+    // Current valid options:
+    // "logy": Will put a log scale on y axis of plots
+    void PrintPosBinnedResPlots(std::string filename, std::string opt="");
     void CreatePosBinnedFitResultTH2Fs();
     void PrintPosBinnedFitResultTH2Fs(std::string filename);
     // Print members

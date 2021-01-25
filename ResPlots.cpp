@@ -146,7 +146,7 @@ void ResPlots::CreatePosBinnedResPlots() {
     }
 } // end
 
-void ResPlots::PrintPosBinnedResPlots(string filename){
+void ResPlots::PrintPosBinnedResPlots(string filename, string opt){
     TCanvas* c = new TCanvas();
     c->Divide(2,2); // 4 plots per pdf page
     c->Print((filename +"[").c_str());
@@ -163,6 +163,7 @@ void ResPlots::PrintPosBinnedResPlots(string filename){
                 hist = (TH1I*)pm->Get(name);
                 if (hist->GetEntries() != 0) {
                     c->cd(count%4 + 1);
+                    if (opt == "logy") gPad->SetLogy();
                     hist->Draw();
                     if (count%4==3) { // Add page once canvas is full
                         c->Print(filename.c_str());
