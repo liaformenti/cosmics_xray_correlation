@@ -1,5 +1,5 @@
 CXX=g++
-ROOTFLAGS=`root-config --cflags --glibs` -L$(ROOTSYS)/lib
+ROOTFLAGS=`root-config --cflags --glibs` -L$(ROOTSYS)/lib -lMinuit
 ROOTFLAGSLINK=`root-config --cflags`
 CFLAGS=-std=gnu++14 -lsqlite3 `xml2-config --cflags` -lxml2
 DEBUG=-Wall -g

@@ -212,22 +212,25 @@ void ResPlots::CreatePosBinnedFitResultTH2Fs() {
     Float_t invalidErr = 0;
     InitializePosBinnedFitResultTH2Fs();
     vector<Combination> comboVec = combinationVector();
-    string name;
+    string histName; // Name of hist to fit
+    string name; // To hold temp names
     TH1I* hist;
-    Int_t status; // hold fit result
-    TF1* theFit;
-    Double_t mean, meanErr;
-    Double_t sigma, sigmaErr;
+    // From when the fit was Gaussian
+    // Int_t status; // hold fit result
+    // TF1* theFit;
+    // Double_t mean, meanErr;
+    // Double_t sigma, sigmaErr;
     TH2F* th2F; 
+    DoubGausFitResult results;
     for (auto combo=comboVec.begin(); combo!=comboVec.end(); combo++){
         for (Int_t i=0; i<binning->xBinEdges.size()-1; i++) {
             for (Int_t j=0; j<binning->yBinEdges.size()-1; j++) {
                 // For each bin and combination do fit
                 // ****** Want to be able to select fit
-                name = nameBase + "_residuals_xbin_" + to_string(i+1);
-                name += "_ybin_" + to_string(j+1) + "_"; 
-                name += combo->String();
-                hist = (TH1I*)pm->Get(name);
+                histName = nameBase + "_residuals_xbin_" + to_string(i+1);
+                histName += "_ybin_" + to_string(j+1) + "_"; 
+                histName += combo->String();
+                hist = (TH1I*)pm->Get(histName);
                 // If residual histogram has less that a min no. entries,
                 // Fill bin with invalid value
                 // Should be in config
@@ -242,7 +245,21 @@ void ResPlots::CreatePosBinnedFitResultTH2Fs() {
                     th2F->SetBinError(i+1, j+1, invalidErr);
                     continue;
                 }
-                status = hist->Fit("gaus", "SQ");
+                // Fit double Gaussian
+                results = DoDoubGausFit(histName, pm);
+                if (results.fitResult == fSUCCESS) {
+                    // Fill mean and sigma area plots with signal Gaus fit params 
+                    name = nameBase + "_means_" + combo->String();
+                    th2F = (TH2F*)pm->GetTH2F(name);
+                    th2F->SetBinContent(i+1, j+1, results.mean);
+                    th2F->SetBinError(i+1, j+1, results.meanError);
+                    name = nameBase + "_sigmas_" + combo->String();
+                    th2F = (TH2F*)pm->GetTH2F(name);
+                    th2F->SetBinContent(i+1, j+1, results.sigmaSignal);
+                    th2F->SetBinError(i+1, j+1, results.sigmaSignalError);
+                }
+                /* WHEN THE FIT WAS GAUSSIAN
+                 * status = hist->Fit("gaus", "SQ");
                 if (status==0) { // Fit was success, fill TH2Fs
                     theFit = (TF1*)hist->GetFunction("gaus");     
                     mean = theFit->GetParameter(1); 
@@ -258,7 +275,7 @@ void ResPlots::CreatePosBinnedFitResultTH2Fs() {
                     th2F = (TH2F*)pm->GetTH2F(name);
                     th2F->SetBinContent(i+1, j+1, sigma);
                     th2F->SetBinError(i+1, j+1, sigmaErr);
-                }
+                }*/
                 else { // if the fit fails, fill bin with invalid
                     name = nameBase + "_means_" + combo->String();
                     th2F = (TH2F*)pm->GetTH2F(name);
