@@ -188,6 +188,7 @@ void CompareData::MakeScatterPlot(){
     // First, put all combinations' residuals on one plot
     vector<Double_t> X, Y, eX, eY;
     for (auto ld=localDataVec.begin(); ld!=localDataVec.end(); ld++) {
+        if (ld->fitResult != 0) continue; // Skip points where residuals fit failed
         X.push_back(ld->xRes.res);
         eX.push_back(0); // Currently don't have errors on xray residuals *************
         Y.push_back(ld->meanCosmicsResidual);
