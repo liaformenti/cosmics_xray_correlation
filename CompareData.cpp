@@ -258,7 +258,7 @@ void CompareData::OutputLocalDataToCSV() {
     
   // Prepare csv file to print numerical results to
   ofstream f;
-  f.open(myInfo->outpath + myInfo->tag + myInfo->quadname + "local_cosmic_and_xray_data.csv");
+  f.open(myInfo->outpath + myInfo->tag + myInfo->quadname + "_local_cosmic_and_xray_data.csv");
   f << "X-ray pt id,Layer,Fixed layer 1,Fixed layer 2,x,y,x low,x high,y low,y high,";
   f << "x-ray residual,xray residual error,";
   f << "fit result,nEntries,";
