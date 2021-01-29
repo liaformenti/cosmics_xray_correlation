@@ -190,7 +190,7 @@ void CompareData::MakeScatterPlot(){
     for (auto ld=localDataVec.begin(); ld!=localDataVec.end(); ld++) {
         if (ld->fitResult != 0) continue; // Skip points where residuals fit failed
         X.push_back(ld->xRes.res);
-        eX.push_back(0); // Currently don't have errors on xray residuals *************
+        eX.push_back(ld->xRes.resErr); 
         Y.push_back(ld->meanCosmicsResidual);
         eY.push_back(ld->meanCosmicsResidualError);
     }
@@ -210,7 +210,9 @@ void CompareData::MakeScatterPlot(){
         return;
     }
     allLocalDataGraph->Draw("AP");
-    allLocalDataGraph->Fit("pol1", "QF");
+    TF1* linFitAll = (TF1*)(gROOT->GetFunction("pol1"));
+    linFitAll->SetParameters(0,1); // Resonable guesses for intercept, slope
+    allLocalDataGraph->Fit(linFitAll, "Q"); // Removed the F option for Minuit fitter
     c->Print(filename.c_str());
     c->Clear();
 
@@ -223,7 +225,7 @@ void CompareData::MakeScatterPlot(){
             if (*comb != ld->xRes.GetCombo()) continue;
             // For correct combination, add data to vectors
             x.push_back(ld->xRes.res);
-            ex.push_back(0); // Currently don't have errors on xray residuals *************
+            ex.push_back(ld->xRes.resErr); 
             y.push_back(ld->meanCosmicsResidual);
             ey.push_back(ld->meanCosmicsResidualError);
         }
@@ -238,7 +240,9 @@ void CompareData::MakeScatterPlot(){
         // Get TGraphErrors
         TGraphErrors* localDataGraph = (TGraphErrors*)pm->Get(name);
         if (localDataGraph->GetN() != 0) {
-            localDataGraph->Fit("pol1", "QF");
+            TF1* linFit = (TF1*)(gROOT->GetFunction("pol1"));
+            linFit->SetParameters(0,1); // Resonable guesses for intercept, slope
+            localDataGraph->Fit(linFit, "Q"); // Removed the F option for Minuit fitter
             localDataGraph->Draw("AP");
             c->Print(filename.c_str());
             c->Clear();
@@ -254,8 +258,9 @@ void CompareData::OutputLocalDataToCSV() {
     
   // Prepare csv file to print numerical results to
   ofstream f;
-  f.open(myInfo->outpath + myInfo->tag + "local_cosmic_and_xray_data.csv");
-  f << "X-ray pt id,Layer,Fixed layer 1,Fixed layer 2,x,y,x low,x high,y low,y high,x-ray residual,";
+  f.open(myInfo->outpath + myInfo->tag + myInfo->quadname + "local_cosmic_and_xray_data.csv");
+  f << "X-ray pt id,Layer,Fixed layer 1,Fixed layer 2,x,y,x low,x high,y low,y high,";
+  f << "x-ray residual,xray residual error,";
   f << "fit result,nEntries,";
 
   // Get header
@@ -274,7 +279,7 @@ void CompareData::OutputLocalDataToCSV() {
     f << ld->xRes.tag << ',' << ld->xRes.l << ',' << ld->xRes.la << ',' << ld->xRes.lb;
     f << ',' << ld->xRes.x << ',' << ld->xRes.y << ',' << ld->xROI.first << ',' << ld->xROI.second;
     f << ',' << ld->yROI.first << ',' << ld->yROI.second << ',' << ld->xRes.res << ',';
-    f << ld->fitResult << ',' << ld->nEntries << ',';
+    f << ld->xRes.resErr << ',' << ld->fitResult << ',' << ld->nEntries << ',';
     
     // If fit failed, or there are no entries
     if (ld->fitResult != 0 || ld->nEntries == 0) {

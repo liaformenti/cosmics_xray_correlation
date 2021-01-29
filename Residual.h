@@ -3,6 +3,7 @@
 
 // C++ includes
 #include <iostream>
+#include <math.h>
 
 // Root includes
 #include "Rtypes.h"
@@ -19,7 +20,7 @@ class Residual {
   public:
     // Constructors
     Residual(){};
-    Residual(Double_t residual, UShort_t layer, 
+    Residual(Double_t residual, Double_t residualError, UShort_t layer, 
              Double_t xpos, Double_t ypos, 
              UShort_t fixedLayer1, UShort_t fixedLayer2);
     Residual(Tracking &trackInfo, UShort_t layer);
@@ -27,6 +28,7 @@ class Residual {
 
     // Members
     Double_t res;
+    Double_t resErr;
     UShort_t l;
     Double_t x;
     Double_t y;

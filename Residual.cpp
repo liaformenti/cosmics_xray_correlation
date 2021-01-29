@@ -5,11 +5,12 @@
 using namespace std;
 
 // Should do hit - track
-Residual::Residual(Double_t residual, UShort_t layer,
+Residual::Residual(Double_t residual, Double_t residualError, UShort_t layer,
                    Double_t xpos, Double_t ypos,
                    UShort_t fixedLayer1, UShort_t fixedLayer2) {
     // Initialize members
     res = residual;
+    resErr = residualError;
     l = layer;
     x = xpos;
     y = ypos;
@@ -24,6 +25,7 @@ Residual::Residual(Tracking &trackInfo, UShort_t layer) {
     la = trackInfo.la;
     lb = trackInfo.lb;
     res = trackInfo.hitsY[l] - trackInfo.fitYPos[l];
+    resErr = sqrt( pow(trackInfo.hitsYUncerts[l],2) + pow(trackInfo.fitYUncerts[l],2) );
     // cout << "Constr.2 " << res << ' ' << l << ' ' << x << ' ' << y << ' ' << la << ' ' << lb << '\n';
 }
 // Returns combination struct based on conditions in which residual
@@ -34,6 +36,6 @@ Combination Residual::GetCombo() {
 
 void Residual::PrintResidual() {
     cout << "Layer: " << l << ", fixed layers: " << la << lb << ", at x = " << x << " mm, y = " << y;
-    cout << " mm, residual: " << res << ' ' << tag << '\n';
+    cout << " mm, residual: " << res << ' ' << resErr << ' ' << tag << '\n';
     return;
 }
