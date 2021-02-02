@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
     PlotManager* plotManager = new PlotManager();    
 
     // Get xray data
-    /*cout << "Getting x-ray data...\n\n";
+    cout << "Getting x-ray data...\n\n";
     XRayData xData(cosmicsInfo, &myInfo, plotManager);
     xData.WriteOutXRayData();
     xData.PlotAverageBeamPositions();
@@ -94,7 +94,16 @@ int main(int argc, char* argv[]) {
     // cout << "Not re-tracking x-ray data\n\n";
     cout << "Re-tracking x-ray data...\n\n";
     XRayRetracking xrayTracks(&xData, cosmicsInfo, &myInfo, plotManager, geom);
-    xrayTracks.Retrack();*/
+    xrayTracks.Retrack();
+    // Temporary way to printout xray residuals
+    ofstream f;
+    f.open(myInfo.outpath + myInfo.quadname + "_xray_residuals.txt");
+    f << "layer,fixed_layer_a, fixed_layer_b, x, y, residual, residual error, tag, mm\n";
+    for (auto r=xrayTracks.residuals.begin(); r!=xrayTracks.residuals.end(); r++){
+        f << r->l << "," << r->la << "," << r->lb << "," << r->x << "," << r->y << ",";
+        f << r->res << "," << r->resErr << "," << r->tag << "\n"; 
+    }
+    f.close();
 
     // cout << "Not retracking cosmics.\n\n";
     cout << "Re-tracking cosmics...\n\n";
@@ -103,12 +112,12 @@ int main(int argc, char* argv[]) {
     cosmicTracks.PrintTrackAngleHistograms();
     
     // cout << "Not comparing cosmics and x-ray data.\n\n";
-    /*cout << "Comparing cosmics and x-ray data...\n\n";
-    CompareData comp(72, 50, &xrayTracks.residuals, &cosmicTracks.residuals, &myInfo, plotManager, 
+    cout << "Comparing cosmics and x-ray data...\n\n";
+    CompareData comp(100, 100, &xrayTracks.residuals, &cosmicTracks.residuals, &myInfo, plotManager, 
                      geom);
     comp.DoComparison();
     comp.MakeScatterPlot();
-    comp.OutputLocalDataToCSV();*/
+    comp.OutputLocalDataToCSV();
 
     // TH2s
     Binning widthBins(100, 100, geom);
