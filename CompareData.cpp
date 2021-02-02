@@ -88,7 +88,14 @@ void LocalData::DoCosmicResidualsFit() {
     cout << "nEntries " << nEntries << '\n';
 
     // Fit histogram
-    fitResult = hist->Fit("gaus", "SQ");
+    // Range is residual E [-1.5,1.5]
+    // Should be in config
+    // Since fit fcn is still based on gaus, the mean parameter is stil named "Mean"
+    TF1* fit = new TF1("myGaus", "gaus", -1.5, 1.5);
+    fit->SetParameter(0, 100); // Guess for amplitude
+    fit->SetParameter(1, hist->GetMean()); // Guess for mean
+    fit->SetParameter(2, hist->GetRMS()); // Guess for sigma
+    fitResult = hist->Fit("myGaus", "SQR");
 
     // Get results
     if (fitResult != 0) {
@@ -98,7 +105,7 @@ void LocalData::DoCosmicResidualsFit() {
         return;
     } 
 
-    fitFcn = (TF1*)hist->GetFunction("gaus");
+    fitFcn = (TF1*)hist->GetFunction("myGaus");
     nFitParams = fitFcn->GetNpar();
     
     // Put fit paramter names and values in member vectors
@@ -188,7 +195,10 @@ void CompareData::MakeScatterPlot(){
     // First, put all combinations' residuals on one plot
     vector<Double_t> X, Y, eX, eY;
     for (auto ld=localDataVec.begin(); ld!=localDataVec.end(); ld++) {
-        if (ld->fitResult != 0) continue; // Skip points where residuals fit failed
+        // Skip points where residuals fit failed 
+        // or where mean cosmics residual error is too high
+        // should be in config
+        if ((ld->fitResult != 0) || (ld->meanCosmicsResidualError > 0.07)) continue; 
         X.push_back(ld->xRes.res);
         eX.push_back(ld->xRes.resErr); 
         Y.push_back(ld->meanCosmicsResidual);
@@ -223,6 +233,10 @@ void CompareData::MakeScatterPlot(){
         for (auto ld=localDataVec.begin(); ld!=localDataVec.end(); ld++) {
             // Skip data points with wrong combination
             if (*comb != ld->xRes.GetCombo()) continue;
+            // Skip points where residuals fit failed or 
+            // where mean cosmics residual error is too high
+            // should be in config
+            if ((ld->fitResult != 0) || (ld->meanCosmicsResidualError > 0.07)) continue; 
             // For correct combination, add data to vectors
             x.push_back(ld->xRes.res);
             ex.push_back(ld->xRes.resErr); 

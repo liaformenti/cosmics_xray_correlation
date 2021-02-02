@@ -242,9 +242,15 @@ void ResPlots::CreatePosBinnedFitResultTH2Fs() {
                     th2F->SetBinError(i+1, j+1, invalidErr);
                     continue;
                 }
-                status = hist->Fit("gaus", "SQ");
+                // Range is residual E [-1.5,1.5]
+                // Should be in config
+                TF1* fit = new TF1("myGaus", "gaus", -1.5, 1.5);
+                fit->SetParameter(0, 100); // Guess for amplitude
+                fit->SetParameter(1, hist->GetMean()); // Guess for mean
+                fit->SetParameter(2, hist->GetRMS()); // Guess for sigma
+                status = hist->Fit("myGaus", "SQR");
                 if (status==0) { // Fit was success, fill TH2Fs
-                    theFit = (TF1*)hist->GetFunction("gaus");     
+                    theFit = (TF1*)hist->GetFunction("myGaus");     
                     mean = theFit->GetParameter(1); 
                     meanErr = theFit->GetParError(1);
                     sigma = theFit->GetParameter(2);
@@ -284,8 +290,8 @@ void ResPlots:: PrintPosBinnedFitResultTH2Fs(string filename) {
         hist = (TH2F*)pm->Get(nameBase + "_means_" + combo->String());  
         if (hist->GetEntries() != 0) { // If plot is not empty,
             // These max and min values should go in config
-            // hist->SetMaximum(0.5);
-            // hist->SetMinimum(-0.5);
+            hist->SetMaximum(0.5);
+            hist->SetMinimum(-0.5);
             hist->Draw("Colz");
             c->Print(filename.c_str());
             c->Clear();
@@ -294,8 +300,8 @@ void ResPlots:: PrintPosBinnedFitResultTH2Fs(string filename) {
         hist = (TH2F*)pm->Get(nameBase + "_sigmas_" + combo->String()); 
         if (hist->GetEntries() != 0) {
             // These max and min values should go in config
-            // hist->SetMaximum(0.5);
-            // hist->SetMinimum(0);
+            hist->SetMaximum(0.5);
+            hist->SetMinimum(0);
             hist->Draw("Colz");
             c->Print(filename.c_str());
             c->Clear();
