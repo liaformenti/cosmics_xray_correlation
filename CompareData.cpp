@@ -85,13 +85,13 @@ void LocalData::DoCosmicResidualsFit() {
     }
 
     nEntries = hist->GetEntries();
-    cout << "nEntries " << nEntries << '\n';
 
     // Fit histogram
-    // Range is residual E [-1.5,1.5]
+    // Range of fit is also fit range
+    // Based on histogram RMS
     // Should be in config
     // Since fit fcn is still based on gaus, the mean parameter is stil named "Mean"
-    TF1* fit = new TF1("myGaus", "gaus", -1.5, 1.5);
+    TF1* fit = new TF1("myGaus", "gaus", -1.0*hist->GetRMS(), 1.0*hist->GetRMS());
     fit->SetParameter(0, 100); // Guess for amplitude
     fit->SetParameter(1, hist->GetMean()); // Guess for mean
     fit->SetParameter(2, hist->GetRMS()); // Guess for sigma

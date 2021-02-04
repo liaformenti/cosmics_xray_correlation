@@ -242,9 +242,10 @@ void ResPlots::CreatePosBinnedFitResultTH2Fs() {
                     th2F->SetBinError(i+1, j+1, invalidErr);
                     continue;
                 }
-                // Range is residual E [-1.5,1.5]
+                // Range of fit is desired fit range
+                // Based on histogram RMS
                 // Should be in config
-                TF1* fit = new TF1("myGaus", "gaus", -1.5, 1.5);
+                TF1* fit = new TF1("myGaus", "gaus", -1.0*hist->GetRMS(), 1.0*hist->GetRMS());
                 fit->SetParameter(0, 100); // Guess for amplitude
                 fit->SetParameter(1, hist->GetMean()); // Guess for mean
                 fit->SetParameter(2, hist->GetRMS()); // Guess for sigma
