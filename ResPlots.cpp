@@ -214,6 +214,7 @@ void ResPlots::CreatePosBinnedFitResultTH2Fs() {
     vector<Combination> comboVec = combinationVector();
     string name;
     TH1I* hist;
+    Double_t histMean, histRMS;
     Int_t status; // hold fit result
     TF1* theFit;
     Double_t mean, meanErr;
@@ -245,10 +246,12 @@ void ResPlots::CreatePosBinnedFitResultTH2Fs() {
                 // Range of fit is desired fit range
                 // Based on histogram RMS
                 // Should be in config
-                TF1* fit = new TF1("myGaus", "gaus", -1.0*hist->GetRMS(), 1.0*hist->GetRMS());
+                histMean = hist->GetMean();
+                histRMS = hist->GetRMS();
+                TF1* fit = new TF1("myGaus", "gaus", histMean - histRMS, histMean + histRMS);
                 fit->SetParameter(0, 100); // Guess for amplitude
-                fit->SetParameter(1, hist->GetMean()); // Guess for mean
-                fit->SetParameter(2, hist->GetRMS()); // Guess for sigma
+                fit->SetParameter(1, histMean); // Guess for mean
+                fit->SetParameter(2, histRMS); // Guess for sigma
                 status = hist->Fit("myGaus", "SQRL");
                 if (status==0) { // Fit was success, fill TH2Fs
                     theFit = (TF1*)hist->GetFunction("myGaus");     

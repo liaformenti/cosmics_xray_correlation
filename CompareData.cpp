@@ -91,10 +91,12 @@ void LocalData::DoCosmicResidualsFit() {
     // Based on histogram RMS
     // Should be in config
     // Since fit fcn is still based on gaus, the mean parameter is stil named "Mean"
-    TF1* fit = new TF1("myGaus", "gaus", -1.0*hist->GetRMS(), 1.0*hist->GetRMS());
+    Double_t histMean = hist->GetMean();
+    Double_t histRMS = hist->GetRMS();
+    TF1* fit = new TF1("myGaus", "gaus", histMean - histRMS, histMean + histRMS);
     fit->SetParameter(0, 100); // Guess for amplitude
-    fit->SetParameter(1, hist->GetMean()); // Guess for mean
-    fit->SetParameter(2, hist->GetRMS()); // Guess for sigma
+    fit->SetParameter(1, histMean); // Guess for mean
+    fit->SetParameter(2, histRMS); // Guess for sigma
     fitResult = hist->Fit("myGaus", "SQRL");
 
     // Get results
