@@ -95,7 +95,7 @@ void LocalData::DoCosmicResidualsFit() {
     fit->SetParameter(0, 100); // Guess for amplitude
     fit->SetParameter(1, hist->GetMean()); // Guess for mean
     fit->SetParameter(2, hist->GetRMS()); // Guess for sigma
-    fitResult = hist->Fit("myGaus", "SQR");
+    fitResult = hist->Fit("myGaus", "SQRL");
 
     // Get results
     if (fitResult != 0) {

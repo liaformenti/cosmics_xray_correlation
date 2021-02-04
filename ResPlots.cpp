@@ -249,7 +249,7 @@ void ResPlots::CreatePosBinnedFitResultTH2Fs() {
                 fit->SetParameter(0, 100); // Guess for amplitude
                 fit->SetParameter(1, hist->GetMean()); // Guess for mean
                 fit->SetParameter(2, hist->GetRMS()); // Guess for sigma
-                status = hist->Fit("myGaus", "SQR");
+                status = hist->Fit("myGaus", "SQRL");
                 if (status==0) { // Fit was success, fill TH2Fs
                     theFit = (TF1*)hist->GetFunction("myGaus");     
                     mean = theFit->GetParameter(1); 
