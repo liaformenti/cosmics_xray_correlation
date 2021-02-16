@@ -48,11 +48,13 @@ class CosmicsRetracking : public Retracking {
     //                                std::map<UShort_t, Double_t> &yTrack);
     void PrintTrackUncertaintyHistograms();
     void PrintTrackAngleHistograms();
+    void PrintResidualUncertaintyHistograms();
 
   private:
     TTree* trksTree = nullptr;
     void InitializeTrackUncertaintyHistograms();
     void InitializeTrackAngleHistograms();
+    void InitializeResidualUncertaintyHistograms();
 };
 
 #endif

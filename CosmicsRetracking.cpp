@@ -34,6 +34,7 @@ void CosmicsRetracking::Retrack() {
 
     InitializeTrackUncertaintyHistograms();
     InitializeTrackAngleHistograms();
+    InitializeResidualUncertaintyHistograms();
 
     // For each entry, do retracking for each set of fixed layers
     // cout << "FEW TRACKS ONLY (CosmicsRetracking)\n";
@@ -78,6 +79,8 @@ void CosmicsRetracking::Retrack() {
                     pm->Fill("track_y_angle_" + Combination(lc, la, lb).String(), 
                              tan(myTrack.resultY->Value(1)));
                     res = Residual(myTrack, lc);
+                    pm->Fill("residual_uncertainty_" + Combination(lc, la, lb).String(), 
+                             res.resErr);
                     residuals.push_back(res);
                 }
                 if (myTrack.hitsY.find(ld) != myTrack.hitsY.end()) {
@@ -87,6 +90,8 @@ void CosmicsRetracking::Retrack() {
                     pm->Fill("track_y_angle_" + Combination(ld, la, lb).String(), 
                              tan(myTrack.resultY->Value(1)));
                     res = Residual(myTrack, ld);
+                    pm->Fill("residual_uncertainty_" + Combination(ld, la, lb).String(), 
+                             res.resErr);
                     residuals.push_back(res);
                 }
                 // Plot linear fit
@@ -121,14 +126,17 @@ void CosmicsRetracking::InitializeTrackUncertaintyHistograms() {
     string headerY = "uncertainty_y_evaluations_";
     for (auto v=combVec.begin(); v!=combVec.end(); v++) {
         // Just try the bin number and limits for now
-        pm->Add(headerY + v->String(), "Layer: " + to_string(v->layer) + ", Fixed layers: " + to_string(v->fixed1) + to_string(v->fixed2) + " y-track fit uncertainty;Uncertainty [mm];Tracks;", 60, 0, 20, myTH1F);
+        pm->Add(headerY + v->String(), "Layer: " + to_string(v->layer) + ", Fixed layers: " + 
+                to_string(v->fixed1) + to_string(v->fixed2) + 
+                " y-track fit uncertainty;Uncertainty [mm];Tracks;", 1500, 0, 15, myTH1F);
     }
     return;
 }
 
 void CosmicsRetracking::PrintTrackUncertaintyHistograms() {
     TCanvas *c = new TCanvas();
-    string outName = myInfo->outpath + myInfo->tag + "y_evaluation_uncertainties.pdf";
+    string outName = myInfo->outpath + myInfo->tag + myInfo->quadname;
+    outName += "_y_evaluation_uncertainties.pdf";
     c->Print((outName + "[").c_str());
     vector<Combination> combVec = combinationVector();
     for (auto comb=combVec.begin(); comb!=combVec.end(); comb++) {
@@ -156,7 +164,7 @@ void CosmicsRetracking::InitializeTrackAngleHistograms() {
 
 void CosmicsRetracking::PrintTrackAngleHistograms() {
     TCanvas *c = new TCanvas();
-    string outName = myInfo->outpath + myInfo->tag + "track_y_angle_hists.pdf";
+    string outName = myInfo->outpath + myInfo->tag + myInfo->quadname + "_track_y_angle_hists.pdf";
     c->Print((outName + "[").c_str());
     vector<Combination> combVec = combinationVector();
     for (auto v=combVec.begin(); v!=combVec.end(); v++) {
@@ -168,4 +176,35 @@ void CosmicsRetracking::PrintTrackAngleHistograms() {
     delete c;
     return;
 }
+
+void CosmicsRetracking::InitializeResidualUncertaintyHistograms() {
+    vector<Combination> combVec = combinationVector(); 
+    string name, title;
+    string headerY = "residual_uncertainty_";
+    for (auto v=combVec.begin(); v!=combVec.end(); v++) { 
+        name = headerY + v->String();
+        title = "Layer: " + to_string(v->layer) + ", Fixed layers: " + to_string(v->fixed1); 
+        title+= to_string(v->fixed2) + " - residual uncertainties;Uncertainty [mm];Tracks";
+        pm->Add(name, title, 1500, 0, 15, myTH1I);
+
+    }
+    return;
+}
+
+void CosmicsRetracking::PrintResidualUncertaintyHistograms() {
+    TCanvas *c = new TCanvas();
+    string outName = myInfo->outpath + myInfo->tag + myInfo->quadname;
+    outName += "_residual_uncertainty_hists.pdf";
+    c->Print((outName + "[").c_str());
+    vector<Combination> combVec = combinationVector();
+    for (auto v=combVec.begin(); v!=combVec.end(); v++) {
+        TH1I* anghist = (TH1I*)pm->GetTH1I("residual_uncertainty_" + v->String());             
+        anghist->Draw();
+        c->Print(outName.c_str());
+    }
+    c->Print((outName + "]").c_str());
+    delete c;
+    return;
+}
+
 
