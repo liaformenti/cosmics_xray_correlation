@@ -119,8 +119,8 @@ int main(int argc, char* argv[]) {
     reclustered->SetBranchAddress("sigma", &sigmaPtr);
     reclustered->SetBranchAddress("pdo_strip", &pdoStripPtr);
     reclustered->SetBranchAddress("posCH", &posCHPtr);
-    // for (Int_t i=0; i<nEntries; i++) {
-    for (Int_t i=0; i<3; i++) {
+    // for (Int_t i=0 i<nEntries; i++) {
+    for (Int_t i=0; i<1000; i++) {
         reclustered->GetEntry();
     }
     caFile->Close();
