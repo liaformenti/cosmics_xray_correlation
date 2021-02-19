@@ -5,6 +5,7 @@
 *_rdict.pcm
 *LinkDef.cpp
 StripPosAnalysis
+ReClustering
 
 # Root files
 *.root
