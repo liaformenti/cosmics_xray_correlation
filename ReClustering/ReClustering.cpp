@@ -26,8 +26,8 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        cout << "Usage: ./ReClustering CosmicsAnalysis.root outpath/ \n";
+    if (argc < 3) {
+        cout << "Usage: ./ReClustering CosmicsAnalysis.root outpath/ [tag_]\n";
         return 0;
     }
     
@@ -38,6 +38,17 @@ int main(int argc, char* argv[]) {
     // Check output directory
     if (gSystem->AccessPathName(argv[2]))
         throw runtime_error("Output directory does not exist.\n\n");
+
+    // Get tag if provided
+    string tag = "";
+    if (argc==4)
+        tag = argv[3];
+
+    // Open output file
+    string outpath = argv[2];
+    TFile* outFile = new TFile((outpath + tag + "reclustering.root").c_str(), "RECREATE");
+    if (outFile->IsZombie())
+        throw runtime_error("Error opening output file.\n\n");
 
     // Open input file
     TFile* caFile = new TFile(argv[1], "READ");
@@ -53,5 +64,7 @@ int main(int argc, char* argv[]) {
 
     caFile->Close();
     delete caFile;
+    outFile->Close();
+    delete outFile;
     return 0;
 }
