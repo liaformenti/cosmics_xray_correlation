@@ -1,27 +1,5 @@
-//***********************************************************
-// ReClustering takes a tracks TTree from CosmicsAnalysis and
-// redoes the cluster fit.
-// It outputs the cluster parameters in a reformatted TTree
-// with more information about the fit than the original, 
-// namely, the fit parameter uncertainties.
-//
-// Author: Lia Formenti
-// Date: 2021-02-18
-// lia.formenti@mail.mcgill.ca
-// ************************************************************
-
-// C++ include
-#include <iostream>
-#include <vector>
-#include <map>
-
-// ROOT includes
-#include <TROOT.h>
-#include <TSystem.h>
-#include <TFile.h>
-#include <TTree.h>
-#include <TCanvas.h>
-#include <TH1F.h>
+#define ReClustering_cxx
+#include "ReClustering.h"
 
 using namespace std;
 
@@ -44,6 +22,9 @@ int main(int argc, char* argv[]) {
     if (argc==4)
         tag = argv[3];
 
+    // Setup plot manager
+    PlotManager* pm = new PlotManager();
+
     // Open input file
     TFile* caFile = new TFile(argv[1], "READ");
     if (caFile->IsZombie())
@@ -55,13 +36,14 @@ int main(int argc, char* argv[]) {
 
     // Get TTree
     TTree* tracks = (TTree*)caFile->Get("tracks");
-
+    
     // Deactivate all branches
     tracks->SetBranchStatus("*", 0);
 
     // Activate the branches you want to copy to output tree
-    for (auto activeBranchName : {"eventnumber", "trackX", "trackYGaussian", "sigma", "pdo_strip",
-                                  "posCH", "relClPosGaussian", "clSize", "isSaturated"}) {
+    for (auto activeBranchName : {"eventnumber", "trackX", "trackYGaussian", "trackYWeighted", 
+                                  "sumPDO", "rms", "sigma", "pdo_strip", "posCH", 
+                                  "relClPosGaussian", "clSize", "isSaturated"}) {
         tracks->SetBranchStatus(activeBranchName, 1);
     }
 
@@ -76,14 +58,16 @@ int main(int argc, char* argv[]) {
 
     TTree* reclustered = tracks->CloneTree();
 
+    pm->Add(reclustered, myTTree);
+
     // Add new branches
     // These contain the fit parameters calculated from redoing the cluster fit
     map <UShort_t, Double_t> amplitude;
     map <UShort_t, Double_t> amplitudeError;
     map <UShort_t, Double_t> mean;
     map <UShort_t, Double_t> meanError;
-    map <UShort_t, Double_t> newsigma;
-    map <UShort_t, Double_t> newsigmaError;
+    map <UShort_t, Double_t> newSigma;
+    map <UShort_t, Double_t> newSigmaError;
     map <UShort_t, Int_t>  ndf;
     map <UShort_t, Int_t> chi2;
 
@@ -91,8 +75,8 @@ int main(int argc, char* argv[]) {
     reclustered->Branch("amplitudeError", &amplitudeError);
     reclustered->Branch("mean", &mean);
     reclustered->Branch("meanError", &meanError);
-    reclustered->Branch("newsigma");
-    reclustered->Branch("newsigmaError");
+    reclustered->Branch("newSigma");
+    reclustered->Branch("newSigmaError");
     reclustered->Branch("ndf", &ndf);
     reclustered->Branch("chi2", &chi2);
 
@@ -102,6 +86,18 @@ int main(int argc, char* argv[]) {
     map <UShort_t, Double_t> trackYGaussian;
     map <UShort_t, Double_t>* trackYGaussianPtr;
     trackYGaussianPtr = &trackYGaussian;
+
+    map <UShort_t, Double_t> trackYWeighted;
+    map <UShort_t, Double_t>* trackYWeightedPtr;
+    trackYWeightedPtr = &trackYWeighted;
+
+    map <UShort_t, Double_t> sumPDO;
+    map <UShort_t, Double_t>* sumPDOPtr;
+    sumPDOPtr = &sumPDO;
+
+    map <UShort_t, Double_t> rms;
+    map <UShort_t, Double_t>* rmsPtr;
+    rmsPtr = &rms;
 
     map<UShort_t, Double_t> sigma;
     map <UShort_t, Double_t>* sigmaPtr;
@@ -116,13 +112,62 @@ int main(int argc, char* argv[]) {
     posCHPtr = &posCH;
 
     reclustered->SetBranchAddress("trackYGaussian", &trackYGaussianPtr);
+    reclustered->SetBranchAddress("trackYWeighted", &trackYWeightedPtr);
+    reclustered->SetBranchAddress("sumPDO", &sumPDOPtr);
+    reclustered->SetBranchAddress("rms", &rmsPtr);
     reclustered->SetBranchAddress("sigma", &sigmaPtr);
     reclustered->SetBranchAddress("pdo_strip", &pdoStripPtr);
     reclustered->SetBranchAddress("posCH", &posCHPtr);
+    UShort_t layer;
+    vector<Double_t> pos;
+    vector<Double_t> pdo;
+    Int_t numFits = 0;
+    Int_t failedFitCount = 0;
+
     // for (Int_t i=0 i<nEntries; i++) {
-    for (Int_t i=0; i<1000; i++) {
+    for (Int_t i=0; i<1; i++) {
+        // Get entry
         reclustered->GetEntry();
+        // Clear the leaves to output
+        amplitude.clear(); amplitudeError.clear();
+        mean.clear(); meanError.clear();
+        newSigma.clear(); newSigmaError.clear();
+        ndf.clear(); chi2.clear();
+        // Assumes that posCH and pdoStrip are same size
+        for (auto val=posCH.begin(); val!=posCH.end(); val++) {
+            layer = val->first;
+            pos = val->second;
+            pdo = pdoStrip.at(layer);
+            // Set initial parameter guesses for Gaussian fit
+            // Same guesses as in CosmicsAnalysis
+            GausFitInfo fitInfo;
+            fitInfo.A = sumPDO.at(layer)/(sqrt(2*TMath::Pi())*rms.at(layer));
+            fitInfo.mean = trackYWeighted.at(layer);
+            fitInfo.sigma = rms.at(layer);
+            // Do fit
+            DoGausFitMinuit(pos, pdo, fitInfo, false);
+            // Store fit parameters in branches
+            amplitude[layer] = fitInfo.A;
+            amplitudeError[layer] = fitInfo.Aerr;
+            mean[layer] = fitInfo.mean;
+            meanError[layer] = fitInfo.meanErr;
+            newSigma[layer] = fitInfo.sigma;
+            newSigmaError[layer] = fitInfo.sigmaErr;
+            ndf[layer] = fitInfo.NDF;
+            chi2[layer] = fitInfo.chi2;
+
+            // May need to add a check here in case fit fails.
+            if (fitInfo.fitResult==false) failedFitCount++; // Keep tally of # of fits that fail
+            numFits++; 
+        }
+        reclustered->Fill();
     }
+    // reclustered->Write(); // Write tree to output file
+    cout << "Notice: " << failedFitCount << " of " << numFits << " fits failed\n";
+    
+    pm->Write(outFile);
+
+    delete pm;
     caFile->Close();
     delete caFile;
     outFile->Close();
