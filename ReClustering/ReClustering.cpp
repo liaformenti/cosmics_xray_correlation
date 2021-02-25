@@ -24,6 +24,18 @@ int main(int argc, char* argv[]) {
 
     // Setup plot manager
     PlotManager* pm = new PlotManager();
+    string lStr;
+    for (UShort_t i=1; i<=4; i++) {
+        lStr = to_string(i);
+        /*pm->Add("tgc_analysis_mean_layer_" + lStr,
+                "Layer: " + lStr + "TGC Analysis #mu_cluster", )*/
+        pm->Add("tgc_analysis_sigma_layer_" + lStr, 
+                "Layer: " + lStr + "TGC Analysis #sigma_cluster;No. Clusters;#sigma [mm]", 1600,
+                0, 16, myTH1F); // Range based on max strip mult of 5*strip pitch
+        pm->Add("reclustering_sigma_layer_" + lStr, 
+                "Layer: " + lStr + "Cluster #sigma;No. Clusters;#sigma [mm]", 1600,
+                0, 16, myTH1F);
+    }
 
     // Open input file
     TFile* caFile = new TFile(argv[1], "READ");
@@ -174,3 +186,9 @@ int main(int argc, char* argv[]) {
     delete outFile;
     return 0;
 }
+
+/*void makeReClusteringPlots(TTree* rTree) {
+    TCanvas* c = new TCanvas();
+    rTree->Draw("")
+    return;
+}*/
