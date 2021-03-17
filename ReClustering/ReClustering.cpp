@@ -24,19 +24,7 @@ int main(int argc, char* argv[]) {
 
     // Setup plot manager
     PlotManager* pm = new PlotManager();
-    string lStr;
-    for (UShort_t i=1; i<=4; i++) {
-        lStr = to_string(i);
-        /*pm->Add("tgc_analysis_mean_layer_" + lStr,
-                "Layer: " + lStr + "TGC Analysis #mu_cluster", )*/
-        pm->Add("tgc_analysis_sigma_layer_" + lStr, 
-                "Layer: " + lStr + "TGC Analysis #sigma_cluster;No. Clusters;#sigma [mm]", 1600,
-                0, 16, myTH1F); // Range based on max strip mult of 5*strip pitch
-        pm->Add("reclustering_sigma_layer_" + lStr, 
-                "Layer: " + lStr + "Cluster #sigma;No. Clusters;#sigma [mm]", 1600,
-                0, 16, myTH1F);
-    }
-
+  
     // Open input file
     TFile* caFile = new TFile(argv[1], "READ");
     if (caFile->IsZombie())
@@ -95,6 +83,9 @@ int main(int argc, char* argv[]) {
     Int_t nEntries = reclustered->GetEntries();
 
     // Setup the vars you need from tree
+
+    Int_t eventnumber;
+
     map <UShort_t, Double_t> trackYGaussian;
     map <UShort_t, Double_t>* trackYGaussianPtr;
     trackYGaussianPtr = &trackYGaussian;
@@ -123,6 +114,7 @@ int main(int argc, char* argv[]) {
     map <UShort_t, vector<Double_t>>* posCHPtr;
     posCHPtr = &posCH;
 
+    reclustered->SetBranchAddress("eventnumber", &eventnumber);
     reclustered->SetBranchAddress("trackYGaussian", &trackYGaussianPtr);
     reclustered->SetBranchAddress("trackYWeighted", &trackYWeightedPtr);
     reclustered->SetBranchAddress("sumPDO", &sumPDOPtr);
@@ -134,12 +126,17 @@ int main(int argc, char* argv[]) {
     vector<Double_t> pos;
     vector<Double_t> pdo;
     Int_t numFits = 0;
+    Int_t numFitsBefore = 0;
     Int_t failedFitCount = 0;
+    Int_t disagreesWithCosmicsCount = 0;
 
-    // for (Int_t i=0 i<nEntries; i++) {
-    for (Int_t i=0; i<1; i++) {
+    // File for output
+    ofstream f;
+    f.open(outpath + tag + "sample_cluster_fit.csv");
+    // for (Int_t i=0; i<nEntries; i++) {
+    for (Int_t i=0; i<50; i++) {
         // Get entry
-        reclustered->GetEntry();
+        reclustered->GetEntry(i);
         // Clear the leaves to output
         amplitude.clear(); amplitudeError.clear();
         mean.clear(); meanError.clear();
@@ -147,17 +144,28 @@ int main(int argc, char* argv[]) {
         ndf.clear(); chi2.clear();
         // Assumes that posCH and pdoStrip are same size
         for (auto val=posCH.begin(); val!=posCH.end(); val++) {
+            numFitsBefore++;
             layer = val->first;
             pos = val->second;
             pdo = pdoStrip.at(layer);
-            // Set initial parameter guesses for Gaussian fit
+            cout << "Event, layer: " << eventnumber << ' ' << layer << '\n';
+            cout << "Positions: ";
+            for (auto x=pos.begin(); x!=pos.end(); x++)
+                cout << *x << ' ';
+            cout << '\n';
+            cout << "PDO: ";
+            for (auto y=pdo.begin(); y!=pdo.end(); y++)
+                cout << *y << ' ';
+            cout << '\n';
+            // Set initial parameter guesses for Minuit2 Gaussian fit
             // Same guesses as in CosmicsAnalysis
             GausFitInfo fitInfo;
             fitInfo.A = sumPDO.at(layer)/(sqrt(2*TMath::Pi())*rms.at(layer));
             fitInfo.mean = trackYWeighted.at(layer);
             fitInfo.sigma = rms.at(layer);
             // Do fit
-            DoGausFitMinuit(pos, pdo, fitInfo, false);
+            DoGausFitMinuit(pos, pdo, fitInfo, true);
+            // DoGausFitGuos(pos, pdo, fitInfo, false);
             // Store fit parameters in branches
             amplitude[layer] = fitInfo.A;
             amplitudeError[layer] = fitInfo.Aerr;
@@ -168,15 +176,38 @@ int main(int argc, char* argv[]) {
             ndf[layer] = fitInfo.NDF;
             chi2[layer] = fitInfo.chi2;
 
+            // Output sample of fits to file
+            if (i<50) {
+                // event number, multiplicity, tgc_analysis mean, tgc_analysis sigma, fit result,
+                // amplitude, amplitude error, mean, mean error, sigma, sigma error, chi2/ndf
+                f << eventnumber  << ',' << pos.size() << ',' << trackYGaussian.at(layer);
+                f << ',' << sigma.at(layer) << ',' << fitInfo.fitResult << ',' << fitInfo.A;
+                f << ',' << fitInfo.Aerr << ',' << fitInfo.mean << ',' << fitInfo.meanErr << ',';
+                f << fitInfo.sigma << ',' << fitInfo.sigmaErr << ',' << fitInfo.chi2/fitInfo.NDF;
+                f << '\n';
+            }
+
             // May need to add a check here in case fit fails.
             if (fitInfo.fitResult==false) failedFitCount++; // Keep tally of # of fits that fail
             numFits++; 
+
+            // Count the number of times the fit mean disagrees with the cosmics mean.
+            if ( (fitInfo.mean - fitInfo.meanErr > trackYGaussian.at(layer)) || 
+                 (fitInfo.mean + fitInfo.meanErr < trackYGaussian.at(layer)) ) {
+                 disagreesWithCosmicsCount++; 
+            }
+            /*if ( abs(fitInfo.mean - trackYGaussian.at(layer))>0.0009 )
+                disagreesWithCosmicsCount++;*/
         }
         reclustered->Fill();
     }
     // reclustered->Write(); // Write tree to output file
     cout << "Notice: " << failedFitCount << " of " << numFits << " fits failed\n";
+    cout << "Notice: " << disagreesWithCosmicsCount << " means of " << numFits;
+    cout << " fits diagree with the cosmics mean\n";
+    cout << numFitsBefore << '\n';
     
+    f.close();
     pm->Write(outFile);
 
     delete pm;

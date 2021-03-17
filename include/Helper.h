@@ -11,6 +11,10 @@
 
 // Root includes
 #include <TROOT.h>
+#include <TH1F.h>
+#include <TF1.h>
+#include <TMatrixD.h>
+#include <TVectorD.h>
 
 // A "Combination" is 2 fixed layers and the layer of interest
 struct Combination {
@@ -40,6 +44,40 @@ struct InputInfo {
 };
 
 void getOtherLayers(UShort_t la, UShort_t lb, UShort_t* lc, UShort_t* ld);
+
+// For fitting clusters
+// Modified from GausFitInfo struct in tgc_analysis
+struct GausFitInfo{
+  Bool_t fitResult = false; // true for successful fit
+  Double_t A = std::numeric_limits<Double_t>::quiet_NaN();
+  Double_t Aerr = std::numeric_limits<Double_t>::quiet_NaN();
+  Double_t mean = std::numeric_limits<Double_t>::quiet_NaN();
+  Double_t meanErr = std::numeric_limits<Double_t>::quiet_NaN();
+  Double_t sigma = std::numeric_limits<Double_t>::quiet_NaN();
+  Double_t sigmaErr = std::numeric_limits<Double_t>::quiet_NaN();
+  Int_t NDF = -1;
+  Double_t chi2 = std::numeric_limits<Double_t>::quiet_NaN();
+  
+  void Print() const{
+    std::cout<<"FitResult="<<fitResult<<std::endl;
+    std::cout<<"A="<<A<<" ("<<Aerr<<")"<<std::endl;
+    std::cout<<"mean="<<mean<<" ("<<meanErr<<")"<<std::endl;
+    std::cout<<"sigma="<<sigma<<" ("<<sigmaErr<<")"<<std::endl;
+    std::cout<<"NDF="<<NDF<<std::endl;
+    std::cout<<"chi2="<<chi2<<std::endl;
+  }
+};
+
+
+// For fitting clusters
+// Modified from tgc_analysis Clustering::DoGausFitMinuit by Benoit
+void DoGausFitMinuit(const std::vector<Double_t> &x,
+			      const std::vector<Double_t> &y,
+			      GausFitInfo &info, Bool_t verbose=false);
+
+void DoGausFitGuos(const std::vector<Double_t> &x, const std::vector<Double_t> &y,
+                   GausFitInfo &info, Bool_t verbose);
+
 // for creating strings of the form:
 // header_layerC_fixedLayersAB_footer
 // string getPermPlotName(string header, string footer, UShort_t layer, UShort_t fixedLayer1, UShort_t fixedLayer2);
