@@ -24,7 +24,38 @@ int main(int argc, char* argv[]) {
 
     // Setup plot manager
     PlotManager* pm = new PlotManager();
-  
+    // Initialize plots
+    // All multiplicity
+    pm->Add("cosmics_sigma", ";Cosmics #sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
+    pm->Add("reclustering_amplitude", ";Amplitude [ADC counts];No. Clusters", 320, 0, 3200, 
+            myTH1F);
+    pm->Add("reclustering_mean_error", ";Cluster mean error [mm];No.Clusters", 20, 0, 0.05, 
+            myTH1F);
+    pm->Add("reclustering_sigma",";#sigma [mm];No. Clusters", 10, 0, 5, myTH1F);
+    // Spec multiplicity
+    for (Int_t m=3; m<=8; m++) {
+        pm->Add("cosmics_sigma_multiplicity_" + to_string(m), "Cluster size = " + to_string(m) + 
+                ";Cosmics #sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
+        pm->Add("reclustering_amplitude_multiplicity_" + to_string(m), "Cluster size = " + 
+                to_string(m) + ";Amplitude [ADC counts];No. Clusters", 320, 0, 3200, myTH1F);
+        pm->Add("reclustering_mean_error_multiplicity_" + to_string(m), "Cluster size = " +
+                to_string(m) + ";Cluster mean error [mm];No.Clusters", 20, 0, 0.05, myTH1F);
+        pm->Add("reclustering_sigma_multiplicity_" + to_string(m), "Cluster size = " +
+                to_string(m) + ";#sigma [mm];No. Clusters", 10, 0, 5, myTH1F);
+    }
+    
+    vector<string> nameBases{"cosmics_sigma", "reclustering_amplitude", "reclustering_mean_error", 
+                 "reclustering_sigma"}; 
+    vector<string> plotNames;
+    for (auto name=nameBases.begin(); name!=nameBases.end(); name++) {
+        plotNames.push_back(*name);
+        // cout << *name << ' ';
+        for (Int_t m=3; m<=8; m++) {
+            plotNames.push_back(*name + "_multiplicity_" + to_string(m));
+            // cout << *name + "_multiplicity_" + to_string(m) << ' ';
+        } 
+        // cout << '\n';
+    }
     // Open input file
     TFile* caFile = new TFile(argv[1], "READ");
     if (caFile->IsZombie())
@@ -125,16 +156,16 @@ int main(int argc, char* argv[]) {
     UShort_t layer;
     vector<Double_t> pos;
     vector<Double_t> pdo;
+    string multStr = "";
     Int_t numFits = 0;
-    Int_t numFitsBefore = 0;
     Int_t failedFitCount = 0;
-    Int_t disagreesWithCosmicsCount = 0;
+    // Int_t disagreesWithCosmicsCount = 0;
 
     // File for output
     ofstream f;
     f.open(outpath + tag + "sample_cluster_fit.csv");
-    // for (Int_t i=0; i<nEntries; i++) {
-    for (Int_t i=0; i<50; i++) {
+    for (Int_t i=0; i<nEntries; i++) {
+    // for (Int_t i=0; i<50; i++) {
         // Get entry
         reclustered->GetEntry(i);
         // Clear the leaves to output
@@ -144,11 +175,10 @@ int main(int argc, char* argv[]) {
         ndf.clear(); chi2.clear();
         // Assumes that posCH and pdoStrip are same size
         for (auto val=posCH.begin(); val!=posCH.end(); val++) {
-            numFitsBefore++;
             layer = val->first;
             pos = val->second;
             pdo = pdoStrip.at(layer);
-            cout << "Event, layer: " << eventnumber << ' ' << layer << '\n';
+            /*cout << "Event, layer: " << eventnumber << ' ' << layer << '\n';
             cout << "Positions: ";
             for (auto x=pos.begin(); x!=pos.end(); x++)
                 cout << *x << ' ';
@@ -156,7 +186,7 @@ int main(int argc, char* argv[]) {
             cout << "PDO: ";
             for (auto y=pdo.begin(); y!=pdo.end(); y++)
                 cout << *y << ' ';
-            cout << '\n';
+            cout << '\n';*/
             // Set initial parameter guesses for Minuit2 Gaussian fit
             // Same guesses as in CosmicsAnalysis
             GausFitInfo fitInfo;
@@ -164,7 +194,7 @@ int main(int argc, char* argv[]) {
             fitInfo.mean = trackYWeighted.at(layer);
             fitInfo.sigma = rms.at(layer);
             // Do fit
-            DoGausFitMinuit(pos, pdo, fitInfo, true);
+            DoGausFitMinuit(pos, pdo, fitInfo, false);
             // DoGausFitGuos(pos, pdo, fitInfo, false);
             // Store fit parameters in branches
             amplitude[layer] = fitInfo.A;
@@ -176,6 +206,18 @@ int main(int argc, char* argv[]) {
             ndf[layer] = fitInfo.NDF;
             chi2[layer] = fitInfo.chi2;
 
+            // Fill plots
+            if  (fitInfo.fitResult!=0 && pos.size()>=3 && pos.size()<=8) { // If fit is good,
+                pm->Fill("cosmics_sigma", sigma.at(layer));
+                pm->Fill("reclustering_amplitude", fitInfo.A);
+                pm->Fill("reclustering_mean_error", fitInfo.meanErr);
+                pm->Fill("reclustering_sigma", fitInfo.sigma);
+                multStr = to_string(pos.size());
+                pm->Fill("cosmics_sigma_multiplicity_" + multStr, sigma.at(layer));
+                pm->Fill("reclustering_amplitude_multiplicity_" + multStr, fitInfo.A);
+                pm->Fill("reclustering_mean_error_multiplicity_" + multStr, fitInfo.meanErr);
+                pm->Fill("reclustering_sigma_multiplicity_" + multStr, fitInfo.sigma);
+            }
             // Output sample of fits to file
             if (i<50) {
                 // event number, multiplicity, tgc_analysis mean, tgc_analysis sigma, fit result,
@@ -192,10 +234,10 @@ int main(int argc, char* argv[]) {
             numFits++; 
 
             // Count the number of times the fit mean disagrees with the cosmics mean.
-            if ( (fitInfo.mean - fitInfo.meanErr > trackYGaussian.at(layer)) || 
+            /*if ( (fitInfo.mean - fitInfo.meanErr > trackYGaussian.at(layer)) || 
                  (fitInfo.mean + fitInfo.meanErr < trackYGaussian.at(layer)) ) {
                  disagreesWithCosmicsCount++; 
-            }
+            }*/
             /*if ( abs(fitInfo.mean - trackYGaussian.at(layer))>0.0009 )
                 disagreesWithCosmicsCount++;*/
         }
@@ -203,13 +245,22 @@ int main(int argc, char* argv[]) {
     }
     // reclustered->Write(); // Write tree to output file
     cout << "Notice: " << failedFitCount << " of " << numFits << " fits failed\n";
-    cout << "Notice: " << disagreesWithCosmicsCount << " means of " << numFits;
-    cout << " fits diagree with the cosmics mean\n";
-    cout << numFitsBefore << '\n';
+    // cout << "Notice: " << disagreesWithCosmicsCount << " means of " << numFits;
+    // cout << " fits diagree with the cosmics mean\n";
     
     f.close();
-    pm->Write(outFile);
+    // Print plots
+    TCanvas* c = new TCanvas();
+    c->Print((outpath + tag + "reclustering_plots.pdf[").c_str());
+    for (auto name=plotNames.begin(); name!=plotNames.end(); name++) {
+        TH1F* h = (TH1F*)pm->GetTH1F(*name);
+        h->Draw();
+        c->Print((outpath + tag + "reclustering_plots.pdf").c_str());
+        c->Clear();
+    }
+    c->Print((outpath + tag + "reclustering_plots.pdf]").c_str());
 
+    pm->Write(outFile);
     delete pm;
     caFile->Close();
     delete caFile;
