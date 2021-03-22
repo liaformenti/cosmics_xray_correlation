@@ -21,46 +21,7 @@ int main(int argc, char* argv[]) {
     string tag = "";
     if (argc==4)
         tag = argv[3];
-
-    // ATLAS style
-    SetAnalysisStyle();
-    // Setup plot manager
-    PlotManager* pm = new PlotManager();
-    // Initialize plots
-    // All multiplicity
-    pm->Add("cosmics_sigma", ";Cosmics #sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
-    pm->Add("reclustering_amplitude", ";Amplitude [ADC counts];No. Clusters", 320, 0, 3200, 
-            myTH1F);
-    pm->Add("reclustering_mean", ";Cluster mean [mm];No.Clusters", 100, 100, 200, myTH1F);
-    pm->Add("reclustering_mean_error", ";Cluster mean error [mm];No.Clusters", 50, 0, 0.05, 
-            myTH1F);
-    pm->Add("reclustering_sigma",";#sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
-    // Spec multiplicity
-    for (Int_t m=3; m<=8; m++) {
-        pm->Add("cosmics_sigma_multiplicity_" + to_string(m), "Cluster size = " + to_string(m) + 
-                ";Cosmics #sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
-        pm->Add("reclustering_amplitude_multiplicity_" + to_string(m), "Cluster size = " + 
-                to_string(m) + ";Amplitude [ADC counts];No. Clusters", 320, 0, 3200, myTH1F);
-        pm->Add("reclustering_mean_multiplicity_" + to_string(m), "Cluster size = " + 
-                to_string(m) + ";Cluster mean [mm];No.Clusters", 100, 100, 200, myTH1F);
-        pm->Add("reclustering_mean_error_multiplicity_" + to_string(m), "Cluster size = " +
-                to_string(m) + ";Cluster mean error [mm];No.Clusters", 20, 0, 0.05, myTH1F);
-        pm->Add("reclustering_sigma_multiplicity_" + to_string(m), "Cluster size = " +
-                to_string(m) + ";#sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
-    }
     
-    vector<string> nameBases{"cosmics_sigma", "reclustering_amplitude","reclustering_mean", 
-                             "reclustering_mean_error", "reclustering_sigma"}; 
-    vector<string> plotNames;
-    for (auto name=nameBases.begin(); name!=nameBases.end(); name++) {
-        plotNames.push_back(*name);
-        // cout << *name << ' ';
-        for (Int_t m=3; m<=8; m++) {
-            plotNames.push_back(*name + "_multiplicity_" + to_string(m));
-            // cout << *name + "_multiplicity_" + to_string(m) << ' ';
-        } 
-        // cout << '\n';
-    }
     // Open input file
     TFile* caFile = new TFile(argv[1], "READ");
     if (caFile->IsZombie())
@@ -70,9 +31,24 @@ int main(int argc, char* argv[]) {
     if (!caFile->GetListOfKeys()->Contains("tracks"))
         throw runtime_error("No tracks TTree in CosmicsAnalysis.root file. Cannot perform analysis.\n\n");
 
-    // Get TTree
+    // Get TTre
     TTree* tracks = (TTree*)caFile->Get("tracks");
+
+    // Get AnalysisInfo object
+    AnalysisInfo* cInfo = GetAnalysisInfo(caFile);
+    if (cInfo == nullptr)
+        throw runtime_error("Error getting AnlysisInfo object, in function GetAnalysisInfo.\n\n");
+
+    DetectorGeometry* g = DetectorGeometryTools::GetDetectorGeometry(cInfo->detectortype);
+    if (g == nullptr)
+        throw runtime_error("Error getting DetectorGeometry object.\n\n");
     
+    // Setup plot manager
+    PlotManager* pm = new PlotManager();
+
+    // tgc_analysis style
+    SetAnalysisStyle();
+
     // Deactivate all branches
     tracks->SetBranchStatus("*", 0);
 
@@ -166,10 +142,47 @@ int main(int argc, char* argv[]) {
     Int_t failedFitCount = 0;
     // Int_t disagreesWithCosmicsCount = 0;
 
+    // Initialize plots
+    // All multiplicity
+    pm->Add("cosmics_sigma", ";Cosmics #sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
+    pm->Add("reclustering_amplitude", ";Amplitude [ADC counts];No. Clusters", 320, 0, 3200, 
+            myTH1F);
+    pm->Add("reclustering_mean", ";Cluster mean [mm];No.Clusters", 100, 100, 200, myTH1F);
+    pm->Add("reclustering_mean_error", ";Cluster mean error [mm];No.Clusters", 50, 0, 0.05, 
+            myTH1F);
+    pm->Add("reclustering_sigma",";#sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
+    // Spec multiplicity
+    for (Int_t m=3; m<=8; m++) {
+        pm->Add("cosmics_sigma_multiplicity_" + to_string(m), "Cluster size = " + to_string(m) + 
+                ";Cosmics #sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
+        pm->Add("reclustering_amplitude_multiplicity_" + to_string(m), "Cluster size = " + 
+                to_string(m) + ";Amplitude [ADC counts];No. Clusters", 320, 0, 3200, myTH1F);
+        pm->Add("reclustering_mean_multiplicity_" + to_string(m), "Cluster size = " + 
+                to_string(m) + ";Cluster mean [mm];No.Clusters", 100, 100, 200, myTH1F);
+        pm->Add("reclustering_mean_error_multiplicity_" + to_string(m), "Cluster size = " +
+                to_string(m) + ";Cluster mean error [mm];No.Clusters", 20, 0, 0.05, myTH1F);
+        pm->Add("reclustering_sigma_multiplicity_" + to_string(m), "Cluster size = " +
+                to_string(m) + ";#sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
+    }
+    
+    // Make list of plot names for printing to pdf
+    vector<string> nameBases{"cosmics_sigma", "reclustering_amplitude","reclustering_mean", 
+                             "reclustering_mean_error", "reclustering_sigma"}; 
+    vector<string> plotNames;
+    for (auto name=nameBases.begin(); name!=nameBases.end(); name++) {
+        plotNames.push_back(*name);
+        // cout << *name << ' ';
+        for (Int_t m=3; m<=8; m++) {
+            plotNames.push_back(*name + "_multiplicity_" + to_string(m));
+            // cout << *name + "_multiplicity_" + to_string(m) << ' ';
+        } 
+        // cout << '\n';
+    }
+
     // File for output
     ofstream f;
     f.open(outpath + tag + "sample_cluster_fit.csv");
-    for (Int_t i=0; i<nEntries; i++) {
+    for (Int_t i=0; i<10; i++) {
     // for (Int_t i=0; i<50; i++) {
         // Get entry
         reclustered->GetEntry(i);

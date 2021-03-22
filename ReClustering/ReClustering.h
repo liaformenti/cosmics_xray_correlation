@@ -31,9 +31,12 @@
 // tgc_analysis includes
 #include "PlotManager.h"
 #include "AnalysisStyle.h"
+#include "DetectorGeometryTools.h"
+#include "AnalysisInfo.h"
 
 // My includes
 #include "Helper.h"
+#include "GetAnalysisInfo.h"
 
 /*class ReClusteringPlots {
   public:
