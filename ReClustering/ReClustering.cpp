@@ -142,12 +142,14 @@ int main(int argc, char* argv[]) {
     Int_t failedFitCount = 0;
     // Int_t disagreesWithCosmicsCount = 0;
 
+    pair<Double_t, Double_t> yLims = g->GetModuleLimitsY();
     // Initialize plots
     // All multiplicity
     pm->Add("cosmics_sigma", ";Cosmics #sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
     pm->Add("reclustering_amplitude", ";Amplitude [ADC counts];No. Clusters", 320, 0, 3200, 
             myTH1F);
-    pm->Add("reclustering_mean", ";Cluster mean [mm];No.Clusters", 100, 100, 200, myTH1F);
+    pm->Add("reclustering_mean", ";Cluster mean [mm];No.Clusters", yLims.second - yLims.first, 
+            yLims.first, yLims.second, myTH1F);
     pm->Add("reclustering_mean_error", ";Cluster mean error [mm];No.Clusters", 50, 0, 0.05, 
             myTH1F);
     pm->Add("reclustering_sigma",";#sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
@@ -158,7 +160,8 @@ int main(int argc, char* argv[]) {
         pm->Add("reclustering_amplitude_multiplicity_" + to_string(m), "Cluster size = " + 
                 to_string(m) + ";Amplitude [ADC counts];No. Clusters", 320, 0, 3200, myTH1F);
         pm->Add("reclustering_mean_multiplicity_" + to_string(m), "Cluster size = " + 
-                to_string(m) + ";Cluster mean [mm];No.Clusters", 100, 100, 200, myTH1F);
+                to_string(m) + ";Cluster mean [mm];No.Clusters", yLims.second - yLims.first, 
+                yLims.first, yLims.second, myTH1F);
         pm->Add("reclustering_mean_error_multiplicity_" + to_string(m), "Cluster size = " +
                 to_string(m) + ";Cluster mean error [mm];No.Clusters", 20, 0, 0.05, myTH1F);
         pm->Add("reclustering_sigma_multiplicity_" + to_string(m), "Cluster size = " +
@@ -182,7 +185,7 @@ int main(int argc, char* argv[]) {
     // File for output
     ofstream f;
     f.open(outpath + tag + "sample_cluster_fit.csv");
-    for (Int_t i=0; i<10; i++) {
+    for (Int_t i=0; i<1000; i++) {
     // for (Int_t i=0; i<50; i++) {
         // Get entry
         reclustered->GetEntry(i);
@@ -280,6 +283,9 @@ int main(int argc, char* argv[]) {
     }
     c->Print((outpath + tag + "reclustering_plots.pdf]").c_str());
 
+    // Copy AnalysisInfo to PlotManager
+    pm->Add(cInfo, myAnalysisInfo);
+    // Write everything in plot manager to output file
     pm->Write(outFile);
     delete pm;
     caFile->Close();
