@@ -30,6 +30,7 @@
 
 // tgc_analysis includes
 #include "PlotManager.h"
+#include "AnalysisStyle.h"
 
 // My includes
 #include "Helper.h"

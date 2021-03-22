@@ -22,6 +22,8 @@ int main(int argc, char* argv[]) {
     if (argc==4)
         tag = argv[3];
 
+    // ATLAS style
+    SetAnalysisStyle();
     // Setup plot manager
     PlotManager* pm = new PlotManager();
     // Initialize plots
@@ -29,23 +31,26 @@ int main(int argc, char* argv[]) {
     pm->Add("cosmics_sigma", ";Cosmics #sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
     pm->Add("reclustering_amplitude", ";Amplitude [ADC counts];No. Clusters", 320, 0, 3200, 
             myTH1F);
-    pm->Add("reclustering_mean_error", ";Cluster mean error [mm];No.Clusters", 20, 0, 0.05, 
+    pm->Add("reclustering_mean", ";Cluster mean [mm];No.Clusters", 100, 100, 200, myTH1F);
+    pm->Add("reclustering_mean_error", ";Cluster mean error [mm];No.Clusters", 50, 0, 0.05, 
             myTH1F);
-    pm->Add("reclustering_sigma",";#sigma [mm];No. Clusters", 10, 0, 5, myTH1F);
+    pm->Add("reclustering_sigma",";#sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
     // Spec multiplicity
     for (Int_t m=3; m<=8; m++) {
         pm->Add("cosmics_sigma_multiplicity_" + to_string(m), "Cluster size = " + to_string(m) + 
                 ";Cosmics #sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
         pm->Add("reclustering_amplitude_multiplicity_" + to_string(m), "Cluster size = " + 
                 to_string(m) + ";Amplitude [ADC counts];No. Clusters", 320, 0, 3200, myTH1F);
+        pm->Add("reclustering_mean_multiplicity_" + to_string(m), "Cluster size = " + 
+                to_string(m) + ";Cluster mean [mm];No.Clusters", 100, 100, 200, myTH1F);
         pm->Add("reclustering_mean_error_multiplicity_" + to_string(m), "Cluster size = " +
                 to_string(m) + ";Cluster mean error [mm];No.Clusters", 20, 0, 0.05, myTH1F);
         pm->Add("reclustering_sigma_multiplicity_" + to_string(m), "Cluster size = " +
-                to_string(m) + ";#sigma [mm];No. Clusters", 10, 0, 5, myTH1F);
+                to_string(m) + ";#sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
     }
     
-    vector<string> nameBases{"cosmics_sigma", "reclustering_amplitude", "reclustering_mean_error", 
-                 "reclustering_sigma"}; 
+    vector<string> nameBases{"cosmics_sigma", "reclustering_amplitude","reclustering_mean", 
+                             "reclustering_mean_error", "reclustering_sigma"}; 
     vector<string> plotNames;
     for (auto name=nameBases.begin(); name!=nameBases.end(); name++) {
         plotNames.push_back(*name);
@@ -210,11 +215,13 @@ int main(int argc, char* argv[]) {
             if  (fitInfo.fitResult!=0 && pos.size()>=3 && pos.size()<=8) { // If fit is good,
                 pm->Fill("cosmics_sigma", sigma.at(layer));
                 pm->Fill("reclustering_amplitude", fitInfo.A);
+                pm->Fill("reclustering_mean", fitInfo.mean);
                 pm->Fill("reclustering_mean_error", fitInfo.meanErr);
                 pm->Fill("reclustering_sigma", fitInfo.sigma);
                 multStr = to_string(pos.size());
                 pm->Fill("cosmics_sigma_multiplicity_" + multStr, sigma.at(layer));
                 pm->Fill("reclustering_amplitude_multiplicity_" + multStr, fitInfo.A);
+                pm->Fill("reclustering_mean_multiplicity_" + multStr, fitInfo.mean);
                 pm->Fill("reclustering_mean_error_multiplicity_" + multStr, fitInfo.meanErr);
                 pm->Fill("reclustering_sigma_multiplicity_" + multStr, fitInfo.sigma);
             }
