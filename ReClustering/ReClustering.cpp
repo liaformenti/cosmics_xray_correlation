@@ -4,23 +4,51 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    if (argc < 3) {
-        cout << "Usage: ./ReClustering CosmicsAnalysis.root outpath/ [tag_]\n";
+    if (argc < 2) {
+        cout << "Usage: ./ReClustering CosmicsAnalysis.root -o outdirectory --tag prefix ";
+        cout << "--dnlconfig dnlconfigfile\n";
         return 0;
     }
-    
-    // Check input CosmicsAnalysis.root file
-    if (gSystem->AccessPathName(argv[1]))
-        throw runtime_error("Input file does not exist\n\n");
 
-    // Check output directory
-    if (gSystem->AccessPathName(argv[2]))
-        throw runtime_error("Output directory does not exist.\n\n");
+    Int_t p=1;
+    string inFileName, outpath, dnlConfigFileName, tag;
+    inFileName = "";
+    outpath = "out/";
+    dnlConfigFileName = "";
+    tag = "";
 
-    // Get tag if provided
-    string tag = "";
-    if (argc==4)
-        tag = argv[3];
+    while(p<argc) {
+        // Get input file
+        if (p==1) {
+            if (gSystem->AccessPathName(argv[p]))
+               throw runtime_error("Input file does not exist\n\n"); 
+            inFileName = argv[p];
+            p+=1; 
+        }
+        // Set output directory
+        else if (string(argv[p]) ==  "-o") {
+            if (gSystem->AccessPathName(argv[p+1]))
+                throw runtime_error("Output directory does not exist.\n\n");
+            outpath = string(argv[p+1]);
+            outpath += "/";
+            p += 2;
+        }
+
+        // Set tag
+        else if (string(argv[p]) == "--tag") {
+            tag = string(argv[p+1]);
+            tag == "_";
+            p += 2;
+        }
+
+        // Set DNL config file name
+        else if (string(argv[p]) == "--dnlconfig") {
+            if (gSystem->AccessPathName(argv[p+1]))
+                throw runtime_error("Config file does not exist.\n\n");
+            dnlConfigFileName = argv[p+1];  
+            p += 2;
+        }
+    }
     
     // Open input file
     TFile* caFile = new TFile(argv[1], "READ");
@@ -63,7 +91,7 @@ int main(int argc, char* argv[]) {
     // ROOT complains if you mix accessing a tree from one root file and writing to another
     // so opening the output file must happen here.
 
-    string outpath = argv[2];
+    // string outpath = argv[2];
     TFile* outFile = new TFile((outpath + tag + "reclustering.root").c_str(), "RECREATE");
     if (outFile->IsZombie())
         throw runtime_error("Error opening output file.\n\n");
@@ -185,7 +213,7 @@ int main(int argc, char* argv[]) {
     // File for output
     ofstream f;
     f.open(outpath + tag + "sample_cluster_fit.csv");
-    for (Int_t i=0; i<1000; i++) {
+    for (Int_t i=0; i<nEntries; i++) {
     // for (Int_t i=0; i<50; i++) {
         // Get entry
         reclustered->GetEntry(i);
