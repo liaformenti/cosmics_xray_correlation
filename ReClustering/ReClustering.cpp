@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
         // Set tag
         else if (string(argv[p]) == "--tag") {
             tag = string(argv[p+1]);
-            tag == "_";
+            tag += "_";
             p += 2;
         }
 
