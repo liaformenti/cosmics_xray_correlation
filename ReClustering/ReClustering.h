@@ -28,6 +28,7 @@
 #include <TCanvas.h>
 #include <TH1F.h>
 #include <TMath.h>
+#include <TChain.h>
 
 // tgc_analysis includes
 #include "PlotManager.h"

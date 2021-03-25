@@ -49,35 +49,80 @@ int main(int argc, char* argv[]) {
                throw runtime_error("Input file does not exist.\n\n"); 
             if ( find(inFileName.begin(), inFileName.end(), string(argv[p])) != inFileName.end() )
                 throw runtime_error("Duplicate input file detected.\n\n");
-            cout << string(argv[p]) << '\n';
             inFileName.push_back(string(argv[p]));
             p += 1;
         }
     }
    
     // Open input file
-    TFile* caFile = new TFile(argv[argc-1], "READ");
-    if (caFile->IsZombie())
-        throw runtime_error("Error opening CosmicsAnalysis.root file.\n\n");
+    // TFile* caFile = new TFile(argv[argc-1], "READ");
+    // if (caFile->IsZombie())
+    //    throw runtime_error("Error opening CosmicsAnalysis.root file.\n\n");
 
     // Check input file has tracks TChain
-    if (!caFile->GetListOfKeys()->Contains("tracks"))
-        throw runtime_error("No tracks TTree in input file. Cannot perform analysis.\n\n");
+    // if (!caFile->GetListOfKeys()->Contains("tracks"))
+   //     throw runtime_error("No tracks TTree in input file. Cannot perform analysis.\n\n");
 
     // Get TChain
-    TChain* tracks = (TChain*)caFile->Get("tracks");
+    // TChain* tracks = (TChain*)caFile->Get("tracks");
 
     // Get AnalysisInfo object
-    AnalysisInfo* cInfo = GetAnalysisInfo(caFile);
-    if (cInfo == nullptr)
-        throw runtime_error("Error getting AnlysisInfo object, in function GetAnalysisInfo.\n\n");
+    // AnalysisInfo* cInfo = GetAnalysisInfo(caFile);
+   // if (cInfo == nullptr)
+   //     throw runtime_error("Error getting AnlysisInfo object, in function GetAnalysisInfo.\n\n");
 
-    DetectorGeometry* g = DetectorGeometryTools::GetDetectorGeometry(cInfo->detectortype);
+    /*DetectorGeometry* g = DetectorGeometryTools::GetDetectorGeometry(cInfo->detectortype);
     if (g == nullptr)
-        throw runtime_error("Error getting DetectorGeometry object.\n\n");
+        throw runtime_error("Error getting DetectorGeometry object.\n\n");*/
     
     // Setup plot manager
     PlotManager* pm = new PlotManager();
+
+    // Check the input files and AnalysisInfo objects
+    vector<AnalysisInfo*> analysisInfoVec;
+    AnalysisInfo* ai;
+    string detectortype = "";
+    for (auto fileName=inFileName.begin(); fileName!=inFileName.end(); fileName++) {
+        cout << *fileName << '\n';
+        TFile *f = TFile::Open((*fileName).c_str());    
+        if (f->IsZombie())
+            throw runtime_error("Error opening input file.\n\n");
+        if (!f->GetListOfKeys()->Contains("tracks"))
+            throw runtime_error("Input file does not contain tracks TTree.\n\n");
+        ai = GetAnalysisInfo(f);
+        if (ai == nullptr)
+            throw runtime_error("Error getting AnalysisInfo object.\n\n");
+        if (detectortype == "") {
+            detectortype = ai->detectortype;
+            analysisInfoVec.push_back(ai);
+        }
+        else {
+            if (detectortype != ai->detectortype)
+                throw runtime_error("Not all input files have same detector type.\n\n");
+            analysisInfoVec.push_back(ai);
+        }
+        if (!f->GetListOfKeys()->Contains("tracks"))
+            throw runtime_error("Not all input files have tracks TTrees.\n\n");
+        f->Close();
+        delete f;
+    }
+  
+    // Add AnalysisInfo objects to file
+    // for (auto info=analysisInfoVec.begin(); info!=analysisInfoVec.end(); info++)
+    //    pm->Add(*info, myAnalysisInfo);
+
+    DetectorGeometry* g = DetectorGeometryTools::GetDetectorGeometry(
+                              analysisInfoVec.back()->detectortype);
+    
+    // Combine tracks TTree
+    // TEST THIS
+    TChain* tracks = new TChain("tracks");
+    for (auto fileName=inFileName.begin(); fileName!=inFileName.end(); fileName++) {
+        tracks->Add((*fileName).c_str());
+        cout << *fileName << " tracks TTree added to TChain.\n";
+    }
+    cout << '\n';
+    cout << "Entries in tracks: " << tracks->GetEntries() << '\n'; 
 
     // tgc_analysis style
     SetAnalysisStyle();
@@ -101,6 +146,9 @@ int main(int argc, char* argv[]) {
     if (outFile->IsZombie())
         throw runtime_error("Error opening output file.\n\n");
     outFile->WriteObject(&inFileName, "inputFileNamesVector");
+    // This isn't ideal because you'll need a LinkDef to read it,
+    // but I'm tired and have to move on.
+    outFile->WriteObject(&analysisInfoVec, "analysisInfoVector"); 
 
     cout << "Cloning CosmicsAnalysis tracks tree.\n";
     TTree* reclustered = tracks->CloneTree();
@@ -222,7 +270,7 @@ int main(int argc, char* argv[]) {
     ofstream f;
     f.open(outpath + tag + "sample_cluster_fit.csv");
     cout << "Starting event loop...\n";
-    for (Int_t i=0; i<nEntries; i++) {
+    for (Int_t i=0; i<12; i++) {
     // for (Int_t i=0; i<5; i++) {
         // Get entry
         reclustered->GetEntry(i);
@@ -302,6 +350,7 @@ int main(int argc, char* argv[]) {
                 disagreesWithCosmicsCount++;*/
         }
         reclustered->Fill();
+        cout << "i = " << i << ", entries = " << reclustered->GetEntries() << '\n';
     }
     // reclustered->Write(); // Write tree to output file
     cout << "Notice: " << failedFitCount << " of " << numFits << " fits failed\n";
@@ -321,14 +370,15 @@ int main(int argc, char* argv[]) {
     c->Print((outpath + tag + "reclustering_plots.pdf]").c_str());
 
     // Copy AnalysisInfo to PlotManager
-    pm->Add(cInfo, myAnalysisInfo);
+    // pm->Add(cInfo, myAnalysisInfo);
     // Write everything in plot manager to output file
     pm->Write(outFile);
     delete pm;
-    caFile->Close();
-    delete caFile;
+    // caFile->Close();
+    // delete caFile;
     outFile->Close();
     delete outFile;
+    delete tracks;
     return 0;
 }
 
