@@ -155,6 +155,7 @@ int main(int argc, char* argv[]) {
     cout << "Cloned!\n";
     reclustered->SetName("reclustering_tracks");
     pm->Add(reclustered, myTTree);
+    cout << "Entries in reclustered: " << reclustered->GetEntries() << '\n';
 
     // Add new branches
     // These contain the fit parameters calculated from redoing the cluster fit
@@ -167,14 +168,14 @@ int main(int argc, char* argv[]) {
     map <UShort_t, Int_t>  ndf;
     map <UShort_t, Int_t> chi2;
 
-    reclustered->Branch("r_amplitude", &amplitude);
-    reclustered->Branch("r_amplitudeError", &amplitudeError);
-    reclustered->Branch("r_mean", &mean);
-    reclustered->Branch("r_meanError", &meanError);
-    reclustered->Branch("r_sigma", &newSigma);
-    reclustered->Branch("r_sigmaError", &newSigmaError);
-    reclustered->Branch("r_ndf", &ndf);
-    reclustered->Branch("r_chi2", &chi2);
+    TBranch* ramplitudeBranch = reclustered->Branch("r_amplitude", &amplitude);
+    TBranch* ramplitudeErrorBranch = reclustered->Branch("r_amplitudeError", &amplitudeError);
+    TBranch* rmeanBranch = reclustered->Branch("r_mean", &mean);
+    TBranch* rmeanErrorBranch = reclustered->Branch("r_meanError", &meanError);
+    TBranch* rsigmaBranch = reclustered->Branch("r_sigma", &newSigma);
+    TBranch* rsigmaErrorBranch = reclustered->Branch("r_sigmaError", &newSigmaError);
+    TBranch* rndfBranch = reclustered->Branch("r_ndf", &ndf);
+    TBranch* rchi2Branch = reclustered->Branch("r_chi2", &chi2);
 
     Int_t nEntries = reclustered->GetEntries();
 
@@ -270,7 +271,7 @@ int main(int argc, char* argv[]) {
     ofstream f;
     f.open(outpath + tag + "sample_cluster_fit.csv");
     cout << "Starting event loop...\n";
-    for (Int_t i=0; i<12; i++) {
+    for (Int_t i=0; i<50; i++) {
     // for (Int_t i=0; i<5; i++) {
         // Get entry
         reclustered->GetEntry(i);
@@ -300,6 +301,7 @@ int main(int argc, char* argv[]) {
             fitInfo.mean = trackYWeighted.at(layer);
             fitInfo.sigma = rms.at(layer);
             // Do fit
+            cout << pos.size() << ' ' << pdo.size() << '\n';
             DoGausFitMinuit(pos, pdo, fitInfo, false);
             // DoGausFitGuos(pos, pdo, fitInfo, false);
             // Store fit parameters in branches
@@ -349,8 +351,15 @@ int main(int argc, char* argv[]) {
             /*if ( abs(fitInfo.mean - trackYGaussian.at(layer))>0.0009 )
                 disagreesWithCosmicsCount++;*/
         }
-        reclustered->Fill();
-        cout << "i = " << i << ", entries = " << reclustered->GetEntries() << '\n';
+        // reclustered->Fill();
+        ramplitudeBranch->Fill();
+        ramplitudeErrorBranch->Fill();
+        rmeanBranch->Fill();
+        rmeanErrorBranch->Fill();
+        rsigmaBranch->Fill();
+        rsigmaErrorBranch->Fill();
+        rndfBranch->Fill();
+        rchi2Branch->Fill();
     }
     // reclustered->Write(); // Write tree to output file
     cout << "Notice: " << failedFitCount << " of " << numFits << " fits failed\n";
