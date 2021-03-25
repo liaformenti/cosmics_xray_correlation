@@ -5,28 +5,22 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        cout << "Usage: ./ReClustering CosmicsAnalysis.root -o outdirectory --tag prefix ";
-        cout << "--dnlconfig dnlconfigfile\n";
+        cout << "Usage: ./ReClustering -o outdirectory --tag prefix ";
+        cout << "--dnlconfig dnlconfigfile CosmicsAnalysis.root [CosmicsAnalysis2.root...]\n";
         return 0;
     }
 
     Int_t p=1;
-    string inFileName, outpath, dnlConfigFileName, tag;
-    inFileName = "";
+    vector<string> inFileName;
+    string outpath, dnlConfigFileName, tag;
     outpath = "out/";
     dnlConfigFileName = "";
     tag = "";
 
     while(p<argc) {
-        // Get input file
-        if (p==1) {
-            if (gSystem->AccessPathName(argv[p]))
-               throw runtime_error("Input file does not exist\n\n"); 
-            inFileName = argv[p];
-            p+=1; 
-        }
+        
         // Set output directory
-        else if (string(argv[p]) ==  "-o") {
+        if (string(argv[p]) ==  "-o") {
             if (gSystem->AccessPathName(argv[p+1]))
                 throw runtime_error("Output directory does not exist.\n\n");
             outpath = string(argv[p+1]);
@@ -48,8 +42,19 @@ int main(int argc, char* argv[]) {
             dnlConfigFileName = argv[p+1];  
             p += 2;
         }
+
+        // You must be at end, get the input file(s)
+        else {
+            if (gSystem->AccessPathName(argv[p]))
+               throw runtime_error("Input file does not exist.\n\n"); 
+            if ( find(inFileName.begin(), inFileName.end(), string(argv[p])) != inFileName.end() )
+                throw runtime_error("Duplicate input file detected.\n\n");
+            cout << string(argv[p]) << '\n';
+            inFileName.push_back(string(argv[p]));
+            p += 1;
+        }
     }
-    
+   
     // Open input file
     TFile* caFile = new TFile(argv[1], "READ");
     if (caFile->IsZombie())
