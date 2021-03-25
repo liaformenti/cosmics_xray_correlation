@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
     }
    
     // Open input file
-    TFile* caFile = new TFile(argv[1], "READ");
+    TFile* caFile = new TFile(argv[argc-1], "READ");
     if (caFile->IsZombie())
         throw runtime_error("Error opening CosmicsAnalysis.root file.\n\n");
 
@@ -100,6 +100,7 @@ int main(int argc, char* argv[]) {
     TFile* outFile = new TFile((outpath + tag + "reclustering.root").c_str(), "RECREATE");
     if (outFile->IsZombie())
         throw runtime_error("Error opening output file.\n\n");
+    outFile->WriteObject(&inFileName, "inputFileNamesVector");
 
     cout << "Cloning CosmicsAnalysis tracks tree.\n";
     TTree* reclustered = tracks->CloneTree();
@@ -222,7 +223,7 @@ int main(int argc, char* argv[]) {
     f.open(outpath + tag + "sample_cluster_fit.csv");
     cout << "Starting event loop...\n";
     for (Int_t i=0; i<nEntries; i++) {
-    // for (Int_t i=0; i<50; i++) {
+    // for (Int_t i=0; i<5; i++) {
         // Get entry
         reclustered->GetEntry(i);
         // Clear the leaves to output
