@@ -15,7 +15,7 @@
 #include <TROOT.h>
 
 // tgc_analysis includes
-#include "tgc_analysis/CosmicsAnalysis/AnalysisInfo.h"
+#include "AnalysisInfo.h"
 
 AnalysisInfo* GetAnalysisInfo(TFile* inROOT);
 
