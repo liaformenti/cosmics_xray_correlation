@@ -55,12 +55,12 @@ int main(int argc, char* argv[]) {
     if (caFile->IsZombie())
         throw runtime_error("Error opening CosmicsAnalysis.root file.\n\n");
 
-    // Check input file has tracks TTree
+    // Check input file has tracks TChain
     if (!caFile->GetListOfKeys()->Contains("tracks"))
-        throw runtime_error("No tracks TTree in CosmicsAnalysis.root file. Cannot perform analysis.\n\n");
+        throw runtime_error("No tracks TTree in input file. Cannot perform analysis.\n\n");
 
-    // Get TTre
-    TTree* tracks = (TTree*)caFile->Get("tracks");
+    // Get TChain
+    TChain* tracks = (TChain*)caFile->Get("tracks");
 
     // Get AnalysisInfo object
     AnalysisInfo* cInfo = GetAnalysisInfo(caFile);
@@ -96,8 +96,10 @@ int main(int argc, char* argv[]) {
     if (outFile->IsZombie())
         throw runtime_error("Error opening output file.\n\n");
 
+    cout << "Cloning CosmicsAnalysis tracks tree.\n";
     TTree* reclustered = tracks->CloneTree();
-
+    cout << "Cloned!\n";
+    reclustered->SetName("reclustering_tracks");
     pm->Add(reclustered, myTTree);
 
     // Add new branches
@@ -111,14 +113,14 @@ int main(int argc, char* argv[]) {
     map <UShort_t, Int_t>  ndf;
     map <UShort_t, Int_t> chi2;
 
-    reclustered->Branch("amplitude", &amplitude);
-    reclustered->Branch("amplitudeError", &amplitudeError);
-    reclustered->Branch("mean", &mean);
-    reclustered->Branch("meanError", &meanError);
-    reclustered->Branch("newSigma");
-    reclustered->Branch("newSigmaError");
-    reclustered->Branch("ndf", &ndf);
-    reclustered->Branch("chi2", &chi2);
+    reclustered->Branch("r_amplitude", &amplitude);
+    reclustered->Branch("r_amplitudeError", &amplitudeError);
+    reclustered->Branch("r_mean", &mean);
+    reclustered->Branch("r_meanError", &meanError);
+    reclustered->Branch("r_sigma", &newSigma);
+    reclustered->Branch("r_sigmaError", &newSigmaError);
+    reclustered->Branch("r_ndf", &ndf);
+    reclustered->Branch("r_chi2", &chi2);
 
     Int_t nEntries = reclustered->GetEntries();
 
@@ -213,6 +215,7 @@ int main(int argc, char* argv[]) {
     // File for output
     ofstream f;
     f.open(outpath + tag + "sample_cluster_fit.csv");
+    cout << "Starting event loop...\n";
     for (Int_t i=0; i<nEntries; i++) {
     // for (Int_t i=0; i<50; i++) {
         // Get entry
@@ -323,7 +326,7 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-/*void makeReClusteringPlots(TTree* rTree) {
+/*void makeReClusteringPlots(TChain* rTree) {
     TCanvas* c = new TCanvas();
     rTree->Draw("")
     return;
