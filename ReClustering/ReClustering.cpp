@@ -54,27 +54,6 @@ int main(int argc, char* argv[]) {
         }
     }
    
-    // Open input file
-    // TFile* caFile = new TFile(argv[argc-1], "READ");
-    // if (caFile->IsZombie())
-    //    throw runtime_error("Error opening CosmicsAnalysis.root file.\n\n");
-
-    // Check input file has tracks TChain
-    // if (!caFile->GetListOfKeys()->Contains("tracks"))
-   //     throw runtime_error("No tracks TTree in input file. Cannot perform analysis.\n\n");
-
-    // Get TChain
-    // TChain* tracks = (TChain*)caFile->Get("tracks");
-
-    // Get AnalysisInfo object
-    // AnalysisInfo* cInfo = GetAnalysisInfo(caFile);
-   // if (cInfo == nullptr)
-   //     throw runtime_error("Error getting AnlysisInfo object, in function GetAnalysisInfo.\n\n");
-
-    /*DetectorGeometry* g = DetectorGeometryTools::GetDetectorGeometry(cInfo->detectortype);
-    if (g == nullptr)
-        throw runtime_error("Error getting DetectorGeometry object.\n\n");*/
-    
     // Setup plot manager
     PlotManager* pm = new PlotManager();
 
@@ -107,15 +86,10 @@ int main(int argc, char* argv[]) {
         delete f;
     }
   
-    // Add AnalysisInfo objects to file
-    // for (auto info=analysisInfoVec.begin(); info!=analysisInfoVec.end(); info++)
-    //    pm->Add(*info, myAnalysisInfo);
-
     DetectorGeometry* g = DetectorGeometryTools::GetDetectorGeometry(
                               analysisInfoVec.back()->detectortype);
     
     // Combine tracks TTree
-    // TEST THIS
     TChain* tracks = new TChain("tracks");
     for (auto fileName=inFileName.begin(); fileName!=inFileName.end(); fileName++) {
         tracks->Add((*fileName).c_str());
@@ -146,15 +120,19 @@ int main(int argc, char* argv[]) {
     if (outFile->IsZombie())
         throw runtime_error("Error opening output file.\n\n");
     outFile->WriteObject(&inFileName, "inputFileNamesVector");
+    // Writing analysis info object to file
+    // Write entire vector of objects
     // This isn't ideal because you'll need a LinkDef to read it,
     // but I'm tired and have to move on.
     outFile->WriteObject(&analysisInfoVec, "analysisInfoVector"); 
+    // Also write just one object from which to extract detectortype in strip_position_analysis
+    outFile->WriteObject(ai, "analysisinfo");
 
     cout << "Cloning CosmicsAnalysis tracks tree.\n";
     TTree* reclustered = tracks->CloneTree();
     cout << "Cloned!\n";
-    reclustered->SetName("reclustering_tracks");
-    pm->Add(reclustered, myTTree);
+    // reclustered->SetName("reclustering_tracks");
+    // pm->Add(reclustered, myTTree);
     cout << "Entries in reclustered: " << reclustered->GetEntries() << '\n';
 
     // Add new branches
@@ -271,8 +249,8 @@ int main(int argc, char* argv[]) {
     ofstream f;
     f.open(outpath + tag + "sample_cluster_fit.csv");
     cout << "Starting event loop...\n";
-    for (Int_t i=0; i<50; i++) {
-    // for (Int_t i=0; i<5; i++) {
+    for (Int_t i=0; i<nEntries; i++) {
+    // for (Int_t i=0; i<120000; i++) {
         // Get entry
         reclustered->GetEntry(i);
         // Clear the leaves to output
@@ -301,7 +279,7 @@ int main(int argc, char* argv[]) {
             fitInfo.mean = trackYWeighted.at(layer);
             fitInfo.sigma = rms.at(layer);
             // Do fit
-            cout << pos.size() << ' ' << pdo.size() << '\n';
+            // cout << pos.size() << ' ' << pdo.size() << '\n';
             DoGausFitMinuit(pos, pdo, fitInfo, false);
             // DoGausFitGuos(pos, pdo, fitInfo, false);
             // Store fit parameters in branches
@@ -378,13 +356,12 @@ int main(int argc, char* argv[]) {
     }
     c->Print((outpath + tag + "reclustering_plots.pdf]").c_str());
 
-    // Copy AnalysisInfo to PlotManager
-    // pm->Add(cInfo, myAnalysisInfo);
+    // Write reclustering tree to output file
+    // reclustered->Write(nullptr, TObject::kWriteDelete);
     // Write everything in plot manager to output file
     pm->Write(outFile);
     delete pm;
-    // caFile->Close();
-    // delete caFile;
+    reclustered->Write(nullptr, TObject::kWriteDelete);
     outFile->Close();
     delete outFile;
     delete tracks;
