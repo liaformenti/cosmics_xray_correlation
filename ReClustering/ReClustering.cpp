@@ -283,14 +283,16 @@ int main(int argc, char* argv[]) {
             DoGausFitMinuit(pos, pdo, fitInfo, false);
             // DoGausFitGuos(pos, pdo, fitInfo, false);
             // Store fit parameters in branches
-            amplitude[layer] = fitInfo.A;
-            amplitudeError[layer] = fitInfo.Aerr;
-            mean[layer] = fitInfo.mean;
-            meanError[layer] = fitInfo.meanErr;
-            newSigma[layer] = fitInfo.sigma;
-            newSigmaError[layer] = fitInfo.sigmaErr;
-            ndf[layer] = fitInfo.NDF;
-            chi2[layer] = fitInfo.chi2;
+            if (fitInfo.fitResult!=0) {
+                amplitude[layer] = fitInfo.A;
+                amplitudeError[layer] = fitInfo.Aerr;
+                mean[layer] = fitInfo.mean;
+                meanError[layer] = fitInfo.meanErr;
+                newSigma[layer] = fitInfo.sigma;
+                newSigmaError[layer] = fitInfo.sigmaErr;
+                ndf[layer] = fitInfo.NDF;
+                chi2[layer] = fitInfo.chi2;
+            }
 
             // Fill plots
             if  (fitInfo.fitResult!=0 && pos.size()>=3 && pos.size()<=8) { // If fit is good,
@@ -321,13 +323,6 @@ int main(int argc, char* argv[]) {
             if (fitInfo.fitResult==false) failedFitCount++; // Keep tally of # of fits that fail
             numFits++; 
 
-            // Count the number of times the fit mean disagrees with the cosmics mean.
-            /*if ( (fitInfo.mean - fitInfo.meanErr > trackYGaussian.at(layer)) || 
-                 (fitInfo.mean + fitInfo.meanErr < trackYGaussian.at(layer)) ) {
-                 disagreesWithCosmicsCount++; 
-            }*/
-            /*if ( abs(fitInfo.mean - trackYGaussian.at(layer))>0.0009 )
-                disagreesWithCosmicsCount++;*/
         }
         // reclustered->Fill();
         ramplitudeBranch->Fill();
