@@ -17,20 +17,20 @@ void CosmicsRetracking::Retrack() {
     map<UShort_t, Double_t>* trackXPtr;
     trackXPtr = &trackX;
     
-    map<UShort_t, Double_t> trackYGaussian;
-    map<UShort_t, Double_t>* trackYGaussianPtr;
-    trackYGaussianPtr = &trackYGaussian;
+    map<UShort_t, Double_t> r_mean;
+    map<UShort_t, Double_t>* r_meanPtr;
+    r_meanPtr = &r_mean;
 
-    // Uncertainty on y position (sigma of strip cluster gaussian fit)
-    map<UShort_t, Double_t> sigma;
-    map<UShort_t, Double_t>* sigmaPtr;
-    sigmaPtr = &sigma;
+    // Uncertainty on y position (uncertainty in fitted reclustering mean)
+    map<UShort_t, Double_t> r_meanError;
+    map<UShort_t, Double_t>* r_meanErrorPtr;
+    r_meanErrorPtr = &r_meanError;
 
     //Initialization TTree branches
     trksTree->SetBranchAddress("eventnumber", &eventnumber);
     trksTree->SetBranchAddress("trackX", &trackXPtr);
-    trksTree->SetBranchAddress("trackYGaussian", &trackYGaussianPtr);
-    trksTree->SetBranchAddress("sigma", &sigmaPtr);
+    trksTree->SetBranchAddress("r_mean", &r_meanPtr);
+    trksTree->SetBranchAddress("r_meanError", &r_meanErrorPtr);
 
     InitializeTrackUncertaintyHistograms();
     InitializeTrackAngleHistograms();
@@ -55,11 +55,11 @@ void CosmicsRetracking::Retrack() {
             for (lb=(la+1); lb<=4; lb++) {
             // for (lb=4; lb<=4; lb++) {
 
-               if (MissingHitsOnFixedLayers(trackX, trackYGaussian))
+               if (MissingHitsOnFixedLayers(trackX, r_mean))
                    continue;
 
                 getOtherLayers(la, lb, &lc, &ld);
-                Tracking myTrack(g, pm, trackX, uncertX, trackYGaussian, sigma, la, lb);
+                Tracking myTrack(g, pm, trackX, uncertX, r_mean, r_meanError, la, lb);
 
                 myTrack.Fit();
 
@@ -128,7 +128,7 @@ void CosmicsRetracking::InitializeTrackUncertaintyHistograms() {
         // Just try the bin number and limits for now
         pm->Add(headerY + v->String(), "Layer: " + to_string(v->layer) + ", Fixed layers: " + 
                 to_string(v->fixed1) + to_string(v->fixed2) + 
-                " y-track fit uncertainty;Uncertainty [mm];Tracks;", 1500, 0, 15, myTH1F);
+                " y-track fit uncertainty;Uncertainty [mm];Tracks;", 30, 0, 0.15, myTH1F);
     }
     return;
 }
@@ -185,7 +185,7 @@ void CosmicsRetracking::InitializeResidualUncertaintyHistograms() {
         name = headerY + v->String();
         title = "Layer: " + to_string(v->layer) + ", Fixed layers: " + to_string(v->fixed1); 
         title+= to_string(v->fixed2) + " - residual uncertainties;Uncertainty [mm];Tracks";
-        pm->Add(name, title, 1500, 0, 15, myTH1I);
+        pm->Add(name, title, 30, 0, 0.15, myTH1I);
 
     }
     return;
