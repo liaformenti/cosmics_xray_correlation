@@ -12,6 +12,7 @@ int main(int argc, char* argv[]) {
 
     Int_t p=1;
     vector<string> inFileName;
+    Bool_t doDNLCorrection = false;
     string outpath, dnlConfigFileName, tag;
     outpath = "out/";
     dnlConfigFileName = "";
@@ -40,6 +41,8 @@ int main(int argc, char* argv[]) {
             if (gSystem->AccessPathName(argv[p+1]))
                 throw runtime_error("Config file does not exist.\n\n");
             dnlConfigFileName = argv[p+1];  
+            doDNLCorrection = true;
+            cout << "DNL configuration: " << dnlConfigFileName << '\n';
             p += 2;
         }
 
@@ -100,6 +103,11 @@ int main(int argc, char* argv[]) {
 
     // tgc_analysis style
     SetAnalysisStyle();
+    gErrorIgnoreLevel = kWarning;
+
+    // Initialize differential non linearity correction class
+    // if (doDNLCorrection) 
+    DNLCorrector dnlCorrector(dnlConfigFileName, g);
 
     // Deactivate all branches
     tracks->SetBranchStatus("*", 0);
@@ -145,6 +153,7 @@ int main(int argc, char* argv[]) {
     map <UShort_t, Double_t> newSigmaError;
     map <UShort_t, Int_t>  ndf;
     map <UShort_t, Int_t> chi2;
+    map <UShort_t, Double_t> newYRel;
 
     TBranch* ramplitudeBranch = reclustered->Branch("r_amplitude", &amplitude);
     TBranch* ramplitudeErrorBranch = reclustered->Branch("r_amplitudeError", &amplitudeError);
@@ -154,6 +163,7 @@ int main(int argc, char* argv[]) {
     TBranch* rsigmaErrorBranch = reclustered->Branch("r_sigmaError", &newSigmaError);
     TBranch* rndfBranch = reclustered->Branch("r_ndf", &ndf);
     TBranch* rchi2Branch = reclustered->Branch("r_chi2", &chi2);
+    TBranch* ryrelBranch = reclustered->Branch("r_yrel", &newYRel);
 
     Int_t nEntries = reclustered->GetEntries();
 
@@ -189,6 +199,11 @@ int main(int argc, char* argv[]) {
     map <UShort_t, vector<Double_t>>* posCHPtr;
     posCHPtr = &posCH;
 
+    map<UShort_t, Double_t> yrel;
+    map <UShort_t, Double_t>* yrelPtr;
+    yrelPtr = &yrel;
+
+
     reclustered->SetBranchAddress("eventnumber", &eventnumber);
     reclustered->SetBranchAddress("trackYGaussian", &trackYGaussianPtr);
     reclustered->SetBranchAddress("trackYWeighted", &trackYWeightedPtr);
@@ -197,9 +212,13 @@ int main(int argc, char* argv[]) {
     reclustered->SetBranchAddress("sigma", &sigmaPtr);
     reclustered->SetBranchAddress("pdo_strip", &pdoStripPtr);
     reclustered->SetBranchAddress("posCH", &posCHPtr);
+    reclustered->SetBranchAddress("relClPosGaussian", &yrelPtr);
+
     UShort_t layer;
     vector<Double_t> pos;
     vector<Double_t> pdo;
+    Double_t yRelAtLayer;
+    Double_t correctedMean;
     string multStr = "";
     Int_t numFits = 0;
     Int_t failedFitCount = 0;
@@ -249,8 +268,8 @@ int main(int argc, char* argv[]) {
     ofstream f;
     f.open(outpath + tag + "sample_cluster_fit.csv");
     cout << "Starting event loop...\n";
-    for (Int_t i=0; i<nEntries; i++) {
-    // for (Int_t i=0; i<120000; i++) {
+    // for (Int_t i=0; i<nEntries; i++) {
+    for (Int_t i=0; i<1; i++) {
         // Get entry
         reclustered->GetEntry(i);
         // Clear the leaves to output
@@ -263,6 +282,7 @@ int main(int argc, char* argv[]) {
             layer = val->first;
             pos = val->second;
             pdo = pdoStrip.at(layer);
+            yRelAtLayer = yrel.at(layer);
             /*cout << "Event, layer: " << eventnumber << ' ' << layer << '\n';
             cout << "Positions: ";
             for (auto x=pos.begin(); x!=pos.end(); x++)
@@ -284,9 +304,22 @@ int main(int argc, char* argv[]) {
             // DoGausFitGuos(pos, pdo, fitInfo, false);
             // Store fit parameters in branches
             if (fitInfo.fitResult!=0) {
+                // calculateYRel(fitInfo.mean, layer, g);
+                if (doDNLCorrection) {
+                    correctedMean = dnlCorrector.ApplyCorrection(fitInfo.mean, yRelAtLayer);
+                    mean[layer] = correctedMean;
+                    // Calculate yrel for the new, corrected mean
+                    newYRel[layer] = dnlCorrector.CalculateYRel(correctedMean, layer);
+                    // cout << doDNLCorrection << ' ' << fitInfo.mean << ' ' << correctedMean << ' ' << yRelAtLayer << ' ' << newYRel[layer] << '\n';
+                }
+                else {
+                    mean[layer] = fitInfo.mean;
+                    // Calculate yrel for the new, uncorrected mean
+                    newYRel[layer] = dnlCorrector.CalculateYRel(fitInfo.mean, layer);
+                }
+                // Put the rest of the fit parameters into their containers
                 amplitude[layer] = fitInfo.A;
                 amplitudeError[layer] = fitInfo.Aerr;
-                mean[layer] = fitInfo.mean;
                 meanError[layer] = fitInfo.meanErr;
                 newSigma[layer] = fitInfo.sigma;
                 newSigmaError[layer] = fitInfo.sigmaErr;
@@ -333,6 +366,7 @@ int main(int argc, char* argv[]) {
         rsigmaErrorBranch->Fill();
         rndfBranch->Fill();
         rchi2Branch->Fill();
+        ryrelBranch->Fill();
     }
     // reclustered->Write(); // Write tree to output file
     cout << "Notice: " << failedFitCount << " of " << numFits << " fits failed\n";
@@ -363,8 +397,3 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-/*void makeReClusteringPlots(TChain* rTree) {
-    TCanvas* c = new TCanvas();
-    rTree->Draw("")
-    return;
-}*/

@@ -39,7 +39,9 @@
 // My includes
 #include "Helper.h"
 #include "GetAnalysisInfo.h"
+#include "DNL.h"
 
+Double_t calculateYRel(Double_t val, UShort_t layer, DetectorGeometry* g);
 /*class ReClusteringPlots {
   public:
       ReClusteringPlots();
