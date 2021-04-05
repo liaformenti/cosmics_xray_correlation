@@ -33,7 +33,7 @@ class DNLCorrector {
       std::string configFileName;
       // Methods
       Double_t GetUniversalAmplitude();
-      Double_t ApplyCorrection(Double_t y, Double_t yrel);
+      Double_t ApplyCorrection(Double_t y, UShort_t layer);
       // Overload for per multiplicity
       // Double_t ApplyCorrection(Double_t y, Double_t yrel, UShort_t mult);
       Double_t CalculateYRel(Double_t val, UShort_t layer);

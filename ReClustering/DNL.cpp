@@ -39,7 +39,7 @@ void DNLCorrector::ParseDNLConfig() {
         }
         else throw runtime_error("Error parsing DNL configuration file: bad multiplicity.\n\n");
         token = line.substr(splitIndex+1, line.size());
-        cout << token << '\n';
+        // cout << token << '\n';
         if (sscanf(token.c_str(), "%lf", &amp) == 1) {
             // cout << amp << '\n';
         }
@@ -64,12 +64,13 @@ void DNLCorrector::ParseDNLConfig() {
 
 Double_t DNLCorrector::GetUniversalAmplitude() { return universalAmplitude; }
 
-Double_t DNLCorrector::ApplyCorrection(Double_t y, Double_t yrel) {
+Double_t DNLCorrector::ApplyCorrection(Double_t y, UShort_t layer) {
+    Double_t yrel = CalculateYRel(y, layer);
     return y + universalAmplitude*TMath::Sin(2*TMath::Pi()*yrel);
 }
 
 Double_t DNLCorrector::CalculateYRel(Double_t val, UShort_t layer) {
-    // cout << "Position: " << val << '\n';
+    // cout << "Position: " << val << ' ' << "layer: " << layer << '\n';
     UShort_t stripID = g->GetID(val, GetSector("L"+to_string(layer)+"S"));
     // cout << "StripID: " << stripID << '\n'; 
     Channel stripCH = {fSTRIP, layer, stripID};
