@@ -6,6 +6,7 @@ using namespace std;
 DNLCorrector::DNLCorrector(string nameOfConfigFile, DetectorGeometry* _g) : g(_g) {
     configFileName = nameOfConfigFile;
     ParseDNLConfig();
+    amplitudeMultiplicityMap.insert(pair<UShort_t, Double_t>(0, universalAmplitude));
 }
 
 void DNLCorrector::ParseDNLConfig() {
@@ -63,6 +64,8 @@ void DNLCorrector::ParseDNLConfig() {
 }
 
 Double_t DNLCorrector::GetUniversalAmplitude() { return universalAmplitude; }
+
+map<UShort_t, Double_t> DNLCorrector::GetAmplitudeMultiplicityMap() { return amplitudeMultiplicityMap; }
 
 Double_t DNLCorrector::ApplyCorrection(Double_t y, UShort_t layer) {
     Double_t yrel = CalculateYRel(y, layer);

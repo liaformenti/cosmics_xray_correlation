@@ -33,6 +33,7 @@ class DNLCorrector {
       std::string configFileName;
       // Methods
       Double_t GetUniversalAmplitude();
+      std::map<UShort_t, Double_t> GetAmplitudeMultiplicityMap();
       Double_t ApplyCorrection(Double_t y, UShort_t layer);
       // Overload for per multiplicity
       // Double_t ApplyCorrection(Double_t y, Double_t yrel, UShort_t mult);
@@ -43,7 +44,8 @@ class DNLCorrector {
       DetectorGeometry* g = nullptr;
       Double_t universalAmplitude = 0;
       // Map for if you want amplitude by multiplicity
-      // std::map<UShort_t, Double_t> amplitudeMultiplicityMap; 
+      // Write this to ouput file for auto documentation
+      std::map<UShort_t, Double_t> amplitudeMultiplicityMap; 
       // Methods
       void ParseDNLConfig();
 };
