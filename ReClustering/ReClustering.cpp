@@ -135,6 +135,8 @@ int main(int argc, char* argv[]) {
     outFile->WriteObject(&analysisInfoVec, "analysisInfoVector"); 
     // Also write just one object from which to extract detectortype in strip_position_analysis
     outFile->WriteObject(ai, "analysisinfo");
+    map<UShort_t, Double_t> amplitudes = dnlCorrector.GetAmplitudeMultiplicityMap();
+    outFile->WriteObject(&amplitudes, "dnl_amplitude_map");
 
     cout << "Cloning CosmicsAnalysis tracks tree.\n";
     TTree* reclustered = tracks->CloneTree();
@@ -276,7 +278,7 @@ int main(int argc, char* argv[]) {
     f.open(outpath + tag + "sample_cluster_fit.csv");
     cout << "Starting event loop...\n";
     // for (Int_t i=0; i<nEntries; i++) {
-    for (Int_t i=0; i<1; i++) {
+    for (Int_t i=0; i<3; i++) {
         // Get entry
         reclustered->GetEntry(i);
         // Clear the leaves to output
@@ -290,7 +292,6 @@ int main(int argc, char* argv[]) {
             pos = val->second;
             pdo = pdoStrip.at(layer);
             cosmicsYRel = yrel.at(layer);
-            cout << "CosmicsYRel: " << cosmicsYRel << '\n';
             /*cout << "Event, layer: " << eventnumber << ' ' << layer << '\n';
             cout << "Positions: ";
             for (auto x=pos.begin(); x!=pos.end(); x++)
@@ -311,14 +312,21 @@ int main(int argc, char* argv[]) {
             DoGausFitMinuit(pos, pdo, fitInfo, false);
             // DoGausFitGuos(pos, pdo, fitInfo, false);
             // Store fit parameters in branches
-            if (fitInfo.fitResult!=0) {
-                // calculateYRel(fitInfo.mean, layer, g);
+
+            // If fitted mean is outside fiducial area, fail the fit
+            if (!g->InFiducialArea(fitInfo.mean, GetSector("L"+to_string(layer)+"S"))) {
+                fitInfo.fitResult=false; 
+            }
+            // If fit was successful
+            else if (fitInfo.fitResult!=0) { 
                 if (doDNLCorrection) {
                     correctedMean = dnlCorrector.ApplyCorrection(fitInfo.mean, layer);
                     mean[layer] = correctedMean;
                     // Calculate yrel for the new, corrected mean
                     newYRel[layer] = dnlCorrector.CalculateYRel(correctedMean, layer);
                     // cout << doDNLCorrection << ' ' << fitInfo.mean << ' ' << correctedMean << ' ' << cosmicsYRel << ' ' << newYRel[layer] << '\n';
+                    if (!g->InFiducialArea(fitInfo.mean, GetSector("L"+to_string(layer)+"S")))
+                        fitInfo.fitResult=false;
                 }
                 else {
                     mean[layer] = fitInfo.mean;
@@ -334,7 +342,6 @@ int main(int argc, char* argv[]) {
                 ndf[layer] = fitInfo.NDF;
                 chi2[layer] = fitInfo.chi2;
             }
-            cout << '\n';
 
             // Fill plots
             if  (fitInfo.fitResult!=0 && pos.size()>=3 && pos.size()<=8) { // If fit is good,
