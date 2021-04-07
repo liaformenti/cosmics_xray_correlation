@@ -65,7 +65,6 @@ int main(int argc, char* argv[]) {
     AnalysisInfo* ai;
     string detectortype = "";
     for (auto fileName=inFileName.begin(); fileName!=inFileName.end(); fileName++) {
-        cout << *fileName << '\n';
         TFile *f = TFile::Open((*fileName).c_str());    
         if (f->IsZombie())
             throw runtime_error("Error opening input file.\n\n");
@@ -219,7 +218,10 @@ int main(int argc, char* argv[]) {
     UShort_t layer;
     vector<Double_t> pos;
     vector<Double_t> pdo;
-    Double_t cosmicsYRel;
+    // yrel is relative position of hit with respect to hit strip's pitch
+    Double_t cosmicsYRel; // from cosmics
+    Double_t reclusteringYRel; // after refitting
+    Double_t correctedYRel; // after DNL correction
     Double_t correctedMean;
     string multStr = "";
     Int_t numFits = 0;
@@ -237,8 +239,8 @@ int main(int argc, char* argv[]) {
     pm->Add("reclustering_mean_error", ";Cluster mean error [mm];No.Clusters", 50, 0, 0.05, 
             myTH1F);
     pm->Add("reclustering_sigma",";#sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
-    pm->Add("cosmics_yrel", ";y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F);
-    pm->Add("reclustering_yrel", ";y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F);
+    pm->Add("reclustering_yrel", ";Reclustering y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F);
+    pm->Add("corrected_yrel", ";DNL corrected y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F);
     // Spec multiplicity
     for (Int_t m=3; m<=8; m++) {
         pm->Add("cosmics_sigma_multiplicity_" + to_string(m), "Cluster size = " + to_string(m) + 
@@ -252,16 +254,16 @@ int main(int argc, char* argv[]) {
                 to_string(m) + ";Cluster mean error [mm];No.Clusters", 20, 0, 0.05, myTH1F);
         pm->Add("reclustering_sigma_multiplicity_" + to_string(m), "Cluster size = " +
                 to_string(m) + ";#sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
-        pm->Add("cosmics_yrel_multiplicity_" + to_string(m), "Cluster size = " +
-                to_string(m) + ";y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F); 
         pm->Add("reclustering_yrel_multiplicity_" + to_string(m), "Cluster size = " +
-                to_string(m) + ";y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F); 
+                to_string(m) + ";Reclustering y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F); 
+        pm->Add("corrected_yrel_multiplicity_" + to_string(m), "Cluster size = " +
+                to_string(m) + ";DNL corrected y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F); 
     }
     
     // Make list of plot names for printing to pdf
     vector<string> nameBases{"cosmics_sigma", "reclustering_amplitude","reclustering_mean", 
-                             "reclustering_mean_error", "reclustering_sigma", "cosmics_yrel", 
-                             "reclustering_yrel"}; 
+                             "reclustering_mean_error", "reclustering_sigma", "reclustering_yrel", 
+                             "corrected_yrel"}; 
     vector<string> plotNames;
     for (auto name=nameBases.begin(); name!=nameBases.end(); name++) {
         plotNames.push_back(*name);
@@ -278,7 +280,7 @@ int main(int argc, char* argv[]) {
     f.open(outpath + tag + "sample_cluster_fit.csv");
     cout << "Starting event loop...\n";
     // for (Int_t i=0; i<nEntries; i++) {
-    for (Int_t i=0; i<3; i++) {
+    for (Int_t i=0; i<nEntries; i++) {
         // Get entry
         reclustered->GetEntry(i);
         // Clear the leaves to output
@@ -310,28 +312,29 @@ int main(int argc, char* argv[]) {
             // Do fit
             // cout << pos.size() << ' ' << pdo.size() << '\n';
             DoGausFitMinuit(pos, pdo, fitInfo, false);
-            // DoGausFitGuos(pos, pdo, fitInfo, false);
-            // Store fit parameters in branches
-
             // If fitted mean is outside fiducial area, fail the fit
             if (!g->InFiducialArea(fitInfo.mean, GetSector("L"+to_string(layer)+"S"))) {
                 fitInfo.fitResult=false; 
             }
-            // If fit was successful
+            // If fit was successful, add fit parameters to branches of output tree
+            // and do DNL correction if desired
             else if (fitInfo.fitResult!=0) { 
+                // Calculate yrel of reclustering mean
+                reclusteringYRel = dnlCorrector.CalculateYRel(fitInfo.mean, layer);
                 if (doDNLCorrection) {
                     correctedMean = dnlCorrector.ApplyCorrection(fitInfo.mean, layer);
                     mean[layer] = correctedMean;
                     // Calculate yrel for the new, corrected mean
-                    newYRel[layer] = dnlCorrector.CalculateYRel(correctedMean, layer);
+                    correctedYRel = dnlCorrector.CalculateYRel(correctedMean, layer);
+                    newYRel[layer] = correctedYRel;
                     // cout << doDNLCorrection << ' ' << fitInfo.mean << ' ' << correctedMean << ' ' << cosmicsYRel << ' ' << newYRel[layer] << '\n';
                     if (!g->InFiducialArea(fitInfo.mean, GetSector("L"+to_string(layer)+"S")))
                         fitInfo.fitResult=false;
                 }
                 else {
                     mean[layer] = fitInfo.mean;
-                    // Calculate yrel for the new, uncorrected mean
-                    newYRel[layer] = dnlCorrector.CalculateYRel(fitInfo.mean, layer);
+                    newYRel[layer] = reclusteringYRel;
+                    correctedYRel = reclusteringYRel;
                 }
                 // Put the rest of the fit parameters into their containers
                 amplitude[layer] = fitInfo.A;
@@ -350,16 +353,16 @@ int main(int argc, char* argv[]) {
                 pm->Fill("reclustering_mean", fitInfo.mean);
                 pm->Fill("reclustering_mean_error", fitInfo.meanErr);
                 pm->Fill("reclustering_sigma", fitInfo.sigma);
-                pm->Fill("cosmics_yrel", cosmicsYRel);
-                pm->Fill("reclustering_yrel", newYRel.at(layer));
+                pm->Fill("reclustering_yrel", reclusteringYRel);
+                pm->Fill("corrected_yrel", correctedYRel);
                 multStr = to_string(pos.size());
                 pm->Fill("cosmics_sigma_multiplicity_" + multStr, sigma.at(layer));
                 pm->Fill("reclustering_amplitude_multiplicity_" + multStr, fitInfo.A);
                 pm->Fill("reclustering_mean_multiplicity_" + multStr, fitInfo.mean);
                 pm->Fill("reclustering_mean_error_multiplicity_" + multStr, fitInfo.meanErr);
                 pm->Fill("reclustering_sigma_multiplicity_" + multStr, fitInfo.sigma);
-                pm->Fill("cosmics_yrel_multiplicity_" + multStr, cosmicsYRel);
-                pm->Fill("reclustering_yrel_multiplicity_" + multStr, newYRel.at(layer));
+                pm->Fill("reclustering_yrel_multiplicity_" + multStr, reclusteringYRel);
+                pm->Fill("corrected_yrel_multiplicity_" + multStr, correctedYRel);
             }
             // Output sample of fits to file
             if (i<50) {
