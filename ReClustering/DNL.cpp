@@ -6,7 +6,7 @@ using namespace std;
 DNLCorrector::DNLCorrector(string nameOfConfigFile, DetectorGeometry* _g) : g(_g) {
     configFileName = nameOfConfigFile;
     ParseDNLConfig();
-    amplitudeMultiplicityMap.insert(pair<UShort_t, Double_t>(0, universalAmplitude));
+    // amplitudeMultiplicityMap.insert(pair<UShort_t, Double_t>(0, universalAmplitude));
 }
 
 void DNLCorrector::ParseDNLConfig() {
@@ -45,7 +45,8 @@ void DNLCorrector::ParseDNLConfig() {
             // cout << amp << '\n';
         }
         else throw runtime_error("Error parsing DNL configuration file: bad amplitude.\n\n");
-
+        // Note: ignores text after the mult/amp if not separately by a space.
+        
         // Choose what to do with it
         // Universal amplitude case
         if (mult==0) {
@@ -53,9 +54,15 @@ void DNLCorrector::ParseDNLConfig() {
             if (universalAmplitude==0) universalAmplitude = amp;
             else throw runtime_error("Error parsing DNL configuration file: more than one universal amplitude parameter.\n\n");
         }
-        if (mult != 0) {
-            throw runtime_error("Error parsing DNL configuration file: amplitudes by multiplicity have not been coded in yet.\n\n");
+        else if ( (mult < 0) || (mult > 25) ) // If mult is out of range
+            throw runtime_error("Error parsing DNL configuration file: invalid multiplicity.\n\n");
+        else {  // valid multiplicity, check if a key already exists.
+            if (amplitudeMultiplicityMap.find(mult) != amplitudeMultiplicityMap.end())
+               throw runtime_error("Error parsing DNL configuration file: duplicate amplitudes for given multiplicity.\n\n"); 
         }
+        cout << mult << ' ' << amp << '\n';
+        amplitudeMultiplicityMap.insert(pair<UShort_t, Double_t>(mult, amp)); 
+        // Add multiplicity and amplitude to map
     }
     // cout << universalAmplitude << '\n';
     f.close();

@@ -281,8 +281,8 @@ int main(int argc, char* argv[]) {
     ofstream f;
     f.open(outpath + tag + "sample_cluster_fit.csv");
     cout << "Starting event loop...\n";
+    for (Int_t i=0; i<1; i++) {
     // for (Int_t i=0; i<nEntries; i++) {
-    for (Int_t i=0; i<nEntries; i++) {
         // Get entry
         reclustered->GetEntry(i);
         // Clear the leaves to output

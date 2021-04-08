@@ -47,6 +47,15 @@ class DNLCorrector {
       // Write this to ouput file for auto documentation
       std::map<UShort_t, Double_t> amplitudeMultiplicityMap; 
       // Methods
+      // Parses DNL configuration file.
+      // Format: multiplicity amplitude [mm]
+      // Multiplicity of zero is a special key for a universal amplitude parameter.
+      // The universal amplitude parameter is used for clusters with multiplicities not listed in
+      // the amplitudeMultiplicity map.
+      // Multiplicity of zero is a special key for a universal amplitude parameter.
+      // The universal amplitude parameter is used for clusters with multiplicities not listed in
+      // the amplitudeMultiplicity map.
+      // Zero (no correction) is the default universal amplitude parameter.
       void ParseDNLConfig();
 };
 
