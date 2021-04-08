@@ -204,7 +204,6 @@ int main(int argc, char* argv[]) {
     map <UShort_t, Double_t>* yrelPtr;
     yrelPtr = &yrel;
 
-
     reclustered->SetBranchAddress("eventnumber", &eventnumber);
     reclustered->SetBranchAddress("trackYGaussian", &trackYGaussianPtr);
     reclustered->SetBranchAddress("trackYWeighted", &trackYWeightedPtr);
@@ -239,6 +238,7 @@ int main(int argc, char* argv[]) {
     pm->Add("reclustering_mean_error", ";Cluster mean error [mm];No.Clusters", 50, 0, 0.05, 
             myTH1F);
     pm->Add("reclustering_sigma",";#sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
+    pm->Add("cosmics_yrel", ";Cosmics y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F);
     pm->Add("reclustering_yrel", ";Reclustering y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F);
     pm->Add("corrected_yrel", ";DNL corrected y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F);
     // Spec multiplicity
@@ -254,6 +254,8 @@ int main(int argc, char* argv[]) {
                 to_string(m) + ";Cluster mean error [mm];No.Clusters", 20, 0, 0.05, myTH1F);
         pm->Add("reclustering_sigma_multiplicity_" + to_string(m), "Cluster size = " +
                 to_string(m) + ";#sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
+        pm->Add("cosmics_yrel_multiplicity_" + to_string(m), "Cluster size = " + to_string(m) + 
+                ";Cosmics y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F);
         pm->Add("reclustering_yrel_multiplicity_" + to_string(m), "Cluster size = " +
                 to_string(m) + ";Reclustering y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F); 
         pm->Add("corrected_yrel_multiplicity_" + to_string(m), "Cluster size = " +
@@ -262,8 +264,8 @@ int main(int argc, char* argv[]) {
     
     // Make list of plot names for printing to pdf
     vector<string> nameBases{"cosmics_sigma", "reclustering_amplitude","reclustering_mean", 
-                             "reclustering_mean_error", "reclustering_sigma", "reclustering_yrel", 
-                             "corrected_yrel"}; 
+                             "reclustering_mean_error", "reclustering_sigma", "cosmics_yrel", 
+                             "reclustering_yrel", "corrected_yrel"}; 
     vector<string> plotNames;
     for (auto name=nameBases.begin(); name!=nameBases.end(); name++) {
         plotNames.push_back(*name);
@@ -353,6 +355,7 @@ int main(int argc, char* argv[]) {
                 pm->Fill("reclustering_mean", fitInfo.mean);
                 pm->Fill("reclustering_mean_error", fitInfo.meanErr);
                 pm->Fill("reclustering_sigma", fitInfo.sigma);
+                pm->Fill("cosmics_yrel", cosmicsYRel);
                 pm->Fill("reclustering_yrel", reclusteringYRel);
                 pm->Fill("corrected_yrel", correctedYRel);
                 multStr = to_string(pos.size());
@@ -361,6 +364,7 @@ int main(int argc, char* argv[]) {
                 pm->Fill("reclustering_mean_multiplicity_" + multStr, fitInfo.mean);
                 pm->Fill("reclustering_mean_error_multiplicity_" + multStr, fitInfo.meanErr);
                 pm->Fill("reclustering_sigma_multiplicity_" + multStr, fitInfo.sigma);
+                pm->Fill("cosmics_yrel_multiplicity_" + multStr, cosmicsYRel);
                 pm->Fill("reclustering_yrel_multiplicity_" + multStr, reclusteringYRel);
                 pm->Fill("corrected_yrel_multiplicity_" + multStr, correctedYRel);
             }
