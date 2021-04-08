@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
     // This should be upgraded to a config file and better cmd line argument format.
     // Also right now you must provide a tag. 
     if (argc != 6) 
-        throw runtime_error("Usage example: ./StripPosAnalysis input_CosmicsAnalysis.root QUADNAME input_xray.db outpath/ tag_\n Quadruplet name format, eg. QL2P06.\n\n");
+        throw runtime_error("Usage example: ./StripPosAnalysis input_reclustering.root QUADNAME input_xray.db outpath/ tag_\n Quadruplet name format, eg. QL2P06.\n\n");
 
     // Check quad name - need name to compare with xray data
     if (argv[2][0] != 'Q') {
@@ -64,21 +64,21 @@ int main(int argc, char* argv[]) {
         throw runtime_error("File does not exist.");
 
     // Open input file
-    TFile* cosmicsAnalysis = new TFile(argv[1], "READ");
-    if (cosmicsAnalysis->IsZombie())
+    TFile* f = new TFile(argv[1], "READ");
+    if (f->IsZombie())
         throw runtime_error("Error opening file.");
 
     // Check TTree
-    if (!cosmicsAnalysis->GetListOfKeys()->Contains("tracks"))
+    if (!f->GetListOfKeys()->Contains("tracks"))
         throw runtime_error("No tracks TTree. Are you sure you have the right file?");
 
     // Get TTree
-    TTree* tracksTree = (TTree*)cosmicsAnalysis->Get("tracks");
+    TTree* tracksTree = (TTree*)f->Get("tracks");
 
     // Get AnalysisInfo object, error handling done in fcn
-    AnalysisInfo* cosmicsInfo = GetAnalysisInfo(cosmicsAnalysis);
+    AnalysisInfo* cosmicsInfo = GetAnalysisInfo(f);
     if (cosmicsInfo == nullptr)
-       throw runtime_error("Error getting AnalysisInfo object, in function GetAnalysisInfo."); 
+       throw runtime_error("Error getting AnalysisInfo object, in function GetAnalysisInfo.\n\n"); 
    
     // Get detector geometry
     DetectorGeometry *geom = DetectorGeometryTools::GetDetectorGeometry(cosmicsInfo->detectortype);
@@ -86,6 +86,7 @@ int main(int argc, char* argv[]) {
     PlotManager* plotManager = new PlotManager();    
 
     // Get xray data
+    // cout << "Not getting x-ray data.\n\n";
     cout << "Getting x-ray data...\n\n";
     XRayData xData(cosmicsInfo, &myInfo, plotManager);
     xData.WriteOutXRayData();
@@ -96,22 +97,24 @@ int main(int argc, char* argv[]) {
     XRayRetracking xrayTracks(&xData, cosmicsInfo, &myInfo, plotManager, geom);
     xrayTracks.Retrack();
     // Temporary way to printout xray residuals
-    ofstream f;
-    f.open(myInfo.outpath + myInfo.quadname + "_xray_residuals.txt");
-    f << "layer,fixed_layer_a, fixed_layer_b, x, y, residual, residual error, tag, mm\n";
+    ofstream of;
+    of.open(myInfo.outpath + myInfo.quadname + "_xray_residuals.txt");
+    of << "layer,fixed_layer_a, fixed_layer_b, x, y, residual, residual error, tag, mm\n";
     for (auto r=xrayTracks.residuals.begin(); r!=xrayTracks.residuals.end(); r++){
-        f << r->l << "," << r->la << "," << r->lb << "," << r->x << "," << r->y << ",";
-        f << r->res << "," << r->resErr << "," << r->tag << "\n"; 
+        of << r->l << "," << r->la << "," << r->lb << "," << r->x << "," << r->y << ",";
+        of << r->res << "," << r->resErr << "," << r->tag << "\n"; 
     }
-    f.close();
+    of.close();
 
     // cout << "Not retracking cosmics.\n\n";
     cout << "Re-tracking cosmics...\n\n";
     CosmicsRetracking cosmicTracks(tracksTree, cosmicsInfo, &myInfo, plotManager, geom);
     cosmicTracks.Retrack();
     cosmicTracks.PrintTrackAngleHistograms();
+    cosmicTracks.PrintTrackUncertaintyHistograms();
+    cosmicTracks.PrintResidualUncertaintyHistograms();
     
-    // cout << "Not comparing cosmics and x-ray data.\n\n";
+    cout << "Not comparing cosmics and x-ray data.\n\n";
     cout << "Comparing cosmics and x-ray data...\n\n";
     CompareData comp(100, 100, &xrayTracks.residuals, &cosmicTracks.residuals, &myInfo, plotManager, 
                      geom);
@@ -131,12 +134,12 @@ int main(int argc, char* argv[]) {
 
     cout << "Finishing up...\n\n"; 
     // Dump all objects to root file
-    TFile* outRoot = new TFile((myInfo.outpath + myInfo.tag + "strip_position_analysis.root").c_str(), 
-                               "RECREATE");
+    TFile* outRoot = new TFile(
+            (myInfo.outpath + myInfo.tag + "strip_position_analysis.root").c_str(), "RECREATE");
     plotManager->Write(outRoot);
     delete outRoot;
     delete plotManager;
-    cosmicsAnalysis->Close();
-    delete cosmicsAnalysis;
+    f->Close();
+    delete f;
     return 0;
 }
