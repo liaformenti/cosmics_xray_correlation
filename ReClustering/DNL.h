@@ -35,8 +35,8 @@ class DNLCorrector {
       Double_t GetUniversalAmplitude();
       std::map<UShort_t, Double_t> GetAmplitudeMultiplicityMap();
       Double_t ApplyCorrection(Double_t y, UShort_t layer);
-      // Overload for per multiplicity
-      // Double_t ApplyCorrection(Double_t y, Double_t yrel, UShort_t mult);
+      // Apply correction when amplitude varies with multiplicity
+      Double_t ApplyCorrection(Double_t y, UShort_t layer, Int_t clSize);
       Double_t CalculateYRel(Double_t val, UShort_t layer);
 
    private:

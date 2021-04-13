@@ -278,11 +278,11 @@ int main(int argc, char* argv[]) {
     }
 
     // File for output
-    ofstream f;
-    f.open(outpath + tag + "sample_cluster_fit.csv");
+    ofstream of;
+    of.open(outpath + tag + "sample_cluster_fit.csv");
     cout << "Starting event loop...\n";
-    for (Int_t i=0; i<1; i++) {
-    // for (Int_t i=0; i<nEntries; i++) {
+    // for (Int_t i=0; i<1; i++) {
+    for (Int_t i=0; i<nEntries; i++) {
         // Get entry
         reclustered->GetEntry(i);
         // Clear the leaves to output
@@ -324,7 +324,8 @@ int main(int argc, char* argv[]) {
                 // Calculate yrel of reclustering mean
                 reclusteringYRel = dnlCorrector.CalculateYRel(fitInfo.mean, layer);
                 if (doDNLCorrection) {
-                    correctedMean = dnlCorrector.ApplyCorrection(fitInfo.mean, layer);
+                    // correctedMean = dnlCorrector.ApplyCorrection(fitInfo.mean, layer);
+                    correctedMean = dnlCorrector.ApplyCorrection(fitInfo.mean, layer, pos.size());
                     mean[layer] = correctedMean;
                     // Calculate yrel for the new, corrected mean
                     correctedYRel = dnlCorrector.CalculateYRel(correctedMean, layer);
@@ -372,11 +373,11 @@ int main(int argc, char* argv[]) {
             if (i<50) {
                 // event number, multiplicity, tgc_analysis mean, tgc_analysis sigma, fit result,
                 // amplitude, amplitude error, mean, mean error, sigma, sigma error, chi2/ndf
-                f << eventnumber  << ',' << pos.size() << ',' << trackYGaussian.at(layer);
-                f << ',' << sigma.at(layer) << ',' << fitInfo.fitResult << ',' << fitInfo.A;
-                f << ',' << fitInfo.Aerr << ',' << fitInfo.mean << ',' << fitInfo.meanErr << ',';
-                f << fitInfo.sigma << ',' << fitInfo.sigmaErr << ',' << fitInfo.chi2/fitInfo.NDF;
-                f << '\n';
+                of << eventnumber  << ',' << pos.size() << ',' << trackYGaussian.at(layer);
+                of << ',' << sigma.at(layer) << ',' << fitInfo.fitResult << ',' << fitInfo.A;
+                of << ',' << fitInfo.Aerr << ',' << fitInfo.mean << ',' << fitInfo.meanErr << ',';
+                of << fitInfo.sigma << ',' << fitInfo.sigmaErr << ',' << fitInfo.chi2/fitInfo.NDF;
+                of << '\n';
             }
 
             // May need to add a check here in case fit fails.
@@ -400,7 +401,7 @@ int main(int argc, char* argv[]) {
     // cout << "Notice: " << disagreesWithCosmicsCount << " means of " << numFits;
     // cout << " fits diagree with the cosmics mean\n";
     
-    f.close();
+    of.close();
     // Print plots
     TCanvas* c = new TCanvas();
     c->Print((outpath + tag + "reclustering_plots.pdf[").c_str());

@@ -18,6 +18,8 @@ void DNLCorrector::ParseDNLConfig() {
     }
     ifstream f(configFileName);
     if (!f.is_open()) throw runtime_error("Error opening DNL configuration file.\n\n");
+    cout << "Parsing DNL configuration file...\n";
+    cout << "Multiplicity, DNL correction amplitude:\n";
     string line;
     Int_t splitIndex = 0;
     string token;
@@ -77,6 +79,21 @@ map<UShort_t, Double_t> DNLCorrector::GetAmplitudeMultiplicityMap() { return amp
 Double_t DNLCorrector::ApplyCorrection(Double_t y, UShort_t layer) {
     Double_t yrel = CalculateYRel(y, layer);
     return y + universalAmplitude*TMath::Sin(2*TMath::Pi()*yrel);
+}
+
+// Apply correction when it depends on multiplicity
+Double_t DNLCorrector::ApplyCorrection(Double_t y, UShort_t layer, Int_t clSize) {
+    Double_t yrel = CalculateYRel(y, layer);
+    Double_t yCorr = y;
+    if (amplitudeMultiplicityMap.find(clSize) != amplitudeMultiplicityMap.end()) {
+        yCorr += amplitudeMultiplicityMap.at(clSize)*TMath::Sin(2*TMath::Pi()*yrel);
+        // cout << clSize << ' ' << amplitudeMultiplicityMap.at(clSize) << ' ' << yrel << ' '<< y << ' ' << yCorr << '\n';
+    }
+    else {
+        yCorr += universalAmplitude*TMath::Sin(2*TMath::Pi()*yrel);
+        // cout << clSize << ' ' << universalAmplitude << ' ' << yrel << ' ' << y << ' ' << yCorr << '\n';
+    }
+    return yCorr;
 }
 
 Double_t DNLCorrector::CalculateYRel(Double_t val, UShort_t layer) {
