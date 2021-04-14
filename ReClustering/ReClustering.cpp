@@ -331,7 +331,7 @@ int main(int argc, char* argv[]) {
                     correctedYRel = dnlCorrector.CalculateYRel(correctedMean, layer);
                     newYRel[layer] = correctedYRel;
                     // cout << doDNLCorrection << ' ' << fitInfo.mean << ' ' << correctedMean << ' ' << cosmicsYRel << ' ' << newYRel[layer] << '\n';
-                    if (!g->InFiducialArea(fitInfo.mean, GetSector("L"+to_string(layer)+"S")))
+                    if (!g->InFiducialArea(correctedMean, GetSector("L"+to_string(layer)+"S")))
                         fitInfo.fitResult=false;
                 }
                 else {
