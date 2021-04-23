@@ -93,15 +93,15 @@ void ResPlots::InitializePosBinnedResPlots() {
                      name += "_residuals_xbin_" + to_string(i+1);
                      name += "_ybin_" + to_string(j+1) + "_";
                      name += combo->String();
-                     title = "Layer: ";
+                     title = "#splitline{Layer: ";
                      title += to_string(combo->layer);
                      title +=", Fixed Layers: ";
                      title += to_string(combo->fixed1);
                      title += to_string(combo->fixed2);
-                     title += ", x#in["+Tools::CStr(x,2)+",";
+                     title += "}{x#in["+Tools::CStr(x,2)+",";
                      title += Tools::CStr(xp1,2)+"] mm, ";
    	                 title += "y#in["+Tools::CStr(y,2)+",";
-                     title += Tools::CStr(yp1,2)+"] mm";
+                     title += Tools::CStr(yp1,2)+"] mm}";
 	                 title += ";Residuals [mm];Tracks";
 
                     // Width: 0.1 mm, range to do with usual spread
@@ -314,6 +314,55 @@ void ResPlots:: PrintPosBinnedFitResultTH2Fs(string filename) {
             c->Clear();
         }
 
+    }
+    c->Print((filename + "]").c_str());
+    delete c;
+    gStyle->SetOptStat("e");
+    gROOT->ForceStyle();
+    return;
+}
+
+void ResPlots::InitializeResidualDistributions() {
+    string name, title;
+    vector<Combination> combVec = combinationVector();    
+    for (auto combo=combVec.begin(); combo!=combVec.end(); combo++) {
+        name = nameBase + "_residual_distribution_" + combo->String();
+        title = "Layer: " + to_string(combo->layer); 
+        title += ", Fixed Layers: " + to_string(combo->fixed1);
+        title += to_string(combo->fixed2);
+        title += ";No. Residuals;Residual [mm]";
+        pm->Add(name, title, 200, -10, 10, myTH1F);
+    }
+    return;
+}
+
+void ResPlots::CreateResidualDistributions() {
+    InitializeResidualDistributions();
+    string name;
+    Combination combo;
+    for (auto r=residuals->begin(); r!=residuals->end(); r++) {
+        combo = r->GetCombo(); 
+        name = nameBase + "_residual_distribution_" + combo.String();
+        pm->Fill(name, r->res);
+    }
+    return;
+}
+
+void ResPlots::PrintResidualDistributions(string filename) {
+    gStyle->SetOptStat("emr");
+    gROOT->ForceStyle();
+    TCanvas* c = new TCanvas();
+    c->Print((filename + "[").c_str());
+    TH1F* hist; // temp var
+    vector<Combination> comboVec = combinationVector();
+    for (auto combo=comboVec.begin(); combo!=comboVec.end(); combo++) {
+        // NEED TO ADD UNIQUE IDENTIFIER TO THIS AS WELL (SAME AS ^)
+        hist = (TH1F*)pm->Get(nameBase + "_residual_distribution_" + combo->String());  
+        if (hist->GetEntries() != 0) {
+            hist->Draw();
+            c->Print(filename.c_str());
+            c->Clear();
+        }
     }
     c->Print((filename + "]").c_str());
     delete c;

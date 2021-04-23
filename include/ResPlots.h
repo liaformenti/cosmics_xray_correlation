@@ -54,7 +54,9 @@ class ResPlots {
     void PrintPosBinnedResPlots(std::string filename);
     void CreatePosBinnedFitResultTH2Fs();
     void PrintPosBinnedFitResultTH2Fs(std::string filename);
-    // Print members
+    void CreateResidualDistributions();
+    void PrintResidualDistributions(std::string filename);
+
   private:
     std::vector<Residual>* residuals = nullptr;
     Binning* binning = nullptr;
@@ -66,5 +68,6 @@ class ResPlots {
     void InitializeNumEntriesTH2Is();
     void InitializePosBinnedResPlots();
     void InitializePosBinnedFitResultTH2Fs();
+    void InitializeResidualDistributions();
 };
 #endif

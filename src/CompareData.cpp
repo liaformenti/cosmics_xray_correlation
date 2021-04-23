@@ -61,10 +61,10 @@ void LocalData::DoCosmicResidualsFit() {
 
     // First, create histogram
     string name = "cosmic_residuals_around_xray_point_" + xRes.tag + "_" + xRes.GetCombo().String();
-    string title = "X-ray point: " + xRes.tag + ", Layer: " + to_string(xRes.l); 
+    string title = "#splitline{X-ray point: " + xRes.tag + ", Layer: " + to_string(xRes.l); 
     title += ", Fixed layers: " + to_string(xRes.la) + to_string(xRes.lb);
-    title += ", x#in["+Tools::CStr(xROI.first,2)+","+Tools::CStr(xROI.second,2)+"] mm y#in[";
-    title += Tools::CStr(yROI.first,2)+","+Tools::CStr(yROI.second,2)+"] mm;Cosmic Residuals [mm];";
+    title += "}{x#in["+Tools::CStr(xROI.first,2)+","+Tools::CStr(xROI.second,2)+"] mm y#in[";
+    title += Tools::CStr(yROI.first,2)+","+Tools::CStr(yROI.second,2)+"] mm};Cosmic Residuals [mm];";
     title += "Tracks";
     pm->Add(name, title, 200, -10, 10, myTH1I);
 
@@ -209,7 +209,7 @@ void CompareData::MakeScatterPlot(){
         eY.push_back(ld->meanCosmicsResidualError);
     }
     string theName = "local_cosmic_and_xray_residuals_scatter"; 
-    string theTitle = "Comparing residuals - all tracking combinations;";
+    string theTitle = "#splitline{Comparing residuals}{All tracking combinations};";
     // string theTitle = ";";
     theTitle += "Exclusive residual from x-ray data [mm];";
     theTitle += "Mean local exclusive residual from cosmics [mm];";
@@ -250,10 +250,10 @@ void CompareData::MakeScatterPlot(){
         }
         // Create combination specific TGraphErrors
         string name = "local_cosmic_and_xray_residuals_scatter_" + comb->String();
-        string title = "Comparing residuals - layer: " + to_string(comb->layer) + ", fixed layers: ";
+        string title = "#splitline{Comparing residuals}{Layer: " + to_string(comb->layer) + ", fixed layers: ";
         // string title = ";";
         title += to_string(comb->fixed1) + to_string(comb->fixed2);
-        title += ";Exclusive residual from x-ray data [mm];";
+        title += "};Exclusive residual from x-ray data [mm];";
         title += "Mean local exclusive residual from cosmics [mm];";
         pm->Add(name, title, x, y, ex, ey, myTGraphErrors); 
         // Get TGraphErrors
