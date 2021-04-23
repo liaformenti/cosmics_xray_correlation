@@ -154,6 +154,8 @@ void CompareData::DoComparison() {
   string filename = myInfo->outpath + myInfo->tag + "cosmic_residuals_in_ROIs.pdf";
   c->Print((filename + "[").c_str());
 
+  // gStyle->SetOptStat(0);
+  // gStyle->SetOptFit(1111);
   for (auto xr=xResiduals->begin(); xr!=xResiduals->end(); xr++) {
 
       LocalData currentPoint(*xr, pm);  
@@ -189,7 +191,7 @@ void CompareData::MakeScatterPlot(){
     c->Print((filename + "[").c_str());
 
     // Print (linear) fit results on plot
-    gStyle->SetOptFit(1111);
+    // gStyle->SetOptFit(1111);
 
     // On x axis: xray residual
     // On y axis: mean cosmics residual in ROI around xray point
@@ -224,6 +226,7 @@ void CompareData::MakeScatterPlot(){
     allLocalDataGraph->Draw("AP");
     TF1* linFitAll = (TF1*)(gROOT->GetFunction("pol1"));
     linFitAll->SetParameters(0,1); // Resonable guesses for intercept, slope
+    linFitAll->SetParNames("Offset", "Slope");
     allLocalDataGraph->Fit(linFitAll, "Q"); // Removed the F option for Minuit fitter
     c->Print(filename.c_str());
     c->Clear();
@@ -258,12 +261,13 @@ void CompareData::MakeScatterPlot(){
         if (localDataGraph->GetN() != 0) {
             TF1* linFit = (TF1*)(gROOT->GetFunction("pol1"));
             linFit->SetParameters(0,1); // Resonable guesses for intercept, slope
+            linFit->SetParNames("Offset", "Slope");
             localDataGraph->Fit(linFit, "Q"); // Removed the F option for Minuit fitter
             localDataGraph->Draw("AP");
             c->Print(filename.c_str());
             c->Clear();
         }
-    } 
+    } // End combo loop 
 
     c->Print((filename + "]").c_str());
     delete c; 

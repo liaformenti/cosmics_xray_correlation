@@ -35,6 +35,10 @@ int main(int argc, char* argv[]) {
     // Set style
     SetAnalysisStyle();
     // cout << "You commented out SetAnalysisStyle\n\n";
+    // Add the Formenti flair
+    gStyle->SetOptStat("e");
+    gStyle->SetOptFit(1);
+    gROOT->ForceStyle();
     
     // Check arguments
     // This should be upgraded to a config file and better cmd line argument format.
@@ -114,7 +118,7 @@ int main(int argc, char* argv[]) {
     cosmicTracks.PrintTrackUncertaintyHistograms();
     cosmicTracks.PrintResidualUncertaintyHistograms();
     
-    cout << "Not comparing cosmics and x-ray data.\n\n";
+    // cout << "Not comparing cosmics and x-ray data.\n\n";
     cout << "Comparing cosmics and x-ray data...\n\n";
     CompareData comp(100, 100, &xrayTracks.residuals, &cosmicTracks.residuals, &myInfo, plotManager, 
                      geom);

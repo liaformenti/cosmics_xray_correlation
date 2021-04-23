@@ -17,6 +17,7 @@
 #include <TH1F.h>
 #include <TH1I.h>
 #include <TH2I.h>
+#include <TStyle.h>
 
 // tgc_analysis includes
 #include "AnalysisInfo.h"

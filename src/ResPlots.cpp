@@ -100,9 +100,9 @@ void ResPlots::InitializePosBinnedResPlots() {
                      title += to_string(combo->fixed2);
                      title += ", x#in["+Tools::CStr(x,2)+",";
                      title += Tools::CStr(xp1,2)+"] mm, ";
-	             title += "y#in["+Tools::CStr(y,2)+",";
+   	                 title += "y#in["+Tools::CStr(y,2)+",";
                      title += Tools::CStr(yp1,2)+"] mm";
-	             title += ";Residuals [mm];Tracks";
+	                 title += ";Residuals [mm];Tracks";
 
                     // Width: 0.1 mm, range to do with usual spread
                     pm->Add(name, title, 200, -10, 10, myTH1I);
@@ -285,6 +285,9 @@ void ResPlots::CreatePosBinnedFitResultTH2Fs() {
 }
 
 void ResPlots:: PrintPosBinnedFitResultTH2Fs(string filename) {
+    // gStyle->SetOptFit(0);
+    gStyle->SetOptStat(0);
+    gROOT->ForceStyle();
     TCanvas* c = new TCanvas();
     c->Print((filename + "[").c_str());
     TH2F* hist; // temp var
@@ -314,5 +317,7 @@ void ResPlots:: PrintPosBinnedFitResultTH2Fs(string filename) {
     }
     c->Print((filename + "]").c_str());
     delete c;
+    gStyle->SetOptStat("e");
+    gROOT->ForceStyle();
     return;
 }
