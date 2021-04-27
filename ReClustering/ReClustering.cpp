@@ -241,6 +241,8 @@ int main(int argc, char* argv[]) {
     pm->Add("cosmics_yrel", ";Cosmics y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F);
     pm->Add("reclustering_yrel", ";Reclustering y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F);
     pm->Add("corrected_yrel", ";DNL corrected y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F);
+    pm->Add("cluster_mean_difference", ";#mu_{reclustering}-#mu_{cosmics};No. Entries", 
+            31, -0.3, 0.3, myTH1F);
     // Spec multiplicity
     for (Int_t m=3; m<=8; m++) {
         pm->Add("cosmics_sigma_multiplicity_" + to_string(m), "Cluster size = " + to_string(m) + 
@@ -260,12 +262,27 @@ int main(int argc, char* argv[]) {
                 to_string(m) + ";Reclustering y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F); 
         pm->Add("corrected_yrel_multiplicity_" + to_string(m), "Cluster size = " +
                 to_string(m) + ";DNL corrected y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F); 
+        if (m==3) {
+            pm->Add("cluster_mean_difference_multiplicity_" + to_string(m), "Cluster size = " + 
+                    to_string(m) + ";#mu_{reclustering}-#mu_{cosmics};No. Entries", 21, -0.01, 
+                    0.01, myTH1F);
+        }
+        else {
+            pm->Add("cluster_mean_difference_multiplicity_" + to_string(m), "Cluster size = " + 
+                to_string(m) + ";#mu_{reclustering}-#mu_{cosmics};No. Entries", 31, -0.3, 0.3, 
+                myTH1F);
+        }
     }
+    // TH2F
+    pm->Add("yrel_vs_y", ";y [mm];y_{rel}", (yLims.second - yLims.first)/20, yLims.first,
+          yLims.second, 20, -0.5, 0.5, myTH2F);
+    pm->Add("yrel_vs_y_multiplicity_3", ";y [mm];y_{rel}", (yLims.second - yLims.first)/40, 
+        yLims.first, yLims.second, 20, -0.5, 0.5, myTH2F);
     
     // Make list of plot names for printing to pdf
     vector<string> nameBases{"cosmics_sigma", "reclustering_amplitude","reclustering_mean", 
                              "reclustering_mean_error", "reclustering_sigma", "cosmics_yrel", 
-                             "reclustering_yrel", "corrected_yrel"}; 
+                             "reclustering_yrel", "corrected_yrel", "cluster_mean_difference"}; 
     vector<string> plotNames;
     for (auto name=nameBases.begin(); name!=nameBases.end(); name++) {
         plotNames.push_back(*name);
@@ -359,6 +376,8 @@ int main(int argc, char* argv[]) {
                 pm->Fill("cosmics_yrel", cosmicsYRel);
                 pm->Fill("reclustering_yrel", reclusteringYRel);
                 pm->Fill("corrected_yrel", correctedYRel);
+                pm->Fill("cluster_mean_difference", fitInfo.mean - trackYGaussian.at(layer)); // Notice diff btw cosmics and DNL corrected mean is not included
+                pm->Fill("yrel_vs_y", mean.at(layer), correctedYRel);
                 multStr = to_string(pos.size());
                 pm->Fill("cosmics_sigma_multiplicity_" + multStr, sigma.at(layer));
                 pm->Fill("reclustering_amplitude_multiplicity_" + multStr, fitInfo.A);
@@ -368,6 +387,10 @@ int main(int argc, char* argv[]) {
                 pm->Fill("cosmics_yrel_multiplicity_" + multStr, cosmicsYRel);
                 pm->Fill("reclustering_yrel_multiplicity_" + multStr, reclusteringYRel);
                 pm->Fill("corrected_yrel_multiplicity_" + multStr, correctedYRel);
+                pm->Fill("cluster_mean_difference_multiplicity_" + multStr, 
+                        fitInfo.mean - trackYGaussian.at(layer));
+                if (pos.size()==3)
+                    pm->Fill("yrel_vs_y_multiplicity_3", mean.at(layer), correctedYRel);
             }
             // Output sample of fits to file
             if (i<50) {
@@ -411,6 +434,12 @@ int main(int argc, char* argv[]) {
         c->Print((outpath + tag + "reclustering_plots.pdf").c_str());
         c->Clear();
     }
+    TH2F* h = (TH2F*)pm->Get("yrel_vs_y");
+    h->Draw("colz");
+    c->Print((outpath + tag + "reclustering_plots.pdf").c_str());
+    h = (TH2F*)pm->Get("yrel_vs_y_multiplicity_3");
+    h->Draw("colz");
+    c->Print((outpath + tag + "reclustering_plots.pdf").c_str());
     c->Print((outpath + tag + "reclustering_plots.pdf]").c_str());
 
     // Write reclustering tree to output file
