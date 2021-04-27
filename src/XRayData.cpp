@@ -37,6 +37,12 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     UShort_t gv; 
     Int_t platform_id;
     Double_t x_beam, y_beam, offset, offset_error;
+    /***
+     * Note about offset_error: there is an offset error recorded in the database, but it is
+     * only the uncertainty on the fitted centroid, and does not account for systematics. Currently
+     * hard coding the uncertainty as 120um as in Benoit's email with subject "Final X-ray dataset"
+     * sent on 2020-12-08.
+     ***/
     // For indexing xray points
     // Each time an XRayPt is added to the ptVec, for each time the
     // constructor is called, num is incremented.
@@ -51,7 +57,10 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
         x_beam = (Double_t)(sqlite3_column_double(stmt, 2));
         y_beam = (Double_t)(sqlite3_column_double(stmt, 3));
         offset = (Double_t)(sqlite3_column_double(stmt, 4));
-        offset_error = (Double_t)(sqlite3_column_double(stmt, 5));
+        // offset_error = (Double_t)(sqlite3_column_double(stmt, 5));
+        // Use fixed offset error of 120um based on Benoit's email "Final X-ray dataset",
+        // 2020-12-08
+        offset_error = 0.120; // mm, from Benoit's email 2020-12-08
         platform_id = (Int_t)(sqlite3_column_int(stmt, 6));
         position_number = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
         // cout << gv << ' ' << x_beam << ' ' << y_beam << ' ' << offset << ' ';
