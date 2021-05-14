@@ -47,6 +47,12 @@ void CosmicsRetracking::Retrack() {
         for (auto itX=trackX.begin(); itX!=trackX.end(); itX++)
             uncertX[itX->first] = 1.8*20/sqrt(12.0); // mm
 
+        // *********** NEW ************
+        // Uncertainty in y is spread of mean_reclustering - mean_cosmics (systematic error)
+        map<UShort_t, Double_t> uncertY;
+        for (auto itY=r_mean.begin(); itY!=r_mean.end(); itY++)
+            uncertY[itY->first] = 0.045; // mm
+
         // for each permutation of two layers
         // la < lb and la is treated first always
         // la and lb are private members
@@ -59,7 +65,9 @@ void CosmicsRetracking::Retrack() {
                    continue;
 
                 getOtherLayers(la, lb, &lc, &ld);
-                Tracking myTrack(g, pm, trackX, uncertX, r_mean, r_meanError, la, lb);
+                // Tracking myTrack(g, pm, trackX, uncertX, r_mean, r_meanError, la, lb);
+                // With uncertY:
+                Tracking myTrack(g, pm, trackX, uncertX, r_mean, uncertY, la, lb);
 
                 myTrack.Fit();
 
