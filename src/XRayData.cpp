@@ -6,17 +6,22 @@ using namespace std;
 XRayData::XRayData(AnalysisInfo* _cinfo,
                    InputInfo* _myInfo, PlotManager* _pm) : 
 cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
+    string csvFileName = myInfo->database;
+    string dbFileName = myInfo->outpath + csvFileName.substr(csvFileName.length()-10, 6) + ".db";
+    csv2db(csvFileName, dbFileName);
 
     // Get relevant data from database
     sqlite3* db;
     sqlite3_stmt *stmt;
     int rc;
-    sqlite3_open(myInfo->database.c_str(), &db);
-    // gv is gasvolume == layer
+    sqlite3_open(dbFileName.c_str(), &db);
+    // gas_volume == layer
     // Select statement chooses desired quadruplet and groups layer data by gun position.
-    string sql = "SELECT quad_name, gv, x_beam, y_beam, offset, offset_error, platform_id, ";
-    sql += "position_number FROM xraydata WHERE quad_name='" + myInfo->quadname; 
-    sql += "' ORDER BY platform_id, position_number;";
+    // WARNING: No check if wedge corresponds to quad!!!
+    string moduleType = myInfo->quadname.substr(0, 4);
+    string sql = "SELECT module, gas_volume, x_beam, y_beam, y_meas, platform_id, position_number";
+    sql += " FROM results WHERE module=\'" + moduleType + "\'";
+    sql += " ORDER BY platform_id, position_number;";
     // cout << sql << '\n';
     // Order by ascending x_beam necessary so only unique beam
     // positions are recorded in ptVec (vector of XRayPt's with each point's layer data)
@@ -43,10 +48,6 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
      * hard coding the uncertainty as 120um as in Benoit's email with subject "Final X-ray dataset"
      * sent on 2020-12-08.
      ***/
-    // For indexing xray points
-    // Each time an XRayPt is added to the ptVec, for each time the
-    // constructor is called, num is incremented.
-    // static Int_t num = 0; 
 
     // For all selected rows
     Int_t rowCount = 0;
@@ -56,13 +57,13 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
         gv = (UShort_t)(sqlite3_column_int(stmt, 1));
         x_beam = (Double_t)(sqlite3_column_double(stmt, 2));
         y_beam = (Double_t)(sqlite3_column_double(stmt, 3));
-        offset = (Double_t)(sqlite3_column_double(stmt, 4));
+        offset = (Double_t)(sqlite3_column_double(stmt, 4)) - y_beam;
         // offset_error = (Double_t)(sqlite3_column_double(stmt, 5));
         // Use fixed offset error of 120um based on Benoit's email "Final X-ray dataset",
         // 2020-12-08
         offset_error = 0.120; // mm, from Benoit's email 2020-12-08
-        platform_id = (Int_t)(sqlite3_column_int(stmt, 6));
-        position_number = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
+        platform_id = (Int_t)(sqlite3_column_int(stmt, 5));
+        position_number = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
         // cout << gv << ' ' << x_beam << ' ' << y_beam << ' ' << offset << ' ';
         // cout << offset_error << ' ' << platform_id << ' ' << position_number << '\n';
 
@@ -100,7 +101,6 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
                 pair<UShort_t, Double_t>(gv, offset_error));
             // Add member to vector
             pointVec.push_back(point);
-            // num++;
         }
         else {
             // Looking at data for same gun position
@@ -145,6 +145,105 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     return;
 }
 
+void XRayData::csv2db(string inFileName, string outFileName) {
+    // Get input csv
+    ifstream inFile;
+    inFile.open(inFileName);
+    if (!inFile.is_open()) {
+        throw runtime_error("Error opening .csv file.\n");
+    }
+
+    // Create output db
+    sqlite3 *db;
+    // db name is same as input csv file => cut off .csv
+    string dbName = outFileName;
+    sqlite3_open(dbName.c_str(), &db); 
+    
+    // Prepare for sqlite3 commands
+    // sqlite3_stmt* stmt;
+    int rc;
+    char* zErrMsg = 0;
+
+    // Create output table
+    string sqlCreateTable = "CREATE TABLE RESULTS (RUN_ID TEXT, MODULE TEXT, GAS_VOLUME INTEGER, X_BEAM REAL, Y_BEAM REAL, Y_MEAS REAL, Y_MEAS_ERROR REAL, PLATFORM_ID INTEGER, POSITION_NUMBER TEXT);";
+    rc = sqlite3_exec(db, sqlCreateTable.c_str(), NULL, 0, &zErrMsg);
+    if (rc != SQLITE_OK) {
+        cout << "sqlite3 error: " << zErrMsg << '\n';
+        sqlite3_free(zErrMsg);
+        sqlite3_close(db);
+        throw runtime_error("Error creating database from x-ray csv file.\n\n");
+    }
+
+    // Parse out column names
+    int ncols = 9;
+    string colNames[ncols];
+    string headers;
+    getline(inFile, headers);
+    headers += ",PLATFORM_ID,POSITION_NUMBER";
+
+    string valuesString;
+    string token = "";
+    string runID, platID, posNum;
+    string sql = "";
+    // int count = 0;
+    
+    while (getline(inFile, valuesString)) {
+       //  cout << valuesString << '\n';
+        stringstream valuesStream;
+        valuesStream << valuesString;
+        valuesString = ""; // Clear values string to be refilled with same but correct sql format
+        getline(valuesStream, runID, ',');
+        // cout << runID << '\n';
+
+        // Parse out the survery point information from the run_id and put it in the values array
+        ParseRunID(runID, platID, posNum);
+        valuesString += "\'" + runID + "\',"; // RUN_ID
+
+        getline(valuesStream, token, ',');
+        valuesString += "\'" + token + "\',"; // MODULE
+        
+        for (int i=0; i<ncols-4; i++) { // For the non-string values,
+            getline(valuesStream, token, ',');
+            valuesString += token + ",";
+        }    
+
+        valuesString += platID + "," + "\'" + posNum + "\'"; // Add the survery pt info
+        // cout << valuesString << '\n';
+
+
+        sql = "INSERT INTO RESULTS (" + headers + ") VALUES (" + valuesString + ");";
+        // cout << sql << '\n';
+        // valuesStream = stringstream(); // clear the stream by resetting it to default
+        valuesString = "";
+
+        // NOW DO THE SQL
+        rc = sqlite3_exec(db, sql.c_str(), NULL, 0, &zErrMsg);
+        if (rc != SQLITE_OK) {
+            cout << "sqlite3 error: " << zErrMsg << '\n';
+            sqlite3_free(zErrMsg);
+            sqlite3_close(db);
+            throw runtime_error("Error inserting into table.\n");
+        }
+        // if (count>3) break;
+        // count++;
+        // cout << '\n';
+    }
+    sqlite3_close(db);
+    inFile.close();    
+    return;
+}
+
+void XRayData::ParseRunID(string runID, string& platformID, string& positionNumber) {
+    char token = '_';
+    string wedgeID, gasVol, runNumber;
+    stringstream ss(runID);
+    getline(ss, wedgeID, token);
+    getline(ss, gasVol, token);
+    getline(ss, platformID, token);
+    getline(ss, positionNumber, token);
+    getline(ss, runNumber);
+    return;
+}
 // Plots the positions of all the xray point in pointVec
 // Uses the average beam position across all four layers.
 // Should add this to plot manager (need to send in plot manager)

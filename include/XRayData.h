@@ -13,6 +13,7 @@
 #include <map>
 #include <vector>
 #include <fstream>
+#include <sstream>
 
 // ROOT includes
 #include <TCanvas.h>
@@ -48,6 +49,10 @@ class XRayData {
     std::vector<XRayPt> pointVec;
 
     // Methods
+    // Filepath indicates the path and name of file to hold the resulting database
+    void csv2db(std::string inFileName, std::string outFileName);
+    // Fills platformID and positionNumber with approrpriate strings from runID
+    void ParseRunID(std::string runID, std::string& platformID, std::string& positionNumber);
     // Plot ybeams vs xbeams, nominal xray positions
     // Take average of position over available layers.
     void PlotAverageBeamPositions();
