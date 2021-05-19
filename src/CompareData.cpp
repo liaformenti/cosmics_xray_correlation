@@ -223,6 +223,8 @@ void CompareData::MakeScatterPlot(){
         cout << " (CompareData::MakeScatterPlot)\n\n";
         return;
     }
+    allLocalDataGraph->GetXaxis()->SetLimits(-2,2);
+    allLocalDataGraph->GetYaxis()->SetLimits(-2,2);
     allLocalDataGraph->Draw("AP");
     TF1* linFitAll = (TF1*)(gROOT->GetFunction("pol1"));
     linFitAll->SetParameters(0,1); // Resonable guesses for intercept, slope
@@ -241,7 +243,7 @@ void CompareData::MakeScatterPlot(){
             // Skip points where residuals fit failed or 
             // where mean cosmics residual error is too high
             // should be in config
-            if ((ld->fitResult != 0) || (ld->meanCosmicsResidualError > 0.07)) continue; 
+            if ((ld->fitResult != 0) || (ld->meanCosmicsResidualError > 0.1)) continue; 
             // For correct combination, add data to vectors
             x.push_back(ld->xRes.res);
             ex.push_back(ld->xRes.resErr); 
@@ -263,6 +265,8 @@ void CompareData::MakeScatterPlot(){
             linFit->SetParameters(0,1); // Resonable guesses for intercept, slope
             linFit->SetParNames("Offset", "Slope");
             localDataGraph->Fit(linFit, "Q"); // Removed the F option for Minuit fitter
+            localDataGraph->GetXaxis()->SetLimits(-2,2);
+            localDataGraph->GetYaxis()->SetLimits(-2,2);
             localDataGraph->Draw("AP");
             c->Print(filename.c_str());
             c->Clear();
