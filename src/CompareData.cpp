@@ -154,8 +154,10 @@ void CompareData::DoComparison() {
   string filename = myInfo->outpath + myInfo->tag + "cosmic_residuals_in_ROIs.pdf";
   c->Print((filename + "[").c_str());
 
-  // gStyle->SetOptStat(0);
-  // gStyle->SetOptFit(1111);
+  // Title size
+  cout << "Title size: " << gStyle->GetTitleSize() << '\n';
+  gStyle->SetTitleSize(0.025, "t");
+  gROOT->ForceStyle();
   for (auto xr=xResiduals->begin(); xr!=xResiduals->end(); xr++) {
 
       LocalData currentPoint(*xr, pm);  
@@ -179,6 +181,8 @@ void CompareData::DoComparison() {
   }
 
   c->Print((filename + "]").c_str());
+  gStyle->SetTitleSize(0.04, "t");
+  gROOT->ForceStyle();
   delete c;
   return;
 }
@@ -197,41 +201,66 @@ void CompareData::MakeScatterPlot(){
     // On y axis: mean cosmics residual in ROI around xray point
 
     // First, put all combinations' residuals on one plot
-    vector<Double_t> X, Y, eX, eY;
+    // To color by interp/extrap, have to make 2 separate graphs
+    vector<Double_t> X, Y, eX, eY; // all
+    vector<Double_t> Xx, Yx, eXx, eYx; // extrapolation
+    vector<Double_t> Xi, Yi, eXi, eYi; // interpolation
     for (auto ld=localDataVec.begin(); ld!=localDataVec.end(); ld++) {
         // Skip points where residuals fit failed 
         // or where mean cosmics residual error is too high
         // should be in config
-        if ((ld->fitResult != 0) || (ld->meanCosmicsResidualError > 0.07)) continue; 
+        if ((ld->fitResult != 0) || (ld->meanCosmicsResidualError > 0.1)) continue; 
+        if (ld->xRes.la < ld->xRes.l && ld->xRes.l < ld->xRes.lb) { // interpolation
+            Xi.push_back(ld->xRes.res);
+            eXi.push_back(ld->xRes.resErr); 
+            Yi.push_back(ld->meanCosmicsResidual);
+            eYi.push_back(ld->meanCosmicsResidualError);
+        }
+        else { // extrapolation
+            Xx.push_back(ld->xRes.res);
+            eXx.push_back(ld->xRes.resErr); 
+            Yx.push_back(ld->meanCosmicsResidual);
+            eYx.push_back(ld->meanCosmicsResidualError);
+        }
         X.push_back(ld->xRes.res);
         eX.push_back(ld->xRes.resErr); 
         Y.push_back(ld->meanCosmicsResidual);
         eY.push_back(ld->meanCosmicsResidualError);
     }
-    string theName = "local_cosmic_and_xray_residuals_scatter"; 
-    string theTitle = "#splitline{Comparing residuals}{All tracking combinations};";
-    // string theTitle = ";";
-    theTitle += "Exclusive residual from x-ray data [mm];";
-    theTitle += "Mean local exclusive residual from cosmics [mm];";
-    // Create TGraphErrors
-    pm->Add(theName, theTitle, X, Y, eX, eY, myTGraphErrors);
+    string names[3] = {"local_cosmic_and_xray_residuals_scatter", "local_cosmic_and_xray_residuals_scatter_interpolation", "local_cosmic_and_xray_residuals_scatter_extrapolation"};
+    string titles[3] = {"#splitline{Comparing residuals}{All tracking combinations};Exclusive residual from x-ray data [mm];Mean local exclusive residual from cosmics [mm];", "#splitline{Comparing residuals}{Interpolation combinations};Exclusive residual from x-ray data [mm];Mean local exclusive residual from cosmics [mm];", "#splitline{Comparing residuals}{Extrapolation combinations};Exclusive residual from x-ray data [mm];Mean local exclusive residual from cosmics [mm];"};
+    pm->Add(names[0], titles[0], X, Y, eX, eY, myTGraphErrors);
+    pm->Add(names[1], titles[1], Xi, Yi, eXi, eYi, myTGraphErrors);
+    pm->Add(names[2], titles[2], Xx, Yx, eXx, eYx, myTGraphErrors);
+
     // Get TGraphErrors 
-    TGraphErrors* allLocalDataGraph = (TGraphErrors*)pm->Get(theName);
-    // allLocalDataGraph->SetMarkerStyle(kCircle);
-    if (allLocalDataGraph->GetN() == 0) {
+    TGraphErrors* graphs[3];
+    TGraphErrors* allLocalDataGraph = (TGraphErrors*)pm->Get(names[0]);
+    TGraphErrors* interpGraph = (TGraphErrors*)pm->Get(names[1]);
+    TGraphErrors* extrapGraph = (TGraphErrors*)pm->Get(names[2]);
+    graphs[0] = allLocalDataGraph;
+    graphs[1] = interpGraph;
+    graphs[2] = extrapGraph;
+
+    // Check there is data
+    if (graphs[0]->GetN() == 0)  {
         cout << "Warning: no association between x-ray retracking combinations and local cosmics data";
         cout << " (CompareData::MakeScatterPlot)\n\n";
         return;
     }
-    allLocalDataGraph->GetXaxis()->SetLimits(-2,2);
-    allLocalDataGraph->GetYaxis()->SetLimits(-2,2);
-    allLocalDataGraph->Draw("AP");
-    TF1* linFitAll = (TF1*)(gROOT->GetFunction("pol1"));
-    linFitAll->SetParameters(0,1); // Resonable guesses for intercept, slope
-    linFitAll->SetParNames("Offset", "Slope");
-    allLocalDataGraph->Fit(linFitAll, "Q"); // Removed the F option for Minuit fitter
-    c->Print(filename.c_str());
-    c->Clear();
+
+    for (Int_t i=0; i<3; i++) {
+        graphs[i]->GetXaxis()->SetLimits(-2,2);
+        graphs[i]->SetMinimum(-2);
+        graphs[i]->SetMaximum(2);
+        graphs[i]->Draw("AP");
+        TF1* linFunc = (TF1*)gROOT->GetFunction("pol1");
+        linFunc->SetParameters(0,1); // Resonable guesses for intercept, slope
+        linFunc->SetParNames("Offset", "Slope");
+        graphs[i]->Fit(linFunc, "Q"); // Removed the F option for Minuit fitter
+        c->Print(filename.c_str());
+        c->Clear();
+    }
 
     // Now make tracking layer specific combinaton-specific plots
     vector<Combination> combVec = combinationVector();
@@ -266,7 +295,8 @@ void CompareData::MakeScatterPlot(){
             linFit->SetParNames("Offset", "Slope");
             localDataGraph->Fit(linFit, "Q"); // Removed the F option for Minuit fitter
             localDataGraph->GetXaxis()->SetLimits(-2,2);
-            localDataGraph->GetYaxis()->SetLimits(-2,2);
+            localDataGraph->SetMinimum(-2);
+            localDataGraph->SetMaximum(2);
             localDataGraph->Draw("AP");
             c->Print(filename.c_str());
             c->Clear();
@@ -274,6 +304,7 @@ void CompareData::MakeScatterPlot(){
     } // End combo loop 
 
     c->Print((filename + "]").c_str());
+    // delete allLocalDataGraph;
     delete c; 
     return;
 }
