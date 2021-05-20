@@ -330,7 +330,7 @@ void ResPlots::InitializeResidualDistributions() {
         title = "Layer: " + to_string(combo->layer); 
         title += ", Fixed Layers: " + to_string(combo->fixed1);
         title += to_string(combo->fixed2);
-        title += ";No. Residuals;Residual [mm]";
+        title += ";Residual [mm];No. Residuals";
         pm->Add(name, title, 200, -10, 10, myTH1F);
     }
     return;
