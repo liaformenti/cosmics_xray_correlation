@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
     th2s.CreateResidualDistributions();
     th2s.PrintNumEntriesTH2Is(myInfo.outpath + myInfo.tag + myInfo.quadname + "_num_entries_binning_" + widthBins.name + ".pdf");
     th2s.PrintPosBinnedResPlots(myInfo.outpath + myInfo.tag + myInfo.quadname + "_residual_fits_binning_" + widthBins.name + ".pdf");
-    th2s.PrintPosBinnedFitResultTH2Fs(myInfo.outpath + myInfo.tag + myInfo.quadname + "_fit_results_binning_" + widthBins.name + ".pdf");
+    th2s.PrintPosBinnedFitResultTH2Fs();
     th2s.PrintResidualDistributions(myInfo.outpath + myInfo.tag + myInfo.quadname + "_residual_distributions_" + widthBins.name + ".pdf");
 
     cout << "Finishing up...\n\n"; 

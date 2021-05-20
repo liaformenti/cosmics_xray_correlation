@@ -53,7 +53,7 @@ class ResPlots {
     void CreatePosBinnedResPlots();
     void PrintPosBinnedResPlots(std::string filename);
     void CreatePosBinnedFitResultTH2Fs();
-    void PrintPosBinnedFitResultTH2Fs(std::string filename);
+    void PrintPosBinnedFitResultTH2Fs();
     void CreateResidualDistributions();
     void PrintResidualDistributions(std::string filename);
 

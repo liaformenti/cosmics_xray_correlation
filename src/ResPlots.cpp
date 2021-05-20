@@ -147,6 +147,8 @@ void ResPlots::CreatePosBinnedResPlots() {
 } // end
 
 void ResPlots::PrintPosBinnedResPlots(string filename){
+    gStyle->SetTitleSize(0.025, "t");
+    gROOT->ForceStyle();
     TCanvas* c = new TCanvas();
     c->Divide(2,2); // 4 plots per pdf page
     c->Print((filename +"[").c_str());
@@ -174,6 +176,8 @@ void ResPlots::PrintPosBinnedResPlots(string filename){
     }
     c->Print((filename + "]").c_str());
     delete c;
+    gStyle->SetTitleSize(0.04, "t"); // reset title size
+    gROOT->ForceStyle();
     return;
 }
 
@@ -284,16 +288,19 @@ void ResPlots::CreatePosBinnedFitResultTH2Fs() {
     }  // end combo loop
 }
 
-void ResPlots:: PrintPosBinnedFitResultTH2Fs(string filename) {
+void ResPlots:: PrintPosBinnedFitResultTH2Fs() {
     // gStyle->SetOptFit(0);
     gStyle->SetOptStat(0);
     gROOT->ForceStyle();
     TCanvas* c = new TCanvas();
-    c->Print((filename + "[").c_str());
     TH2F* hist; // temp var
     vector<Combination> comboVec = combinationVector();
+    string filename;
+
+    // Means
+    filename = myInfo->outpath + myInfo->tag + myInfo->quadname + "_fit_means_binning_" + binning->name + ".pdf";
+    c->Print((filename + "[").c_str());
     for (auto combo=comboVec.begin(); combo!=comboVec.end(); combo++) {
-        // Means
         hist = (TH2F*)pm->Get(nameBase + "_means_" + combo->String());  
         if (hist->GetEntries() != 0) { // If plot is not empty,
             // These max and min values should go in config
@@ -303,7 +310,13 @@ void ResPlots:: PrintPosBinnedFitResultTH2Fs(string filename) {
             c->Print(filename.c_str());
             c->Clear();
         }
-        // Stdevs
+    }
+    c->Print((filename + "]").c_str());
+
+    // Sigmas
+    filename = myInfo->outpath + myInfo->tag + myInfo->quadname + "_fit_sigmas_binning_" + binning->name + ".pdf";
+    c->Print((filename + "[").c_str());
+    for (auto combo=comboVec.begin(); combo!=comboVec.end(); combo++) {
         hist = (TH2F*)pm->Get(nameBase + "_sigmas_" + combo->String()); 
         if (hist->GetEntries() != 0) {
             // These max and min values should go in config
@@ -317,6 +330,7 @@ void ResPlots:: PrintPosBinnedFitResultTH2Fs(string filename) {
     }
     c->Print((filename + "]").c_str());
     delete c;
+    // Return to regular style
     gStyle->SetOptStat("e");
     gROOT->ForceStyle();
     return;
