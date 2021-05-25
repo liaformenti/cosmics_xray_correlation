@@ -112,9 +112,9 @@ int main(int argc, char* argv[]) {
     tracks->SetBranchStatus("*", 0);
 
     // Activate the branches you want to copy to output tree
-    for (auto activeBranchName : {"eventnumber", "trackX", "trackYGaussian", "trackYWeighted", 
-                                  "sumPDO", "rms", "sigma", "pdo_strip", "posCH", 
-                                  "relClPosGaussian", "clSize", "isSaturated"}) {
+    for (auto activeBranchName : {"eventnumber*", "trackX*", "trackYGaussian*", "trackYWeighted*", 
+                                  "sumPDO*", "rms*", "sigma*", "pdo_strip*", "posCH*", 
+                                  "relClPosGaussian*", "clSize*", "isSaturated*"}) {
         tracks->SetBranchStatus(activeBranchName, 1);
     }
 
