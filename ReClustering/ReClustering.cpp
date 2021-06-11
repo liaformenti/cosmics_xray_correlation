@@ -221,7 +221,7 @@ int main(int argc, char* argv[]) {
     Double_t cosmicsYRel; // from cosmics
     Double_t reclusteringYRel; // after refitting
     Double_t correctedYRel; // after DNL correction
-    Double_t correctedMean;
+    Double_t correctedMean; // after DNL correction
     string multStr = "";
     Int_t numFits = 0;
     Int_t failedFitCount = 0;
@@ -241,8 +241,10 @@ int main(int argc, char* argv[]) {
     pm->Add("cosmics_yrel", ";Cosmics y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F);
     pm->Add("reclustering_yrel", ";Reclustering y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F);
     pm->Add("corrected_yrel", ";DNL corrected y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F);
-    pm->Add("cluster_mean_difference", ";#mu_{reclustering}-#mu_{cosmics};No. Entries", 
-            30, -0.3, 0.3, myTH1F);
+    pm->Add("cluster_mean_difference", ";#mu_{reclustering}-#mu_{cosmics};No. Entries", 30, -0.3,
+            0.3, myTH1F);
+    pm->Add("dnl_corrected_cluster_mean_difference", 
+            ";#mu_{DNL corrected}-#mu_{cosmics};No. Entries", 30, -0.3, 0.3, myTH1F);
     // Spec multiplicity
     for (Int_t m=3; m<=8; m++) {
         pm->Add("cosmics_sigma_multiplicity_" + to_string(m), "Cluster size = " + to_string(m) + 
@@ -262,6 +264,9 @@ int main(int argc, char* argv[]) {
                 to_string(m) + ";Reclustering y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F); 
         pm->Add("corrected_yrel_multiplicity_" + to_string(m), "Cluster size = " +
                 to_string(m) + ";DNL corrected y_{rel};No. Clusters", 20, -0.5, 0.5, myTH1F); 
+        pm->Add("dnl_corrected_cluster_mean_difference_multiplicity_" + to_string(m), 
+                "Cluster size = " + to_string(m) + 
+                ";#mu_{DNL corrected}-#mu_{cosmics};No. Entries", 30, -0.3, 0.3, myTH1F);
         if (m==3) {
             pm->Add("cluster_mean_difference_multiplicity_" + to_string(m), "Cluster size = " + 
                     to_string(m) + ";#mu_{reclustering}-#mu_{cosmics};No. Entries", 20, -0.01, 
@@ -282,7 +287,8 @@ int main(int argc, char* argv[]) {
     // Make list of plot names for printing to pdf
     vector<string> nameBases{"cosmics_sigma", "reclustering_amplitude","reclustering_mean", 
                              "reclustering_mean_error", "reclustering_sigma", "cosmics_yrel", 
-                             "reclustering_yrel", "corrected_yrel", "cluster_mean_difference"}; 
+                             "reclustering_yrel", "corrected_yrel", "cluster_mean_difference",
+                             "dnl_corrected_cluster_mean_difference"}; 
     vector<string> plotNames;
     for (auto name=nameBases.begin(); name!=nameBases.end(); name++) {
         plotNames.push_back(*name);
@@ -355,6 +361,8 @@ int main(int argc, char* argv[]) {
                     mean[layer] = fitInfo.mean;
                     newYRel[layer] = reclusteringYRel;
                     correctedYRel = reclusteringYRel;
+                    // No difference in DNL corrected mean and reclustering mean
+                    correctedMean = fitInfo.mean; 
                 }
                 // Put the rest of the fit parameters into their containers
                 amplitude[layer] = fitInfo.A;
@@ -376,7 +384,9 @@ int main(int argc, char* argv[]) {
                 pm->Fill("cosmics_yrel", cosmicsYRel);
                 pm->Fill("reclustering_yrel", reclusteringYRel);
                 pm->Fill("corrected_yrel", correctedYRel);
-                pm->Fill("cluster_mean_difference", fitInfo.mean - trackYGaussian.at(layer)); // Notice diff btw cosmics and DNL corrected mean is not included
+                pm->Fill("cluster_mean_difference", fitInfo.mean - trackYGaussian.at(layer)); 
+                pm->Fill("dnl_corrected_cluster_mean_difference", 
+                         correctedMean - trackYGaussian.at(layer));
                 pm->Fill("yrel_vs_y", mean.at(layer), correctedYRel);
                 multStr = to_string(pos.size());
                 pm->Fill("cosmics_sigma_multiplicity_" + multStr, sigma.at(layer));
@@ -389,6 +399,8 @@ int main(int argc, char* argv[]) {
                 pm->Fill("corrected_yrel_multiplicity_" + multStr, correctedYRel);
                 pm->Fill("cluster_mean_difference_multiplicity_" + multStr, 
                         fitInfo.mean - trackYGaussian.at(layer));
+                pm->Fill("dnl_corrected_cluster_mean_difference_multiplicity_" + multStr, 
+                         correctedMean - trackYGaussian.at(layer));
                 if (pos.size()==3)
                     pm->Fill("yrel_vs_y_multiplicity_3", mean.at(layer), correctedYRel);
             }
