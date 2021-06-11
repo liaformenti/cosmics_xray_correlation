@@ -233,8 +233,8 @@ int main(int argc, char* argv[]) {
     pm->Add("cosmics_sigma", ";Cosmics #sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
     pm->Add("reclustering_amplitude", ";Amplitude [ADC counts];No. Clusters", 320, 0, 3200, 
             myTH1F);
-    pm->Add("reclustering_mean", ";Cluster mean [mm];No.Clusters", yLims.second - yLims.first, 
-            yLims.first, yLims.second, myTH1F);
+    // pm->Add("reclustering_mean", ";Cluster mean [mm];No.Clusters", yLims.second - yLims.first, 
+    // yLims.first, yLims.second, myTH1F);
     pm->Add("reclustering_mean_error", ";Cluster mean error [mm];No.Clusters", 50, 0, 0.05, 
             myTH1F);
     pm->Add("reclustering_sigma",";#sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
@@ -251,9 +251,9 @@ int main(int argc, char* argv[]) {
                 ";Cosmics #sigma [mm];No. Clusters", 100, 0, 10, myTH1F);
         pm->Add("reclustering_amplitude_multiplicity_" + to_string(m), "Cluster size = " + 
                 to_string(m) + ";Amplitude [ADC counts];No. Clusters", 320, 0, 3200, myTH1F);
-        pm->Add("reclustering_mean_multiplicity_" + to_string(m), "Cluster size = " + 
-                to_string(m) + ";Cluster mean [mm];No.Clusters", yLims.second - yLims.first, 
-                yLims.first, yLims.second, myTH1F);
+        // pm->Add("reclustering_mean_multiplicity_" + to_string(m), "Cluster size = " + 
+        //        to_string(m) + ";Cluster mean [mm];No.Clusters", yLims.second - yLims.first, 
+        //        yLims.first, yLims.second, myTH1F);
         pm->Add("reclustering_mean_error_multiplicity_" + to_string(m), "Cluster size = " +
                 to_string(m) + ";Cluster mean error [mm];No.Clusters", 20, 0, 0.05, myTH1F);
         pm->Add("reclustering_sigma_multiplicity_" + to_string(m), "Cluster size = " +
@@ -278,14 +278,21 @@ int main(int argc, char* argv[]) {
                 myTH1F);
         }
     }
+    // Plots by layer
+    for (UShort_t i=1; i<=4; i++) {
+        pm->Add("reclustering_mean_layer_" + to_string(i), 
+                "Layer " + to_string(i) + ";Cluster mean [mm];No.Clusters", 
+                yLims.second - yLims.first, yLims.first, yLims.second, myTH1F);
+        pm->Add("yrel_vs_y_layer_" + to_string(i), "Layer " + to_string(i) + ";y [mm];y_{rel}", 
+                (yLims.second - yLims.first)/20, yLims.first, yLims.second, 20, -0.5, 0.5, myTH2F);
+        pm->Add("yrel_vs_y_multiplicity_3_layer_" + to_string(i), 
+                "Cluster size 3, layer " + to_string(i) + ";y [mm];y_{rel}", 
+               (yLims.second - yLims.first)/40, yLims.first, yLims.second, 20, -0.5, 0.5, myTH2F);
+    }
     // TH2F
-    pm->Add("yrel_vs_y", ";y [mm];y_{rel}", (yLims.second - yLims.first)/20, yLims.first,
-          yLims.second, 20, -0.5, 0.5, myTH2F);
-    pm->Add("yrel_vs_y_multiplicity_3", "Cluster size = 3;y [mm];y_{rel}", 
-           (yLims.second - yLims.first)/40, yLims.first, yLims.second, 20, -0.5, 0.5, myTH2F);
     
     // Make list of plot names for printing to pdf
-    vector<string> nameBases{"cosmics_sigma", "reclustering_amplitude","reclustering_mean", 
+    vector<string> nameBases{"cosmics_sigma", "reclustering_amplitude",
                              "reclustering_mean_error", "reclustering_sigma", "cosmics_yrel", 
                              "reclustering_yrel", "corrected_yrel", "cluster_mean_difference",
                              "dnl_corrected_cluster_mean_difference"}; 
@@ -298,6 +305,10 @@ int main(int argc, char* argv[]) {
             // cout << *name + "_multiplicity_" + to_string(m) << ' ';
         } 
         // cout << '\n';
+    }
+    // Layer-dependent TH1s
+    for (UShort_t i=1; i<=4; i++) {
+        plotNames.push_back("reclustering_mean_layer_" + to_string(i));
     }
 
     // File for output
@@ -378,7 +389,7 @@ int main(int argc, char* argv[]) {
             if  (fitInfo.fitResult!=0 && pos.size()>=3 && pos.size()<=8) { // If fit is good,
                 pm->Fill("cosmics_sigma", sigma.at(layer));
                 pm->Fill("reclustering_amplitude", fitInfo.A);
-                pm->Fill("reclustering_mean", fitInfo.mean);
+                // pm->Fill("reclustering_mean", fitInfo.mean);
                 pm->Fill("reclustering_mean_error", fitInfo.meanErr);
                 pm->Fill("reclustering_sigma", fitInfo.sigma);
                 pm->Fill("cosmics_yrel", cosmicsYRel);
@@ -387,11 +398,10 @@ int main(int argc, char* argv[]) {
                 pm->Fill("cluster_mean_difference", fitInfo.mean - trackYGaussian.at(layer)); 
                 pm->Fill("dnl_corrected_cluster_mean_difference", 
                          correctedMean - trackYGaussian.at(layer));
-                pm->Fill("yrel_vs_y", mean.at(layer), correctedYRel);
                 multStr = to_string(pos.size());
                 pm->Fill("cosmics_sigma_multiplicity_" + multStr, sigma.at(layer));
                 pm->Fill("reclustering_amplitude_multiplicity_" + multStr, fitInfo.A);
-                pm->Fill("reclustering_mean_multiplicity_" + multStr, fitInfo.mean);
+                // pm->Fill("reclustering_mean_multiplicity_" + multStr, fitInfo.mean);
                 pm->Fill("reclustering_mean_error_multiplicity_" + multStr, fitInfo.meanErr);
                 pm->Fill("reclustering_sigma_multiplicity_" + multStr, fitInfo.sigma);
                 pm->Fill("cosmics_yrel_multiplicity_" + multStr, cosmicsYRel);
@@ -401,8 +411,12 @@ int main(int argc, char* argv[]) {
                         fitInfo.mean - trackYGaussian.at(layer));
                 pm->Fill("dnl_corrected_cluster_mean_difference_multiplicity_" + multStr, 
                          correctedMean - trackYGaussian.at(layer));
-                if (pos.size()==3)
-                    pm->Fill("yrel_vs_y_multiplicity_3", mean.at(layer), correctedYRel);
+                if (pos.size()==3) {
+                    pm->Fill("yrel_vs_y_multiplicity_3_layer_" + to_string(layer), 
+                             mean.at(layer), correctedYRel);
+                }
+                pm->Fill("reclustering_mean_layer_" + to_string(layer), mean.at(layer));
+                pm->Fill("yrel_vs_y_layer_" + to_string(layer), mean.at(layer), correctedYRel);
             }
             // Output sample of fits to file
             if (i<50) {
@@ -430,7 +444,8 @@ int main(int argc, char* argv[]) {
         rndfBranch->Fill();
         rchi2Branch->Fill();
         ryrelBranch->Fill();
-    }
+    } // End reclustering loop
+
     // reclustered->Write(); // Write tree to output file
     cout << "Notice: " << failedFitCount << " of " << numFits << " fits failed\n";
     // cout << "Notice: " << disagreesWithCosmicsCount << " means of " << numFits;
@@ -446,12 +461,17 @@ int main(int argc, char* argv[]) {
         c->Print((outpath + tag + "reclustering_plots.pdf").c_str());
         c->Clear();
     }
-    TH2F* h = (TH2F*)pm->Get("yrel_vs_y");
-    h->Draw("colz");
-    c->Print((outpath + tag + "reclustering_plots.pdf").c_str());
-    h = (TH2F*)pm->Get("yrel_vs_y_multiplicity_3");
-    h->Draw("colz");
-    c->Print((outpath + tag + "reclustering_plots.pdf").c_str());
+    // Now draw the TH2s
+    for (UShort_t i=1; i<=4; i++) {
+        TH2F* h = (TH2F*)pm->Get("yrel_vs_y_layer_" + to_string(i));
+        h->Draw("colz");
+        c->Print((outpath + tag + "reclustering_plots.pdf").c_str());
+    }
+    for (UShort_t i=1; i<=4; i++) {
+        TH2F* h = (TH2F*)pm->Get("yrel_vs_y_multiplicity_3_layer_" + to_string(i));
+        h->Draw("colz");
+        c->Print((outpath + tag + "reclustering_plots.pdf").c_str());
+    }
     c->Print((outpath + tag + "reclustering_plots.pdf]").c_str());
 
     // Write reclustering tree to output file
