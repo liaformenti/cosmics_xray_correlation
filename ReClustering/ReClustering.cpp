@@ -452,6 +452,22 @@ int main(int argc, char* argv[]) {
     // cout << " fits diagree with the cosmics mean\n";
     
     of.close();
+
+
+    // Check for evidence of excess noise by fitting constant to distribution of reclustering mean.
+    for (UShort_t i=1; i<=4; i++) {
+        TH1F* h = (TH1F*)pm->GetTH1F("reclustering_mean_layer_" + to_string(i));
+        h->Fit("pol0", "W"); // Ignore bin errors when fitting constant
+        TF1* f = h->GetFunction("pol0");
+        Double_t C = f->GetParameter(0);
+        for (Int_t b=1; b<h->GetNbinsX()+1; b++) {
+            if (h->GetBinContent(b) > 5*C) {
+                cout << "WARNING: there could be excessive noise on layer " << i << " near y = ";
+                cout << h->GetBinCenter(b) << " mm. Check cluster mean distribution. \n";
+            } 
+        }
+    }
+
     // Print plots
     TCanvas* c = new TCanvas();
     c->Print((outpath + tag + "reclustering_plots.pdf[").c_str());
