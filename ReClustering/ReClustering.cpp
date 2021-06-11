@@ -324,6 +324,12 @@ int main(int argc, char* argv[]) {
         mean.clear(); meanError.clear();
         newSigma.clear(); newSigmaError.clear();
         ndf.clear(); chi2.clear();
+
+        // FOR QL2C04 3100V ONLY
+        // if (trackYGaussian.find(2) != trackYGaussian.end()) {
+        //    if (trackYGaussian.at(2) > 1173) continue;
+        // }
+        
         // Assumes that posCH and pdoStrip are same size
         for (auto val=posCH.begin(); val!=posCH.end(); val++) {
             layer = val->first;
