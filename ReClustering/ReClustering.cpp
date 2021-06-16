@@ -316,7 +316,7 @@ int main(int argc, char* argv[]) {
     of.open(outpath + tag + "sample_cluster_fit.csv");
     cout << "Starting event loop...\n";
     // for (Int_t i=0; i<1; i++) {
-    for (Int_t i=0; i<50; i++) {
+    for (Int_t i=0; i<nEntries; i++) {
         // Get entry
         reclustered->GetEntry(i);
         // Clear the leaves to output
@@ -326,7 +326,7 @@ int main(int argc, char* argv[]) {
         ndf.clear(); chi2.clear();
 
         // FOR QL2C04 3100V ONLY
-        if (trackYGaussian.find(2) != trackYGaussian.end()) {
+        /*if (trackYGaussian.find(2) != trackYGaussian.end()) {
             if (trackYGaussian.at(2) > 1173) {
                 ramplitudeBranch->Fill();
                 ramplitudeErrorBranch->Fill();
@@ -339,7 +339,7 @@ int main(int argc, char* argv[]) {
                 ryrelBranch->Fill();
                 continue;
             }
-        }
+        }*/
 
         
         // Assumes that posCH and pdoStrip are same size
