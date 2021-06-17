@@ -419,6 +419,15 @@ void ResPlots::CreateDNLPlots() {
         // Fill combo specific DNL plot
         pm->Fill(name, yrel, r->res);
     }
+    // Now make profiles
+    // First, all residuals
+    MakeProfileX(nameBase + "_residual_vs_yrel", "profile");
+    // Then, by combination
+    vector<Combination> combVec = combinationVector();    
+    for (auto comb=combVec.begin(); comb!=combVec.end(); comb++) {
+        name = nameBase + "_residual_vs_yrel_" + comb->String();
+        MakeProfileX(name, "profile");
+    }
     return;
 }
 
@@ -446,3 +455,70 @@ void ResPlots::PrintDNLPlots(string filename) {
     return;
 
 }
+
+// Profile plots for differential non linearity
+// Adds the 'ext' string to plot name as a name for the
+// generated TGraph. New graph has exactly the same title has the input TH2F
+// Returns 'true' for each successful fit
+//  1. TH2F root object must exist
+//  2. TH2F object must have enough entries according to AnalysisInfo
+void ResPlots::MakeProfileX(string hName, string ext) {
+    
+  if(!pm->objExist(hName)) {
+    cout << "Warning: histogram " << hName << " not profiled because it does not exist!\n\n";
+    return;
+ }
+
+  TH2F *h = (TH2F*)pm->Get(hName);
+  vector<Double_t> gX, gXError, gY, gYError;
+
+  for(Int_t binX=1; binX<=h->GetNbinsX(); binX++){
+    Int_t N=0; // Sum of entries in X bin
+    Double_t Y=0, Y2=0; // Mean and std dev in X bin
+
+    for(Int_t binY=1; binY<=h->GetNbinsY(); binY++){
+      Int_t n = h->GetBinContent(binX, binY);
+      Double_t y = h->GetYaxis()->GetBinCenter(binY);
+      Y+=n*y;
+      Y2+=n*y*y;
+      N+=n;
+    }
+
+    if(N>3){ // Cannot calc std dev if less than 3 entries in X bin
+      gX.push_back(h->GetXaxis()->GetBinCenter(binX));
+      gXError.push_back(h->GetXaxis()->GetBinWidth(binX));
+      gY.push_back(Y/N);
+
+      Double_t sigma=sqrt(Y2/N-Y*Y/(N*N));
+      sigma/=sqrt(N);
+      gYError.push_back(sigma);
+    } 
+  }
+
+  string title(h->GetTitle());
+  title += ";"+string(h->GetXaxis()->GetTitle());
+  title += ";Mean "+string(h->GetYaxis()->GetTitle());
+  
+  pm->Add(hName+"_"+ext, title, gX, gY, gXError, gYError, myTGraphErrors);
+
+  // Do sine fit if enough stats in TGraph
+  /*if(gX.size()<analysisInfo->minStatProfile)
+    return false;
+
+  TGraphErrors *gr = (TGraphErrors*) pm->Get(hName+"_"+ext);
+  string fName = "fSine_"+hName;
+  TF1 *fSine = new TF1(fName.c_str(),
+		       "[0]*TMath::Sin(2*TMath::Pi()*x)+[1]", -0.5, 0.5);
+  fSine->SetParameter(0, 0.200);
+  fSine->SetParameter(1, 0.);
+  fSine->SetParName(0, "A");
+  fSine->SetParName(1, "ofst");
+
+  TFitResultPtr r = gr->Fit(fName.c_str(), "MSR");
+  string statusStr(gMinuit->fCstatu);
+
+  return (statusStr.find("CONVERGED")!=string::npos);*/
+  return;
+}
+
+

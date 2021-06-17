@@ -54,10 +54,18 @@ class ResPlots {
     void PrintPosBinnedResPlots(std::string filename);
     void CreatePosBinnedFitResultTH2Fs();
     void PrintPosBinnedFitResultTH2Fs();
+    // Note: plot name of residual distributions and DNL plots includes name associated with
+    // Binning, event though they don't use the Binning the other ResPlots do.
     void CreateResidualDistributions();
     void PrintResidualDistributions(std::string filename);
+    // The DNL plots include a TH2F of residual vs yrel for each combination, but also a profile
+    // of that TH2F.
     void CreateDNLPlots();
     void PrintDNLPlots(std::string filename);
+    // For making profile in a PlotManager friendly way. 
+    // From tgc_analysis' FinalizeAnalysis.cpp:L1082.
+    // Designed for DNL plots
+    void MakeProfileX(std::string hName, std::string ext);
 
   private:
     std::vector<Residual>* residuals = nullptr;
