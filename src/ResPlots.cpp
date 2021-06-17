@@ -388,7 +388,7 @@ void ResPlots::PrintResidualDistributions(string filename) {
 void ResPlots::InitializeDNLPlots() {
     // All residuals
     pm->Add(nameBase + "_residual_vs_yrel", ";y_{rel,hit};Residual [mm]",
-            20, -0.5, 0.5, 200, -10, 10, myTH2F);
+            20, -0.5, 0.5, 200, -4, 4, myTH2F);
     // Residuals by combination
     string name, title;
     vector<Combination> combVec = combinationVector();    
@@ -398,7 +398,7 @@ void ResPlots::InitializeDNLPlots() {
         title += ", Fixed Layers: " + to_string(combo->fixed1);
         title += to_string(combo->fixed2);
         title += ";y_{rel, hit};Residual [mm]";
-        pm->Add(name, title, 20, -0.5, 0.5, 200, -10, 10, myTH2F);
+        pm->Add(name, title, 20, -0.5, 0.5, 200, -4, 4, myTH2F);
     }
 
     return;
