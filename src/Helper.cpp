@@ -232,5 +232,19 @@ void DoGausFitGuos(const vector<Double_t> &x, const vector<Double_t> &y,
     
 }
 
+Double_t CalculateYRelFromResidual(UShort_t layer, Double_t residual, Double_t trackY, 
+                                   DetectorGeometry* g) {
+    Double_t yHit = residual + trackY;
+    // cout << "Position: " << yHit << ' ' << "layer: " << layer << '\n';
+    UShort_t stripID = g->GetID(yHit, GetSector("L"+to_string(layer)+"S"));
+    // cout << "StripID: " << stripID << '\n'; 
+    Channel stripCH = {fSTRIP, layer, stripID};
+    // cout << "Channel: " << stripCH.CStr(" ") << '\n';
+    Double_t stripCenter = g->PositionChannel(stripCH);
+    // cout << "Strip center: " << stripCenter << '\n';
+    Double_t yrel = (yHit - stripCenter)/g->GetPitch(fSTRIP);
+    // cout << "yrel: " << yrel << '\n';
+    return yrel;
+}
 
 

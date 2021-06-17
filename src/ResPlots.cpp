@@ -384,3 +384,65 @@ void ResPlots::PrintResidualDistributions(string filename) {
     gROOT->ForceStyle();
     return;
 }
+
+void ResPlots::InitializeDNLPlots() {
+    // All residuals
+    pm->Add(nameBase + "_residual_vs_yrel", ";y_{rel,hit};Residual [mm]",
+            20, -0.5, 0.5, 200, -10, 10, myTH2F);
+    // Residuals by combination
+    string name, title;
+    vector<Combination> combVec = combinationVector();    
+    for (auto combo=combVec.begin(); combo!=combVec.end(); combo++) {
+        name = nameBase + "_residual_vs_yrel_" + combo->String();
+        title = "Layer: " + to_string(combo->layer); 
+        title += ", Fixed Layers: " + to_string(combo->fixed1);
+        title += to_string(combo->fixed2);
+        title += ";y_{rel, hit};Residual [mm]";
+        pm->Add(name, title, 20, -0.5, 0.5, 200, -10, 10, myTH2F);
+    }
+
+    return;
+}
+
+void ResPlots::CreateDNLPlots() {
+    InitializeDNLPlots();
+    string name;
+    Combination combo;
+    Double_t yrel;
+    for (auto r=residuals->begin(); r!=residuals->end(); r++) {
+        combo = r->GetCombo(); 
+        yrel = CalculateYRelFromResidual(r->l, r->res, r->y, g);
+        name = nameBase + "_residual_vs_yrel";
+        // Fill all residuals DNL plot
+        pm->Fill(name, yrel, r->res);
+        name += "_" + combo.String();
+        // Fill combo specific DNL plot
+        pm->Fill(name, yrel, r->res);
+    }
+    return;
+}
+
+void ResPlots::PrintDNLPlots(string filename) {
+    TCanvas* c = new TCanvas();
+    c->Print((filename + "[").c_str());
+    TH2F* hist; // temp var
+    // Print all residual combinations plot
+    hist = (TH2F*)pm->Get(nameBase + "_residual_vs_yrel");
+    hist->Draw("colz");
+    c->Print(filename.c_str());
+    c->Clear();
+    // Print per combination plot
+    vector<Combination> comboVec = combinationVector();
+    for (auto combo=comboVec.begin(); combo!=comboVec.end(); combo++) {
+        hist = (TH2F*)pm->Get(nameBase + "_residual_vs_yrel_" + combo->String());  
+        if (hist->GetEntries() != 0) {
+            hist->Draw("Colz");
+            c->Print(filename.c_str());
+            c->Clear();
+        }
+    }
+    c->Print((filename + "]").c_str());
+    delete c;
+    return;
+
+}

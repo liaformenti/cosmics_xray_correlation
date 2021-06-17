@@ -16,6 +16,8 @@
 #include <TMatrixD.h>
 #include <TVectorD.h>
 
+// tgc_analysis includes
+#include "DetectorGeometryTools.h"
 // A "Combination" is 2 fixed layers and the layer of interest
 struct Combination {
   Combination(){};
@@ -78,6 +80,9 @@ void DoGausFitMinuit(const std::vector<Double_t> &x,
 void DoGausFitGuos(const std::vector<Double_t> &x, const std::vector<Double_t> &y,
                    GausFitInfo &info, Bool_t verbose);
 
+// Takes in value of residual and position of track. Back-calculates position of hit from inputs,
+// then returns y_rel of hit
+Double_t CalculateYRelFromResidual(UShort_t layer, Double_t residual, Double_t trackY, DetectorGeometry* g);
 // for creating strings of the form:
 // header_layerC_fixedLayersAB_footer
 // string getPermPlotName(string header, string footer, UShort_t layer, UShort_t fixedLayer1, UShort_t fixedLayer2);

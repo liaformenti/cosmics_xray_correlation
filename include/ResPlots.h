@@ -56,6 +56,8 @@ class ResPlots {
     void PrintPosBinnedFitResultTH2Fs();
     void CreateResidualDistributions();
     void PrintResidualDistributions(std::string filename);
+    void CreateDNLPlots();
+    void PrintDNLPlots(std::string filename);
 
   private:
     std::vector<Residual>* residuals = nullptr;
@@ -69,5 +71,6 @@ class ResPlots {
     void InitializePosBinnedResPlots();
     void InitializePosBinnedFitResultTH2Fs();
     void InitializeResidualDistributions();
+    void InitializeDNLPlots();
 };
 #endif
