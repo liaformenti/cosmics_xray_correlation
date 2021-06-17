@@ -39,6 +39,7 @@ int main(int argc, char* argv[]) {
     gStyle->SetOptStat("e");
     gStyle->SetOptFit(1);
     gROOT->ForceStyle();
+    gErrorIgnoreLevel = kWarning;
     
     // Check arguments
     // This should be upgraded to a config file and better cmd line argument format.
