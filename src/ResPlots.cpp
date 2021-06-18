@@ -432,6 +432,7 @@ void ResPlots::CreateDNLPlots() {
 }
 
 void ResPlots::PrintDNLPlots(string filename) {
+    // Print TH2Fs
     TCanvas* c = new TCanvas();
     c->Print((filename + "[").c_str());
     TH2F* hist; // temp var
@@ -451,6 +452,24 @@ void ResPlots::PrintDNLPlots(string filename) {
         }
     }
     c->Print((filename + "]").c_str());
+
+    // Print profiles
+    TGraphErrors* graph;
+    // Add _profile to input filename
+    filename = filename.erase(filename.length()-4);
+    filename += "_profile.pdf";
+    c->Print((filename + "[").c_str());
+    graph = (TGraphErrors*)pm->Get(nameBase + "_residual_vs_yrel_profile");
+    graph->Draw("AP");
+    c->Print(filename.c_str());
+    c->Clear();
+    for (auto combo=comboVec.begin(); combo!=comboVec.end(); combo++) {
+        graph = (TGraphErrors*)pm->Get(nameBase + "_residual_vs_yrel_" + combo->String() + "_profile");
+        graph->Draw("AP");
+        c->Print(filename.c_str());
+        c->Clear();
+    }
+    c->Print((filename + "]").c_str());
     delete c;
     return;
 
@@ -462,6 +481,7 @@ void ResPlots::PrintDNLPlots(string filename) {
 // Returns 'true' for each successful fit
 //  1. TH2F root object must exist
 //  2. TH2F object must have enough entries according to AnalysisInfo
+//  MODIFIED FROM tgc_analysis/src/FinalizeAnalysis.cpp:L1082
 void ResPlots::MakeProfileX(string hName, string ext) {
     
   if(!pm->objExist(hName)) {
