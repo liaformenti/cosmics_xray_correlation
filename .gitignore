@@ -5,6 +5,7 @@
 *_rdict.pcm
 *LinkDef.cpp
 StripPosAnalysis
+ReClustering/ReClustering
 
 # Root files
 *.root
@@ -15,3 +16,10 @@ out*
 
 # x-ray data
 *.db
+
+# text files
+*.txt
+*.csv
+
+# Swap files
+.*.sw*
