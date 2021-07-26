@@ -105,7 +105,7 @@ void ResPlots::InitializePosBinnedResPlots() {
 	                 title += ";Residuals [mm];Tracks";
 
                     // Width: 0.1 mm, range to do with usual spread
-                    pm->Add(name, title, 200, -10, 10, myTH1I);
+                    pm->Add(name, title, 100, -10, 10, myTH1I);
             }
         }
     }
@@ -345,7 +345,7 @@ void ResPlots::InitializeResidualDistributions() {
         title += ", Fixed Layers: " + to_string(combo->fixed1);
         title += to_string(combo->fixed2);
         title += ";Residual [mm];No. Residuals";
-        pm->Add(name, title, 200, -10, 10, myTH1F);
+        pm->Add(name, title, 100, -10, 10, myTH1F);
     }
     return;
 }
@@ -388,7 +388,7 @@ void ResPlots::PrintResidualDistributions(string filename) {
 void ResPlots::InitializeDNLPlots() {
     // All residuals
     pm->Add(nameBase + "_residual_vs_yrel", ";y_{rel,hit};Residual [mm]",
-            20, -0.5, 0.5, 200, -4, 4, myTH2F);
+            20, -0.5, 0.5, 40, -4, 4, myTH2F);
     // Residuals by combination
     string name, title;
     vector<Combination> combVec = combinationVector();    
@@ -398,7 +398,7 @@ void ResPlots::InitializeDNLPlots() {
         title += ", Fixed Layers: " + to_string(combo->fixed1);
         title += to_string(combo->fixed2);
         title += ";y_{rel, hit};Residual [mm]";
-        pm->Add(name, title, 20, -0.5, 0.5, 200, -4, 4, myTH2F);
+        pm->Add(name, title, 20, -0.5, 0.5, 40, -4, 4, myTH2F);
     }
 
     return;
