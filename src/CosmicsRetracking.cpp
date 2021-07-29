@@ -51,7 +51,7 @@ void CosmicsRetracking::Retrack() {
         // Uncertainty in y is spread of mean_reclustering - mean_cosmics (systematic error)
         map<UShort_t, Double_t> uncertY;
         for (auto itY=r_mean.begin(); itY!=r_mean.end(); itY++)
-            uncertY[itY->first] = 0.057; // mm
+            uncertY[itY->first] = 0.06; // mm
 
         // for each permutation of two layers
         // la < lb and la is treated first always
