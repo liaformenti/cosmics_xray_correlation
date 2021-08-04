@@ -230,18 +230,18 @@ void CompareData::MakeScatterPlot(){
             Xi.push_back(ld->xRes.res);
             eXi.push_back(ld->xRes.resErr); 
             Yi.push_back(ld->meanCosmicsResidual);
-            eYi.push_back(TMath::Sqrt(TMath::Power(ld->meanCosmicsResidualStatError,2) + TMath::Power(ld->meanCosmicsResidualSysError,2))); // CHANGE THIS
+            eYi.push_back(TMath::Sqrt(TMath::Power(ld->meanCosmicsResidualStatError,2) + TMath::Power(ld->meanCosmicsResidualSysError,2))); 
         }
         else { // extrapolation
             Xx.push_back(ld->xRes.res);
             eXx.push_back(ld->xRes.resErr); 
             Yx.push_back(ld->meanCosmicsResidual);
-            eYx.push_back(TMath::Sqrt(TMath::Power(ld->meanCosmicsResidualStatError,2) + TMath::Power(ld->meanCosmicsResidualSysError,2))); // CHANGE THIS
+            eYx.push_back(TMath::Sqrt(TMath::Power(ld->meanCosmicsResidualStatError,2) + TMath::Power(ld->meanCosmicsResidualSysError,2))); 
         }
         X.push_back(ld->xRes.res);
         eX.push_back(ld->xRes.resErr); 
         Y.push_back(ld->meanCosmicsResidual);
-        eY.push_back(TMath::Sqrt(TMath::Power(ld->meanCosmicsResidualStatError,2) + TMath::Power(ld->meanCosmicsResidualSysError,2)));// CHANGE THIS
+        eY.push_back(TMath::Sqrt(TMath::Power(ld->meanCosmicsResidualStatError,2) + TMath::Power(ld->meanCosmicsResidualSysError,2)));
     }
     string names[3] = {"local_cosmic_and_xray_residuals_scatter", "local_cosmic_and_xray_residuals_scatter_interpolation", "local_cosmic_and_xray_residuals_scatter_extrapolation"};
     string titles[3] = {"#splitline{Comparing residuals}{All tracking combinations};Exclusive residual from x-ray data [mm];Mean local exclusive residual from cosmics [mm];", "#splitline{Comparing residuals}{Interpolation combinations};Exclusive residual from x-ray data [mm];Mean local exclusive residual from cosmics [mm];", "#splitline{Comparing residuals}{Extrapolation combinations};Exclusive residual from x-ray data [mm];Mean local exclusive residual from cosmics [mm];"};
@@ -293,7 +293,7 @@ void CompareData::MakeScatterPlot(){
             x.push_back(ld->xRes.res);
             ex.push_back(ld->xRes.resErr); 
             y.push_back(ld->meanCosmicsResidual);
-            ey.push_back(TMath::Sqrt(TMath::Power(ld->meanCosmicsResidualStatError,2) + TMath::Power(ld->meanCosmicsResidualSysError,2))); // CHANGE THIS
+            ey.push_back(TMath::Sqrt(TMath::Power(ld->meanCosmicsResidualStatError,2) + TMath::Power(ld->meanCosmicsResidualSysError,2))); 
         }
         // Create combination specific TGraphErrors
         string name = "local_cosmic_and_xray_residuals_scatter_" + comb->String();
@@ -343,6 +343,7 @@ void CompareData::OutputLocalDataToCSV() {
       }
       break; // Only need header printed once
   }
+  f << "Mean cosmics residual,stat error,sys error";
   f << '\n';
 
   // Now ouput fit data to file
@@ -357,12 +358,14 @@ void CompareData::OutputLocalDataToCSV() {
       for (Int_t i=0; i<ld->nFitParams; i++) {
           f << "NA,NA,";
       }
+      f << "NA,NA,NA,";
       f << '\n';
     } 
     else { // if fit was successful,
       for (Int_t i=0; i<ld->nFitParams; i++) {
         f << ld->fitParamValues.at(i) << ',' << ld->fitParamErrors.at(i) << ',';
       }
+      f << ld->meanCosmicsResidual << ',' << ld->meanCosmicsResidualStatError << ',' << ld->meanCosmicsResidualSysError << ',';
       f << '\n';
     }
   }
