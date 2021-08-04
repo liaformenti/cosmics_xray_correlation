@@ -19,6 +19,7 @@
 
 // Root includes
 #include "TStyle.h"
+#include "TMultiGraph.h"
 
 // tgc_analysis includes
 #include "Tools.h"
@@ -58,7 +59,22 @@ class LocalData {
     // The mean cosmics residual MUST ALWAYS BE THE FIT PARAMETER WITH NAME "Mean"!
     // This is how it is extracted.
     Double_t meanCosmicsResidual;
-    Double_t meanCosmicsResidualError;
+    Double_t meanCosmicsResidualStatError;
+    Double_t meanCosmicsResidualSysError; 
+    // Systematic uncertainties on mean cosmics residual based on tracking combination
+    // Ordered in same way as combinationVector() (Helper.cpp)
+    Double_t sysUncerts[12] = { 0.047,
+                                0.098,
+                                0.025,
+                                0.044,
+                                0.038,
+                                0.038,
+                                0.047,
+                                0.047,
+                                0.044,
+                                0.025,
+                                0.098,
+                                0.047 };
 
     // Methods
     // Set regions of interest around xray points which define which cosmics residuals go into
@@ -69,6 +85,8 @@ class LocalData {
     // cosmicsResiduals vector
     void GroupCosmicResiduals(const std::vector<Residual>& allCosmicResiduals);
     void DoCosmicResidualsFit();
+    // Returns correct systematic uncertainty to meanCosmicsResidualSysError based on combination
+    Double_t GetSysUncertainty();
 
   private:
     // Fill with residuals that fall in ROI with correct combo

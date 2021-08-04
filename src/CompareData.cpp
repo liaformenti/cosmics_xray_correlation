@@ -133,8 +133,24 @@ void LocalData::DoCosmicResidualsFit() {
 
     // AND THE RESULT!
     meanCosmicsResidual = fitParamValues.at(meanParamIndex);
-    meanCosmicsResidualError = fitParamErrors.at(meanParamIndex);
+    meanCosmicsResidualStatError = fitParamErrors.at(meanParamIndex);
+    // Systematic uncertainty by combination
+    meanCosmicsResidualSysError = GetSysUncertainty();
     return;
+}
+
+Double_t LocalData::GetSysUncertainty() {
+    Int_t i = 0;
+    vector<Combination> comboVec = combinationVector();
+    vector<Combination>::const_iterator itc = comboVec.begin();
+    while (*itc != xRes.GetCombo()) {
+        if (itc == comboVec.end()) {
+            throw runtime_error("Invalid combination assigned to local data point (LocalData::AssignSysUncert\n\n)");
+        }
+        i++; 
+        itc++;
+    }
+    return sysUncerts[i]; 
 }
 
 CompareData::CompareData(Double_t xBinWidth, Double_t yBinWidth, vector<Residual>* _xRayResiduals, 
@@ -207,25 +223,25 @@ void CompareData::MakeScatterPlot(){
     vector<Double_t> Xi, Yi, eXi, eYi; // interpolation
     for (auto ld=localDataVec.begin(); ld!=localDataVec.end(); ld++) {
         // Skip points where residuals fit failed 
-        // or where mean cosmics residual error is too high
+        // or where mean cosmics residual stat error is too high (bad fit)
         // should be in config
-        if ((ld->fitResult != 0) || (ld->meanCosmicsResidualError > 0.1)) continue; 
+        if ((ld->fitResult != 0) || (ld->meanCosmicsResidualStatError > 0.1)) continue; 
         if (ld->xRes.la < ld->xRes.l && ld->xRes.l < ld->xRes.lb) { // interpolation
             Xi.push_back(ld->xRes.res);
             eXi.push_back(ld->xRes.resErr); 
             Yi.push_back(ld->meanCosmicsResidual);
-            eYi.push_back(ld->meanCosmicsResidualError);
+            eYi.push_back(TMath::Sqrt(TMath::Power(ld->meanCosmicsResidualStatError,2) + TMath::Power(ld->meanCosmicsResidualSysError,2))); // CHANGE THIS
         }
         else { // extrapolation
             Xx.push_back(ld->xRes.res);
             eXx.push_back(ld->xRes.resErr); 
             Yx.push_back(ld->meanCosmicsResidual);
-            eYx.push_back(ld->meanCosmicsResidualError);
+            eYx.push_back(TMath::Sqrt(TMath::Power(ld->meanCosmicsResidualStatError,2) + TMath::Power(ld->meanCosmicsResidualSysError,2))); // CHANGE THIS
         }
         X.push_back(ld->xRes.res);
         eX.push_back(ld->xRes.resErr); 
         Y.push_back(ld->meanCosmicsResidual);
-        eY.push_back(ld->meanCosmicsResidualError);
+        eY.push_back(TMath::Sqrt(TMath::Power(ld->meanCosmicsResidualStatError,2) + TMath::Power(ld->meanCosmicsResidualSysError,2)));// CHANGE THIS
     }
     string names[3] = {"local_cosmic_and_xray_residuals_scatter", "local_cosmic_and_xray_residuals_scatter_interpolation", "local_cosmic_and_xray_residuals_scatter_extrapolation"};
     string titles[3] = {"#splitline{Comparing residuals}{All tracking combinations};Exclusive residual from x-ray data [mm];Mean local exclusive residual from cosmics [mm];", "#splitline{Comparing residuals}{Interpolation combinations};Exclusive residual from x-ray data [mm];Mean local exclusive residual from cosmics [mm];", "#splitline{Comparing residuals}{Extrapolation combinations};Exclusive residual from x-ray data [mm];Mean local exclusive residual from cosmics [mm];"};
@@ -272,12 +288,12 @@ void CompareData::MakeScatterPlot(){
             // Skip points where residuals fit failed or 
             // where mean cosmics residual error is too high
             // should be in config
-            if ((ld->fitResult != 0) || (ld->meanCosmicsResidualError > 0.1)) continue; 
+            if ((ld->fitResult != 0) || (ld->meanCosmicsResidualStatError > 0.1)) continue; 
             // For correct combination, add data to vectors
             x.push_back(ld->xRes.res);
             ex.push_back(ld->xRes.resErr); 
             y.push_back(ld->meanCosmicsResidual);
-            ey.push_back(ld->meanCosmicsResidualError);
+            ey.push_back(TMath::Sqrt(TMath::Power(ld->meanCosmicsResidualStatError,2) + TMath::Power(ld->meanCosmicsResidualSysError,2))); // CHANGE THIS
         }
         // Create combination specific TGraphErrors
         string name = "local_cosmic_and_xray_residuals_scatter_" + comb->String();
