@@ -365,7 +365,7 @@ void CompareData::OutputLocalDataToCSV() {
       for (Int_t i=0; i<ld->nFitParams; i++) {
         f << ld->fitParamValues.at(i) << ',' << ld->fitParamErrors.at(i) << ',';
       }
-      f << ld->meanCosmicsResidual << ',' << ld->meanCosmicsResidualStatError << ',' << ld->meanCosmicsResidualSysError << ',';
+      f << ld->meanCosmicsResidual << ',' << ld->meanCosmicsResidualStatError << ',' << ld->meanCosmicsResidualSysError;
       f << '\n';
     }
   }
