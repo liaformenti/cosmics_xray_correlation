@@ -4,7 +4,7 @@
 *.so
 *_rdict.pcm
 *LinkDef.cpp
-StripPosAnalysis
+CosmicsXRayCorrelation
 ReClustering/ReClustering
 
 # Root files
