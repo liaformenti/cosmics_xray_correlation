@@ -121,14 +121,14 @@ int main(int argc, char* argv[]) {
     
     // cout << "Not comparing cosmics and x-ray data.\n\n";
     cout << "Comparing cosmics and x-ray data...\n\n";
-    CompareData comp(100, 100, &xrayTracks.residuals, &cosmicTracks.residuals, &myInfo, plotManager, 
+    CompareData comp(40, 20, &xrayTracks.residuals, &cosmicTracks.residuals, &myInfo, plotManager, 
                      geom);
     comp.DoComparison();
     comp.MakeScatterPlot();
     comp.OutputLocalDataToCSV();
 
     // TH2s
-    Binning widthBins(100, 100, geom);
+    Binning widthBins(40, 20, geom);
     ResPlots th2s(&cosmicTracks.residuals, &widthBins, widthBins.name, cosmicsInfo, geom, plotManager, &myInfo);
     th2s.CreateNumEntriesTH2Is();
     th2s.CreatePosBinnedResPlots();
@@ -144,7 +144,7 @@ int main(int argc, char* argv[]) {
     cout << "Finishing up...\n\n"; 
     // Dump all objects to root file
     TFile* outRoot = new TFile(
-            (myInfo.outpath + myInfo.tag + "strip_position_analysis.root").c_str(), "RECREATE");
+            (myInfo.outpath + myInfo.tag + "cosmics_xray_correlation.root").c_str(), "RECREATE");
     plotManager->Write(outRoot);
     delete outRoot;
     delete plotManager;
