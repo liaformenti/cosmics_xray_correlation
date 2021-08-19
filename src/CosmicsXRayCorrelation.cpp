@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     // This should be upgraded to a config file and better cmd line argument format.
     // Also right now you must provide a tag. 
     if (argc != 6) 
-        throw runtime_error("Usage example: ./StripPosAnalysis input_reclustering.root QUADNAME input_xray.db outpath/ tag_\n Quadruplet name format, eg. QL2P06.\n\n");
+        throw runtime_error("Usage example: ./CosmicsXRayCorrelation input_reclustering.root QUADNAME input_xray.db outpath/ tag_\n Quadruplet name format, eg. QL2P06.\n\n");
 
     // Check quad name - need name to compare with xray data
     if (argv[2][0] != 'Q') {
