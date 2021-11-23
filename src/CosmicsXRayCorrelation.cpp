@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     // This should be upgraded to a config file and better cmd line argument format.
     // Also right now you must provide a tag. 
     if (argc != 6) 
-        throw runtime_error("Usage example: ./CosmicsXRayCorrelation input_reclustering.root QUADNAME input_xray.db outpath/ tag_\n Quadruplet name format, eg. QL2P06.\n\n");
+        throw runtime_error("Usage example: ./CosmicsXRayCorrelation input_reclustering.root QUADNAME input_xray_results.db outpath/ tag_\n Quadruplet name format, eg. QL2P06.\n\n");
 
     // Check quad name - need name to compare with xray data
     if (argv[2][0] != 'Q') {
@@ -94,11 +94,11 @@ int main(int argc, char* argv[]) {
     // cout << "Not getting x-ray data.\n\n";
     cout << "Getting x-ray data...\n\n";
     XRayData xData(cosmicsInfo, &myInfo, plotManager);
-    xData.WriteOutXRayData();
-    xData.PlotAverageBeamPositions();
+    // xData.WriteOutXRayData();
+    // xData.PlotAverageBeamPositions();
 
-    // cout << "Not re-tracking x-ray data\n\n";
-    cout << "Re-tracking x-ray data...\n\n";
+    cout << "Not re-tracking x-ray data\n\n";
+    /*cout << "Re-tracking x-ray data...\n\n";
     XRayRetracking xrayTracks(&xData, cosmicsInfo, &myInfo, plotManager, geom);
     xrayTracks.Retrack();
     // Temporary way to printout xray residuals
@@ -109,26 +109,26 @@ int main(int argc, char* argv[]) {
         of << r->l << "," << r->la << "," << r->lb << "," << r->x << "," << r->y << ",";
         of << r->res << "," << r->resErr << "," << r->tag << "\n"; 
     }
-    of.close();
+    of.close();*/
 
-    // cout << "Not retracking cosmics.\n\n";
-    cout << "Re-tracking cosmics...\n\n";
+    cout << "Not retracking cosmics.\n\n";
+    /*cout << "Re-tracking cosmics...\n\n";
     CosmicsRetracking cosmicTracks(tracksTree, cosmicsInfo, &myInfo, plotManager, geom);
     cosmicTracks.Retrack();
     cosmicTracks.PrintTrackAngleHistograms();
     cosmicTracks.PrintTrackUncertaintyHistograms();
-    cosmicTracks.PrintResidualUncertaintyHistograms();
+    cosmicTracks.PrintResidualUncertaintyHistograms();*/
     
-    // cout << "Not comparing cosmics and x-ray data.\n\n";
-    cout << "Comparing cosmics and x-ray data...\n\n";
+    cout << "Not comparing cosmics and x-ray data.\n\n";
+    /*cout << "Comparing cosmics and x-ray data...\n\n";
     CompareData comp(40, 20, &xrayTracks.residuals, &cosmicTracks.residuals, &myInfo, plotManager, 
                      geom);
     comp.DoComparison();
     comp.MakeScatterPlot();
-    comp.OutputLocalDataToCSV();
+    comp.OutputLocalDataToCSV();*/
 
     // TH2s
-    Binning widthBins(40, 20, geom);
+    /*Binning widthBins(40, 20, geom);
     ResPlots th2s(&cosmicTracks.residuals, &widthBins, widthBins.name, cosmicsInfo, geom, plotManager, &myInfo);
     th2s.CreateNumEntriesTH2Is();
     th2s.CreatePosBinnedResPlots();
@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
     th2s.PrintPosBinnedResPlots(myInfo.outpath + myInfo.tag + myInfo.quadname + "_residual_fits_binning_" + widthBins.name + ".pdf");
     th2s.PrintPosBinnedFitResultTH2Fs();
     th2s.PrintResidualDistributions(myInfo.outpath + myInfo.tag + myInfo.quadname + "_residual_distributions_" + widthBins.name + ".pdf");
-    th2s.PrintDNLPlots(myInfo.outpath + myInfo.tag + myInfo.quadname + "_residual_vs_yrel.pdf");
+    th2s.PrintDNLPlots(myInfo.outpath + myInfo.tag + myInfo.quadname + "_residual_vs_yrel.pdf");*/
 
     cout << "Finishing up...\n\n"; 
     // Dump all objects to root file

@@ -1,30 +1,45 @@
 #define XRayData_cxx
 #include "XRayData.h"
 
+// This is the file you need to edit if the format of the x-ray data changes or you want to change
+// the selection of which x-ray measurements to use.
+
 using namespace std;
 
 XRayData::XRayData(AnalysisInfo* _cinfo,
                    InputInfo* _myInfo, PlotManager* _pm) : 
 cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
-    string csvFileName = myInfo->database;
-    string dbFileName = myInfo->outpath + csvFileName.substr(csvFileName.length()-10, 6) + ".db";
-    csv2db(csvFileName, dbFileName);
+
+    // Check quad name
+    if (quadToWedge.find(myInfo->quadname) == quadToWedge.end()) {
+        throw runtime_error("Problem with input quadruplet name or format. Eg. correct format: QS3P06.\n\n");
+    }
 
     // Get relevant data from database
     sqlite3* db;
     sqlite3_stmt *stmt;
     int rc;
-    sqlite3_open(dbFileName.c_str(), &db);
+    sqlite3_open((myInfo->database).c_str(), &db);
     // gas_volume == layer
     // Select statement chooses desired quadruplet and groups layer data by gun position.
-    // WARNING: No check if wedge corresponds to quad!!!
+    // Current select statement only selects production runs with newest ball mount for x-ray
+    // platform. Cuts entries with the data quality flag "BADCHANNEL" and "WIRESUPPORT"
+    // ("STRUCT_" or "WARNING_" are OK)
+    // Orders by xnom to proxy ordering by platform ID and position number (gun position).
+    // Edit select statement to change cuts on x-ray data.
     string moduleType = myInfo->quadname.substr(0, 4);
-    string sql = "SELECT module, gas_volume, x_beam, y_beam, y_meas, platform_id, position_number";
-    sql += " FROM results WHERE module=\'" + moduleType + "\'";
-    sql += " ORDER BY platform_id, position_number;";
+    string mtfStr = quadToWedge.at(myInfo->quadname);
+    string sql = "SELECT run_id, mtf, run_type, mount_type, quad_type, gv, y_meas_raw_w, ";
+    sql += "y_meas_raw_error_w, dq_flag, x_nom, y_corrangle from results ";
+    sql += "where mtf=\"" + mtfStr + "\" and ";
+    sql += "run_type=\"PRODUCTION\" and ";
+    sql += "mount_type=\"NEW_BALL\" and ";
+    sql += "quad_type=\"" + moduleType + "\" and ";
+    sql += "dq_flag not like \"%BADCHANNEL%\" and dq_flag not like \"WIRESUPPORT%\" and ";
+    sql += "y_corrangle is not null ";
+    sql += "order by xnom;";
     // cout << sql << '\n';
-    // Order by ascending x_beam necessary so only unique beam
-    // positions are recorded in ptVec (vector of XRayPt's with each point's layer data)
+    // YOU ARE HERE
 
     // Prepare query
     rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
@@ -145,7 +160,7 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     return;
 }
 
-void XRayData::csv2db(string inFileName, string outFileName) {
+/*void XRayData::csv2db(string inFileName, string outFileName) {
     // Get input csv
     ifstream inFile;
     inFile.open(inFileName);
@@ -231,7 +246,7 @@ void XRayData::csv2db(string inFileName, string outFileName) {
     sqlite3_close(db);
     inFile.close();    
     return;
-}
+}*/
 
 void XRayData::ParseRunID(string runID, string& platformID, string& positionNumber) {
     char token = '_';
