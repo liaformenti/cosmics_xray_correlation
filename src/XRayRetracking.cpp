@@ -14,7 +14,8 @@ void XRayRetracking::Retrack() {
   // z values are layers z positions
   
   for (auto xPt=xData->pointVec.begin(); xPt!=xData->pointVec.end(); xPt++) {
-
+    // cout << xPt->platformID << xPt->positionNumber << '\n';
+    // cout << "No. layers: " << xPt->xbeams.size() << '\n';
     // xbeams do not have errors so create a map of zeros for them
     map<UShort_t, Double_t> uncertX; 
     for (auto x=xPt->xbeams.begin(); x!=xPt->xbeams.end(); x++) {
@@ -29,6 +30,8 @@ void XRayRetracking::Retrack() {
           continue;
 
         getOtherLayers(la, lb, &lc, &ld);
+        // cout << "Combo: " << la << ", " << lb << ", " << lc << ", " << ld << "\n";
+
         Tracking myTrack(g, pm, xPt->xbeams, uncertX, xPt->offsets, xPt->offsetErrors, la, lb);
         myTrack.Fit();
 
@@ -43,6 +46,7 @@ void XRayRetracking::Retrack() {
                            myTrack.fitYPos.at(lc) + xPt->ybeams.at(lc), la, lb);
             res.tag = to_string(xPt->platformID) + xPt->positionNumber;
             residuals.push_back(res);
+            // res.PrintResidual();
         }
         if (myTrack.hitsY.find(ld) != myTrack.hitsY.end()) {
             myTrack.EvaluateAt(ld);
@@ -52,6 +56,7 @@ void XRayRetracking::Retrack() {
                            myTrack.fitYPos.at(ld) + xPt->ybeams.at(ld), la, lb);
             res.tag = to_string(xPt->platformID) + xPt->positionNumber;
             residuals.push_back(res);
+            // res.PrintResidual();
         }
       }
     } // End fixed layer combinations loop

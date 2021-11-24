@@ -37,9 +37,8 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     sql += "quad_type=\"" + moduleType + "\" and ";
     sql += "dq_flag not like \"%BADCHANNEL%\" and dq_flag not like \"WIRESUPPORT%\" and ";
     sql += "y_corrangle is not null ";
-    sql += "order by xnom;";
-    // cout << sql << '\n';
-    // YOU ARE HERE
+    sql += "order by x_nom;";
+    cout << sql << '\n';
 
     // Prepare query
     rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
@@ -52,11 +51,9 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     }
 
     // Vars to hold column entries 
-    // Temp var names match xray data database
-    string quad_name, position_number;
+    string run_id, platform_id, position_number;
     UShort_t gv; 
-    Int_t platform_id;
-    Double_t x_beam, y_beam, offset, offset_error;
+    Double_t x_beam, y_beam, y_meas, offset, offset_error;
     /***
      * Note about offset_error: there is an offset error recorded in the database, but it is
      * only the uncertainty on the fitted centroid, and does not account for systematics. Currently
@@ -69,18 +66,18 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
 
         // Get column values
-        gv = (UShort_t)(sqlite3_column_int(stmt, 1));
-        x_beam = (Double_t)(sqlite3_column_double(stmt, 2));
-        y_beam = (Double_t)(sqlite3_column_double(stmt, 3));
-        offset = (Double_t)(sqlite3_column_double(stmt, 4)) - y_beam;
-        // offset_error = (Double_t)(sqlite3_column_double(stmt, 5));
+        run_id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        ParseRunID(run_id, platform_id, position_number);
+        gv = (UShort_t)(sqlite3_column_int(stmt, 5));
+        x_beam = (Double_t)(sqlite3_column_double(stmt, 9));
+        y_beam = (Double_t)(sqlite3_column_double(stmt, 10));
+        y_meas = (Double_t)(sqlite3_column_double(stmt, 6)); 
+        offset = y_meas - y_beam;
+        // cout << run_id << ' ' << platform_id << ' ' << position_number << ' ' << gv << ' ' << x_beam << ' ' << y_beam << ' ' << y_meas << ' ' << offset << ' ' << offset_error << '\n';
         // Use fixed offset error of 120um based on Benoit's email "Final X-ray dataset",
         // 2020-12-08
+        // UNCOMMENT NEXT LINE!! JUST SEEING WHAT RECRODED OFFSET_ERROR IS NOW
         offset_error = 0.120; // mm, from Benoit's email 2020-12-08
-        platform_id = (Int_t)(sqlite3_column_int(stmt, 5));
-        position_number = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
-        // cout << gv << ' ' << x_beam << ' ' << y_beam << ' ' << offset << ' ';
-        // cout << offset_error << ' ' << platform_id << ' ' << position_number << '\n';
 
         // If position is new, add point entry to pointVec
         // Deal with 1st entry separately to prevent seg fault
@@ -88,7 +85,7 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
         if (pointVec.size() == 0) {
             // Initialize point with column values
             // point.num = num;
-            point.platformID = platform_id;
+            point.platformID = stoi(platform_id);
             point.positionNumber = position_number;
             // point.xbeam = x_beam;
             // point.ybeam = y_beam;
@@ -101,11 +98,11 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
             pointVec.push_back(point);
         }
         // If we're at a new gun position (platform ID and position number),
-        else if (platform_id != pointVec.back().platformID or 
+        else if (stoi(platform_id) != pointVec.back().platformID or 
                  position_number != pointVec.back().positionNumber) {
             // Initialize point
             // point.num = num;
-            point.platformID = platform_id;
+            point.platformID = stoi(platform_id);
             point.positionNumber = position_number;
             // point.xbeam = x_beam; 
             // point.ybeam = y_beam;
@@ -120,7 +117,8 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
         else {
             // Looking at data for same gun position
             // Add new gv data to maps of last pushed point
-            // This works because you ordered rows by platform id and position number in SELECT,
+            // This works because you ordered rows by x_nom in SELECT,
+            // which orders by platform id and position number,
             // so last point pushed back is always from the same gun position.
             // You handled the case of new gun positions above.
             // If gv key DNE, add new gv offset to map
