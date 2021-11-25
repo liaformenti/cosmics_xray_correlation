@@ -121,14 +121,14 @@ int main(int argc, char* argv[]) {
     
     // cout << "Not comparing cosmics and x-ray data.\n\n";
     cout << "Comparing cosmics and x-ray data...\n\n";
-    CompareData comp(40, 20, &xrayTracks.residuals, &cosmicTracks.residuals, &myInfo, plotManager, 
+    CompareData comp(100, 100, &xrayTracks.residuals, &cosmicTracks.residuals, &myInfo, plotManager, 
                      geom);
     comp.DoComparison();
     comp.MakeScatterPlot();
     comp.OutputLocalDataToCSV();
 
     // TH2s
-    Binning widthBins(40, 20, geom);
+    Binning widthBins(100, 100, geom);
     ResPlots th2s(&cosmicTracks.residuals, &widthBins, widthBins.name, cosmicsInfo, geom, plotManager, &myInfo);
     th2s.CreateNumEntriesTH2Is();
     th2s.CreatePosBinnedResPlots();
