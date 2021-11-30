@@ -104,8 +104,8 @@ void ResPlots::InitializePosBinnedResPlots() {
                      title += Tools::CStr(yp1,2)+"] mm}";
 	                 title += ";Residuals [mm];Tracks";
 
-                    // Width: 0.1 mm, range to do with usual spread
-                    pm->Add(name, title, 100, -10, 10, myTH1I);
+                    // Width: 0.2 mm, range to do with usual spread
+                    pm->Add(name, title, 60, -6, 6, myTH1I);
             }
         }
     }
@@ -304,8 +304,8 @@ void ResPlots:: PrintPosBinnedFitResultTH2Fs() {
         hist = (TH2F*)pm->Get(nameBase + "_means_" + combo->String());  
         if (hist->GetEntries() != 0) { // If plot is not empty,
             // These max and min values should go in config
-            hist->SetMaximum(0.5);
-            hist->SetMinimum(-0.5);
+            hist->SetMaximum(1);
+            hist->SetMinimum(-1);
             hist->Draw("Colz");
             c->Print(filename.c_str());
             c->Clear();
@@ -320,7 +320,7 @@ void ResPlots:: PrintPosBinnedFitResultTH2Fs() {
         hist = (TH2F*)pm->Get(nameBase + "_sigmas_" + combo->String()); 
         if (hist->GetEntries() != 0) {
             // These max and min values should go in config
-            hist->SetMaximum(0.5);
+            hist->SetMaximum(1);
             hist->SetMinimum(0);
             hist->Draw("Colz");
             c->Print(filename.c_str());
@@ -345,7 +345,7 @@ void ResPlots::InitializeResidualDistributions() {
         title += ", Fixed Layers: " + to_string(combo->fixed1);
         title += to_string(combo->fixed2);
         title += ";Residual [mm];No. Residuals";
-        pm->Add(name, title, 100, -10, 10, myTH1F);
+        pm->Add(name, title, 60, -6, 6, myTH1F);
     }
     return;
 }

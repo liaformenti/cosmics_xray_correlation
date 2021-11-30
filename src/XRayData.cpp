@@ -12,7 +12,7 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
 
     // Check quad name
     if (quadToWedge.find(myInfo->quadname) == quadToWedge.end()) {
-        throw runtime_error("Problem with input quadruplet name or format. Eg. correct format: QS3P06.\n\n");
+        throw runtime_error("Cannot find wedge corresponding to quadruplet. Check that x-ray data is available for the given quadruplet and that the format of the quadruplet name was entered correctly. Eg. correct format: QS3P06.\n\n");
     }
 
     // Get relevant data from database
