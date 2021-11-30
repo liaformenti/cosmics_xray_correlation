@@ -33,9 +33,11 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     sql += "y_meas_raw_error_w, dq_flag, x_nom, y_corrangle from results ";
     sql += "where mtf=\"" + mtfStr + "\" and ";
     sql += "run_type=\"PRODUCTION\" and ";
-    sql += "mount_type=\"NEW_BALL\" and ";
+    // Stergios says you can use all mount types
+    // sql += "mount_type=\"NEW_BALL\" and ";
     sql += "quad_type=\"" + moduleType + "\" and ";
     sql += "dq_flag not like \"%BADCHANNEL%\" and dq_flag not like \"WIRESUPPORT%\" and ";
+    sql += "dq_flag not like \"%LOWNENTRIES%\" and ";
     sql += "y_corrangle is not null ";
     sql += "order by x_nom;";
     cout << sql << '\n';
