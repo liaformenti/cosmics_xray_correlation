@@ -105,7 +105,7 @@ void ResPlots::InitializePosBinnedResPlots() {
 	                 title += ";Residuals [mm];Tracks";
 
                     // Width: 0.2 mm, range to do with usual spread
-                    pm->Add(name, title, 60, -6, 6, myTH1I);
+                    pm->Add(name, title, 50, -5, 5, myTH1I);
             }
         }
     }
@@ -345,7 +345,7 @@ void ResPlots::InitializeResidualDistributions() {
         title += ", Fixed Layers: " + to_string(combo->fixed1);
         title += to_string(combo->fixed2);
         title += ";Residual [mm];No. Residuals";
-        pm->Add(name, title, 60, -6, 6, myTH1F);
+        pm->Add(name, title, 50, -5, 5, myTH1F);
     }
     return;
 }

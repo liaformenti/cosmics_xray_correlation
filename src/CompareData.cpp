@@ -66,7 +66,7 @@ void LocalData::DoCosmicResidualsFit() {
     title += "}{x#in["+Tools::CStr(xROI.first,2)+","+Tools::CStr(xROI.second,2)+"] mm y#in[";
     title += Tools::CStr(yROI.first,2)+","+Tools::CStr(yROI.second,2)+"] mm};Cosmic Residuals [mm];";
     title += "Tracks";
-    pm->Add(name, title, 60, -6, 6, myTH1I);
+    pm->Add(name, title, 50, -5, 5, myTH1I);
 
     // Fill histogram
     for (auto cr=cosmicResidualsInROI.begin(); cr!=cosmicResidualsInROI.end(); cr++) {
