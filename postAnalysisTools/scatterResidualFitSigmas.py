@@ -1,5 +1,5 @@
-# Takes in two strip_position_analysis.root files where the fitting params are different, and
-# compares the sigmas. Gets sigmas from the sigma TH2F ResPlots objects stored in the .root file.
+# Takes in two analysis output root files that you want to compare, and
+# compares the sigmas of residual distribution fits in the same region of interest for the same tracking combination. Gets sigmas from the sigma TH2F ResPlots objects stored in the .root file.
 # User specifies which tracking combination they are interested in.
 # Not sure what to do about outliers
 
@@ -12,6 +12,8 @@ import numpy as np
 import sys
 import atlasplots as aplt
 
+# Function to create scatter plot of residual distribution fit sigmas for equivalent regions of 
+# interest for the given tracking combination. Outputs scatter plot to pdf and root file.
 def compareResidualFitSigmas(file1Name, file2Name, layer, fixedLayer1, fixedLayer2):
 
     # If a bin has value -100, it means the fit failed / too few entries in bin
@@ -43,7 +45,8 @@ def compareResidualFitSigmas(file1Name, file2Name, layer, fixedLayer1, fixedLaye
             sigmasHist2 = file2.Get(name)
             break;
 
-    # Check that the two histograms are compatible
+    # Check that the two histograms have the same area binning so sigmas in the same area bins
+    # can be compared directly in the scatter plot
     if (sigmasHist1.GetNbinsX() != sigmasHist2.GetNbinsX() or 
             sigmasHist1.GetNbinsY() != sigmasHist2.GetNbinsY()):
         print("The two histograms do not have the same number of bins. Check inputs.")
@@ -59,6 +62,7 @@ def compareResidualFitSigmas(file1Name, file2Name, layer, fixedLayer1, fixedLaye
                 continue
             sigmas1.append(sigma1)
             sigmas2.append(sigma2)
+
     # Create scatter plot 
     sigmas1Arr = np.array(sigmas1)
     sigmas2Arr = np.array(sigmas2)
@@ -74,6 +78,8 @@ def compareResidualFitSigmas(file1Name, file2Name, layer, fixedLayer1, fixedLaye
     # Create canvas
     c = ROOT.TCanvas("c","c")
     scatterPlot.Draw("AP")
+
+    # Write out scatter plot to file
     c.Print("compareSigmas.pdf")
     c.Print("compareSigmas.root")
 
@@ -85,7 +91,10 @@ if len(sys.argv) < 6:
           "file2_strip_position_analysis.root layer fixedlayer1 fixedlayer2")
     exit();
 
+# Set style 
 aplt.set_atlas_style()
+
+# Call function to create scatter plot
 compareResidualFitSigmas(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
 
 

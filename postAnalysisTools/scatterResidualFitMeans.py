@@ -1,7 +1,6 @@
-# Takes in two strip_position_analysis.root files where the fitting params are different, and
-# compares the means. Gets means from the mean TH2F ResPlots objects stored in the .root file.
-# User specifies which tracking combination they are interested in.
-# Not sure what to do about outliers
+# Takes in two analysis output.root files that you want to compare, and
+# makes a scatter plot comparing the means for both.
+# User specifies which tracking combination (fixed tracking layers and layer the residual is calculate on) they are interested in.
 
 # Lia Formenti
 # McGill University
@@ -12,6 +11,7 @@ import numpy as np
 import sys
 import atlasplots as aplt
 
+# Create scatter plots and store them in a ROOT file and a pdf
 def compareResidualFitMeans(file1Name, file2Name, layer, fixedLayer1, fixedLayer2):
 
     # If a bin has value -100, it means the fit failed / too few entries in bin
@@ -21,12 +21,12 @@ def compareResidualFitMeans(file1Name, file2Name, layer, fixedLayer1, fixedLayer
     file1 = ROOT.TFile(file1Name)
     file2 = ROOT.TFile(file2Name)
 
-    # Get list of key names
+    # Get list of all key names in analysis ouput files
     keyNames1 = [key.GetName() for key in file1.GetListOfKeys()]
     keyNames2 = [key.GetName() for key in file2.GetListOfKeys()]
 
     # Define the trait of the key you want
-    # Which plot: means TH2F, which combination: provided by user
+    # Which plot: 2D histogram of residual means for the user's input tracking combination
     desiredNameEnd = "means_layer" + str(layer) + "_fixedlayers" + str(fixedLayer1)
     desiredNameEnd += str(fixedLayer2)
     sliceFromIndex = len(desiredNameEnd)
@@ -43,7 +43,8 @@ def compareResidualFitMeans(file1Name, file2Name, layer, fixedLayer1, fixedLayer
             meansHist2 = file2.Get(name)
             break;
 
-    # Check that the two histograms are compatible
+    # Check that the two histograms are compatible: they must have the same binning to compare
+    # residual means in equivalent regions of interest
     if (meansHist1.GetNbinsX() != meansHist2.GetNbinsX() or 
             meansHist1.GetNbinsY() != meansHist2.GetNbinsY()):
         print("The two histograms do not have the same number of bins. Check inputs.")
@@ -74,6 +75,8 @@ def compareResidualFitMeans(file1Name, file2Name, layer, fixedLayer1, fixedLayer
     # Create canvas
     c = ROOT.TCanvas("c","c")
     scatterPlot.Draw("AP")
+
+    # Print scatter plot to file
     c.Print("compareMeans.pdf")
     c.Print("compareMeans.root")
 
@@ -85,8 +88,10 @@ if len(sys.argv) < 6:
           "file2_strip_position_analysis.root layer fixedlayer1 fixedlayer2")
     exit();
 
+# Set style
 aplt.set_atlas_style()
-compareResidualFitMeans(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
 
+# Call function to create scatter plots
+compareResidualFitMeans(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
 
 
