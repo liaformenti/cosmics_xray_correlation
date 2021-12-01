@@ -36,6 +36,7 @@ int main(int argc, char* argv[]) {
     SetAnalysisStyle();
     // cout << "You commented out SetAnalysisStyle\n\n";
     // Add the Formenti flair
+    gStyle->SetPalette(57); // kBird, blue->yellow
     gStyle->SetOptStat("e");
     gStyle->SetOptFit(1);
     gROOT->ForceStyle();
