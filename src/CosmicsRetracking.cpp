@@ -110,7 +110,7 @@ void CosmicsRetracking::Retrack() {
         } // end lc loop
         // Count iterations
         if (i%10000==0) {
-            cout << "Iteration " << i << " of " <<  nEntries << '\n';
+            cout << "Track " << i << " of " <<  nEntries << '\n';
         }
     } // end event loop
 

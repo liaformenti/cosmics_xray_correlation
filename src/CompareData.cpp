@@ -171,7 +171,6 @@ void CompareData::DoComparison() {
   c->Print((filename + "[").c_str());
 
   // Title size
-  cout << "Title size: " << gStyle->GetTitleSize() << '\n';
   gStyle->SetTitleSize(0.025, "t");
   gROOT->ForceStyle();
   for (auto xr=xResiduals->begin(); xr!=xResiduals->end(); xr++) {
