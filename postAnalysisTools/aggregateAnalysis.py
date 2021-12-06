@@ -20,8 +20,8 @@ def aggregateCorrelationParameters(inFileNames, tag):
     slopeHist = ROOT.TH1F("slopeHist", ";Slope;No. entries", 20, 0, 2)
     slopeUncertHist = ROOT.TH1F("slopeUncertHist", ";Slope fit uncertainty;No. entries", 10, 0, 0.1)
     offsetHist = ROOT.TH1F("offsetHist", ";Offset [mm];No. entries", 20, -0.05, 0.05)
-    offsetUncertHist = ROOT.TH1F("offsetUncertHist", "Offset fit uncertainty [mm];No. entries",10, 0, 0.01)
-    chi2OverNDFHist = ROOT.TH1F("chi2Hist", ";#chi^{2};No. entries", 10, 0, 100)
+    offsetUncertHist = ROOT.TH1F("offsetUncertHist", ";Offset fit uncertainty [mm];No. entries",10, 0, 0.01)
+    chi2OverNDFHist = ROOT.TH1F("chi2Hist", ";#chi^{2}/ndf;No. entries", 10, 0, 100)
 
     # Setup csv file
     # Change to cmd line arg out file path
