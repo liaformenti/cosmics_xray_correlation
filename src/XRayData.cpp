@@ -53,8 +53,14 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     }
 
     // Vars to hold column entries 
-    string run_id, platform_id, position_number;
+    // Example: run_id=WLAP00003_GV1_0_A_run0
+    //     - platform_id = "0"
+    //     - position_number = "A"
+    //     - run_number = "run0"
+    string run_id, platform_id, position_number, run_number;
     UShort_t gv; 
+    // x_ and y_beam are expected x-ran gun profile centroids,
+    // y_meas is measured x-ray gun profile centroid.
     Double_t x_beam, y_beam, y_meas, offset, offset_error;
     /***
      * Note about offset_error: there is an offset error recorded in the database, but it is
@@ -69,7 +75,12 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
 
         // Get column values
         run_id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-        ParseRunID(run_id, platform_id, position_number);
+        ParseRunID(run_id, platform_id, position_number, run_number);
+        // Skip entry if run_id is not labelled with run number zero.
+        // Other runs are R&D runs
+        if (run_number!="run0") {
+            continue;
+        }
         gv = (UShort_t)(sqlite3_column_int(stmt, 5));
         x_beam = (Double_t)(sqlite3_column_double(stmt, 9));
         y_beam = (Double_t)(sqlite3_column_double(stmt, 10));
@@ -248,9 +259,10 @@ cinfo(_cinfo), myInfo(_myInfo), pm(_pm) {
     return;
 }*/
 
-void XRayData::ParseRunID(string runID, string& platformID, string& positionNumber) {
+void XRayData::ParseRunID(string runID, string& platformID, string& positionNumber,
+                          string& runNumber) {
     char token = '_';
-    string wedgeID, gasVol, runNumber;
+    string wedgeID, gasVol;
     stringstream ss(runID);
     getline(ss, wedgeID, token);
     getline(ss, gasVol, token);

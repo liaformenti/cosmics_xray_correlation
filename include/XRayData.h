@@ -55,7 +55,8 @@ class XRayData {
     // Filepath indicates the path and name of file to hold the resulting database
     // void csv2db(std::string inFileName, std::string outFileName);
     // Fills platformID and positionNumber with approrpriate strings from runID
-    void ParseRunID(std::string runID, std::string& platformID, std::string& positionNumber);
+    void ParseRunID(std::string runID, std::string& platformID, std::string& positionNumber,
+                    std::string& runNumber);
     // Plot ybeams vs xbeams, nominal xray positions
     // Take average of position over available layers.
     void PlotAverageBeamPositions();
