@@ -130,6 +130,7 @@ int main(int argc, char* argv[]) {
 
     // TH2s
     Binning widthBins(100, 100, geom);
+    // Binning widthBins(geom);
     ResPlots th2s(&cosmicTracks.residuals, &widthBins, widthBins.name, cosmicsInfo, geom, plotManager, &myInfo);
     th2s.CreateNumEntriesTH2Is();
     th2s.CreatePosBinnedResPlots();

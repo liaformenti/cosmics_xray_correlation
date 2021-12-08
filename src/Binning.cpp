@@ -46,6 +46,16 @@ Binning::Binning(Int_t wx, Int_t wy, DetectorGeometry* _g) :
     name += to_string(wy) + "mm";
 }
 
+// Custom binning for looking at mean of residuals in roughly centered quadrants 300 mm by 300 mm
+// Appropriate for QL2's
+Binning::Binning(DetectorGeometry* _g) : g(_g) {
+    xBinEdges = {-903, -450, -150, 150, 450, 903};
+    yBinEdges = {0, 200, 500, 700, 1000, 1194.6};
+    nBinsX = xBinEdges.size()-1; // is 5
+    nBinsY = yBinEdges.size()-1; // is 5
+    name = "custom_QL2_quadrants";
+}
+
 /*Binning::Binning(XRayData* data, Int_t wx, Int_t wy,
                 DetectorGeometry* _g) : g(_g) {
     // I THINK THIS IS BUGGY.
