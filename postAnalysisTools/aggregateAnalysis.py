@@ -9,6 +9,7 @@ import numpy as np
 import atlasplots as aplt
 import sys
 from datetime import datetime
+import os
 #
 # A tracking combination is a set of two fixed layers used to define a track and the layer that track is polated to to calculate residuals on.
 class Combination:
@@ -51,6 +52,7 @@ def GetComboList():
 # Produces the distribution of the slope, offset and chi2 parameters from each correlation plot and prints them to a pdf and a root file.
 # Also writes the slope, offset and chi2 of each input file to a csv
 
+# *** Need to edit so it takes in output directory name and treats it accordingly ***
 def aggregateCorrelationParameters(inFileNames, tag):
 
     # Define histograms to hold slope, offset, chi2 and respective uncertainties
@@ -122,6 +124,7 @@ def aggregateCorrelationParameters(inFileNames, tag):
 
 # Fits Gaussian to overall mean distribution (same way as Gaussian fits to residual distributions
 # in smaller regions of interest) and makes distribution of means per tracking combination to search for systematic patterns in global offset. Outputs distribution of means in global PDF and values of Gaussian means in csv
+# *** Need to edit so it takes in output directory name and treats it accordingly ***
 def aggregateOverallResidualDistributionMeans(inFileNames, tag):
 
     combos = GetComboList() 
@@ -217,15 +220,39 @@ inFileList = []
 # Get cmd line args
 # Just do skeleton for today, Dec. 1 so you can make some distributions
 pos = 1
+theTag = ""
+theOutDir = "out"
+gotListOfInputFiles = False
 while pos < len(sys.argv):
+    print(sys.argv[pos])
     # Deal with input file list in .txt file
     if sys.argv[pos] == "-l":
         fileListFile = open(sys.argv[pos+1])
         for fileName in fileListFile:
             inFileList.append(fileName[:-1])
+        gotListOfInputFiles = True
+        pos += 2
+    elif sys.argv[pos] == "--tag":
+        theTag = sys.argv[pos+1]
+        pos += 2
+    elif sys.argv[pos] == "-o":
+        if os.path.isdir(sys.argv[pos+1]):
+            theOutDir = sys.argv[pos+1]
+        else:
+            print("Warning: Output directory specified does not exist.\n")
         pos += 2
 
-# Until you setup a tag flag,
-theTag = "QL2C_aggregate_results_" + datetime.today().strftime('%Y-%m-%d')
-aggregateOverallResidualDistributionMeans(inFileList, theTag)
+# If no tag has been assigned
+if theTag == "":
+    theTag = "aggregate_results_" + datetime.today().strftime('%Y-%m-%d')
+print("Output will be put in", theOutDir, "\n")
+
+if gotListOfInputFiles == False:
+    print("Usage: python aggregateAnalysis.py -l list_of_paths_to_input_files.txt [-o output directory] [--tag append_this_prefix_to_output_filenames]")
+    exit(1)
+if len(inFileList)==0:
+    print("List of input files is empty.\n")
+    exit(1)
+print(theTag, theOutDir)
+# aggregateOverallResidualDistributionMeans(inFileList, theTag)
 
