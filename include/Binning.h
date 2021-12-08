@@ -25,6 +25,9 @@ class Binning {
     // Rectangular bins
     // Lowest y bin and highest x bin not width - controlled
     Binning(Int_t xWidth, Int_t yWidth, DetectorGeometry* _g);
+    // Custom binning for looking at mean of reisduals in rouhgly centered quadrants 300 mm by 300 mm
+    // Appropriate for QL2's
+    Binning(DetectorGeometry* _g);
     // To bin a rectangle around xray points, with specified
     // x and y widths
     // Binning(XRayData* data, Int_t xWidth, Int_t yWidth,
