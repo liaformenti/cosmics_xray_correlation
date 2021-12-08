@@ -6,6 +6,7 @@
 *LinkDef.cpp
 CosmicsXRayCorrelation
 ReClustering/ReClustering
+usefulScripts/testGeom/a.out
 
 # Root files
 *.root
