@@ -10,6 +10,7 @@ import atlasplots as aplt
 import sys
 from datetime import datetime
 import os
+import pandas as pd
 #
 # A tracking combination is a set of two fixed layers used to define a track and the layer that track is polated to to calculate residuals on.
 class Combination:
@@ -211,10 +212,72 @@ def aggregateOverallResidualDistributionMeans(inFileNames, tag):
     c.Print(outFileNameBase + "_distributions.pdf]")
     csvOutFile.close()
 
+# Takes mean of residuals in TH2F with special QL2 binning (specific constructor in Binning.cpp)
+# and makes a distribution of those means in each quadrant for each combination.
+# Trying to look for systematic patterns on a 300mm by 300mm scale.
+# Numbered quadrants starting at 1 from top left and read like an English book
+#             y^    1 ---> 2
+#              |          
+#              |          
+#              |    3 ---> 4
+#              ---------------> x [tgc_analysis coordinate system]
+def aggregateResidualMeansByQuadrant(inFileNames, tag, outDir):
+    combos = GetComboList()
+
+    outFileNameBase = outDir + '/' + tag + "_residual_means_by_QL2_quadrant"
+
+    meansOfResiduals = {}
+
+    c = ROOT.TCanvas("c","c",800,600)
+    c.Print(outFileNameBase + "_distributions.pdf[")
+
+    # Setup csv file and dictionary of dataframes to hold means of residuals of each quadrant
+    csvOutFile = open(outFileNameBase + ".csv", 'w')
+    csvOutFile.write("Quadrant,")
+    for combo in combos:
+        csvOutFile.write(combo.string + ',')
+        # Initialize means of residuals stored in dataframe to invalid values (-100)
+        meansOfResiduals[combo.string] = pd.DataFrame(np.ones((len(inFileNames),4))*-100, index=inFileNames, columns=[1,2,3,4])
+
+    for fileName in inFileNames:
+        f = ROOT.TFile(fileName)
+        for combo in combos:
+            resMeanTH2 = f.Get("custom_QL2_quadrants_means_" + combo.string)
+            meansOfResiduals[combo.string].at[fileName, 1] = resMeanTH2.GetBinContent(2,4)
+            meansOfResiduals[combo.string].at[fileName, 2] = resMeanTH2.GetBinContent(4,4)
+            meansOfResiduals[combo.string].at[fileName, 3] = resMeanTH2.GetBinContent(2,2)
+            meansOfResiduals[combo.string].at[fileName, 4] = resMeanTH2.GetBinContent(4,2)
+
+
+    # For each combo, create a page of the output pdf showing the distribution of residual means
+    # in each quadrant, arranged 2X2 on the page corresponding to the position of each quadrant
+    # on a layer (eg. top left distribution is top left quadrant of quadruplet)
+    for combo in combos:
+        c.Divide(2,2)
+        df = meansOfResiduals[combo.string]
+        hists = []
+        for q in [1,2,3,4]:
+            hist = ROOT.TH1F(combo.string + "_q" + str(q), ";Mean of residuals in quadrant [mm];No. instances", 25, -5, 5)
+            hists.append(hist)
+            means = df[q]
+            for mean in means:
+                hist.Fill(mean)
+            c.cd(q)
+            hist.Draw()
+        c.Print(outFileNameBase + "_distributions.pdf")
+        c.Clear()
+
+
+    c.Print(outFileNameBase + "_distributions.pdf]")
+    csvOutFile.close()
+
+
+
+
 ### MAIN ###
-aplt.set_atlas_style()
-ROOT.gStyle.SetOptStat(1)
-ROOT.gROOT.ForceStyle()
+# aplt.set_atlas_style()
+# ROOT.gStyle.SetOptStat(1)
+# ROOT.gROOT.ForceStyle()
 # List of names of analysis output root files to include in analysis
 inFileList = []
 # Get cmd line args
@@ -224,7 +287,6 @@ theTag = ""
 theOutDir = "out"
 gotListOfInputFiles = False
 while pos < len(sys.argv):
-    print(sys.argv[pos])
     # Deal with input file list in .txt file
     if sys.argv[pos] == "-l":
         fileListFile = open(sys.argv[pos+1])
@@ -253,6 +315,16 @@ if gotListOfInputFiles == False:
 if len(inFileList)==0:
     print("List of input files is empty.\n")
     exit(1)
-print(theTag, theOutDir)
-# aggregateOverallResidualDistributionMeans(inFileList, theTag)
 
+aggregateResidualMeansByQuadrant(inFileList, theTag, theOutDir)
+
+
+    # Setup 4x4 canvas
+    # xSpace = 0.05
+    # ySpace = 0.05
+    # xPad = (1 - 3*xSpace)/2
+    # yPad = (1 - 3*ySpace)/2
+
+    # p1 = ROOT.TPad("q1", "q1", xSpace, 2*ySpace + yPad, 0.5-xSpace/2, ySpace, -1, 3, 1)
+    # p2 = ROOT.TPad("q2", "q2", 0.5 + xSpace/2, 2*ySpace + yPad, 1-xSpace, 1-ySpace, -1, 3, 1)
+    # p3 = ROOT.TPad("q3", "q3", 0.5 + xSpace/2, )
