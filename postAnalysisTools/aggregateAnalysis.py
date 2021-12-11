@@ -221,6 +221,7 @@ def aggregateOverallResidualDistributionMeans(inFileNames, tag):
 #              |          
 #              |    3 ---> 4
 #              ---------------> x [tgc_analysis coordinate system]
+# *** Plot styling only works is set_atlas_style() is commented out
 def aggregateResidualMeansByQuadrant(inFileNames, tag, outDir):
     combos = GetComboList()
 
@@ -233,9 +234,8 @@ def aggregateResidualMeansByQuadrant(inFileNames, tag, outDir):
 
     # Setup csv file and dictionary of dataframes to hold means of residuals of each quadrant
     csvOutFile = open(outFileNameBase + ".csv", 'w')
-    csvOutFile.write("Quadrant,")
+    csvOutFile.write(",top left,top right,bottom left,bottom right\n")
     for combo in combos:
-        csvOutFile.write(combo.string + ',')
         # Initialize means of residuals stored in dataframe to invalid values (-100)
         meansOfResiduals[combo.string] = pd.DataFrame(np.ones((len(inFileNames),4))*-100, index=inFileNames, columns=[1,2,3,4])
 
@@ -248,11 +248,11 @@ def aggregateResidualMeansByQuadrant(inFileNames, tag, outDir):
             meansOfResiduals[combo.string].at[fileName, 3] = resMeanTH2.GetBinContent(2,2)
             meansOfResiduals[combo.string].at[fileName, 4] = resMeanTH2.GetBinContent(4,2)
 
-
     # For each combo, create a page of the output pdf showing the distribution of residual means
     # in each quadrant, arranged 2X2 on the page corresponding to the position of each quadrant
     # on a layer (eg. top left distribution is top left quadrant of quadruplet)
     for combo in combos:
+        csvOutFile.write(combo.string + ',')
         c.Divide(2,2)
         df = meansOfResiduals[combo.string]
         hists = []
@@ -262,22 +262,23 @@ def aggregateResidualMeansByQuadrant(inFileNames, tag, outDir):
             means = df[q]
             for mean in means:
                 hist.Fill(mean)
+            histMean = hist.GetMean()
+            csvOutFile.write(str(histMean) + ',')
             c.cd(q)
             hist.Draw()
         c.Print(outFileNameBase + "_distributions.pdf")
         c.Clear()
+        csvOutFile.write('\n')
 
 
     c.Print(outFileNameBase + "_distributions.pdf]")
     csvOutFile.close()
 
 
-
-
 ### MAIN ###
-# aplt.set_atlas_style()
-# ROOT.gStyle.SetOptStat(1)
-# ROOT.gROOT.ForceStyle()
+aplt.set_atlas_style()
+ROOT.gStyle.SetOptStat(1)
+ROOT.gROOT.ForceStyle()
 # List of names of analysis output root files to include in analysis
 inFileList = []
 # Get cmd line args
