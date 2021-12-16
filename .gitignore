@@ -15,9 +15,6 @@ usefulScripts/testGeom/a.out
 *.pdf
 out*
 
-# x-ray data
-*.db
-
 # text files
 *.txt
 *.csv
