@@ -47,8 +47,8 @@ void CosmicsRetracking::Retrack() {
         for (auto itX=trackX.begin(); itX!=trackX.end(); itX++)
             uncertX[itX->first] = 1.8*20/sqrt(12.0); // mm
 
-        // *********** NEW ************
-        // Uncertainty in y is spread of mean_reclustering - mean_cosmics (systematic error)
+        // Uncertainty in y is spread of mean_reclustering - mean_cosmics distribution for 3100V
+        // (systematic error)
         map<UShort_t, Double_t> uncertY;
         for (auto itY=r_mean.begin(); itY!=r_mean.end(); itY++)
             uncertY[itY->first] = 0.06; // mm
