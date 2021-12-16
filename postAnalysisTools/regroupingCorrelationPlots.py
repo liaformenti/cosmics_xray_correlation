@@ -159,8 +159,10 @@ def correlationPlotsByCombinationColouredGunPositions(allData, colorTheseGunPosi
     c.SetFillStyle(4000)
     c.Print(outFileNameBase + ".pdf[")
     # ROOT color codes that you can cycle through that produce colours with enough contrast
-    acceptableColors = [1,2,3,4,5,6,7,8,9,13,28,30,38,40,41,42,46,47]
-    colorPerGunPos = acceptableColors[:len(colorTheseGunPositions)]
+    colorByGunPosition = {"9A":2, "11C":3, "5C":4, "8C":5, "8D2":6, "11B":7, "8B":8, "8A":9,
+            "7C":13, "11A":28, "6A":30, "4C":38, "5A":40, "7D1":41, "4D1":42, "8D1":47}
+    # acceptableColors = [2,3,4,5,6,7,8,9,13,28,30,38,40,41,42,46,47]
+    # colorPerGunPos = acceptableColors[:len(colorTheseGunPositions)]
     combos = GetComboList()
 
     for combo in combos:
@@ -203,10 +205,11 @@ def correlationPlotsByCombinationColouredGunPositions(allData, colorTheseGunPosi
                 print("Warning: no entries found for gun position: ", gunPos) 
                 continue
             g = ROOT.TGraphErrors(len(xg), xg, yg, exg, eyg)
-            g.SetMarkerColor(colorPerGunPos[colorNum])
+            g.SetMarkerColor(colorByGunPosition[gunPos])
+            g.SetLineColor(colorByGunPosition[gunPos])
             graphs.append(g)
             gunLabelText = labelBox.AddText(gunPos)
-            gunLabelText.SetTextColor(colorPerGunPos[colorNum])
+            gunLabelText.SetTextColor(colorByGunPosition[gunPos])
             gunLabelText.SetTextSize(30)
             gunLabelText.SetTextAlign(11)
             labelTexts.append(gunLabelText)
@@ -282,5 +285,7 @@ for i in range(1, len(inFileList)):
     allTheData= allTheData.append(pd.read_csv(inFileList[i], index_col=False), ignore_index=True)
 
 gunPositions = allTheData['X-ray pt id'].unique()
-# print(len(gunPositions))
+# gunPositions=["9A","8D1","8D2","8A"]
+# gunPositions=["11B","7C"]
+print(gunPositions)
 correlationPlotsByCombinationColouredGunPositions(allTheData, gunPositions, theTag, theOutDir)
