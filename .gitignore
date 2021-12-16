@@ -13,7 +13,10 @@ usefulScripts/testGeom/a.out
 
 # Outputs
 *.pdf
-out*
+out/*.pdf
+out/*.root
+out/*.csv
+out/*.txt
 
 # text files
 *.txt
