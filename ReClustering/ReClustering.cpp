@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
 
     // tgc_analysis style
     SetAnalysisStyle();
-    gErrorIgnoreLevel = kWarning;
+    gErrorIgnoreLevel = kWarning
 
     // Initialize differential non linearity correction class
     // if (doDNLCorrection) 
@@ -325,9 +325,16 @@ int main(int argc, char* argv[]) {
         newSigma.clear(); newSigmaError.clear();
         ndf.clear(); chi2.clear();
 
-        // FOR QL2C04 3100V ONLY
-        /*if (trackYGaussian.find(2) != trackYGaussian.end()) {
-            if (trackYGaussian.at(2) > 1173) {
+        // A couple quads have excess noise on the long edge on certain layers
+        // Use this scaffold to cut noise at high-y edge for certain quads
+        // Known noisy quads include: 
+        // QL2C04 3100V layer 2
+        // QL2P01 3100V layer 1
+        // QL2P02 3100V layer 2 (cut for y > 1169 mm)
+        /*
+        UShort_t noisyLayer = 2;
+        if (trackYGaussian.find(noisyLayer) != trackYGaussian.end()) {
+            if (trackYGaussian.at(noisyLayer) > 1173) {
                 ramplitudeBranch->Fill();
                 ramplitudeErrorBranch->Fill();
                 rmeanBranch->Fill();
@@ -473,6 +480,7 @@ int main(int argc, char* argv[]) {
 
 
     // Check for evidence of excess noise by fitting constant to distribution of reclustering mean.
+    // and seeing if no. entries in each bin is 5 times higher than that constant
     for (UShort_t i=1; i<=4; i++) {
         TH1F* h = (TH1F*)pm->GetTH1F("reclustering_mean_layer_" + to_string(i));
         h->Fit("pol0", "W"); // Ignore bin errors when fitting constant
