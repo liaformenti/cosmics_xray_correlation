@@ -1,6 +1,6 @@
 # Takes in a list of analysis output files to analyze.
 # Performs various analyses on all of them designed to explore patterns across all quadruplets of a given geoemtry.
-# Each function does a different analysis.
+# Each function does a different analysis, described in the comments above the function.
 # Lia Formenti
 # 2021-12-01
 
@@ -32,7 +32,8 @@ class Combination:
 
         self.string = "layer" + str(self.layer) + "_fixedlayers" + str(self.la) + str(self.lb)
 
-# Defines all tracking combinations
+# Defines a list of tracking combinations
+# Useful for looping over all combinations
 def GetComboList():
     combos = []
     combos.append(Combination(3,1,2))
@@ -49,12 +50,10 @@ def GetComboList():
     combos.append(Combination(2,3,4))
     return combos
 
-# Takes in a list of analysis output files to analyze. 
+# Takes in a list of analysis output root files to analyze. 
 # Produces the distribution of the slope, offset and chi2 parameters from each correlation plot and prints them to a pdf and a root file.
 # Also writes the slope, offset and chi2 of each input file to a csv
-
-# *** Need to edit so it takes in output directory name and treats it accordingly ***
-def aggregateCorrelationParameters(inFileNames, tag):
+def aggregateCorrelationParameters(inFileNames, tag, outDir):
 
     # Define histograms to hold slope, offset, chi2 and respective uncertainties
     slopeHist = ROOT.TH1F("slopeHist", ";Slope;No. entries", 20, 0, 2)
@@ -65,7 +64,7 @@ def aggregateCorrelationParameters(inFileNames, tag):
 
     # Setup csv file
     # Change to cmd line arg out file path
-    outFileNameBase = "out/" + tag + "_correlation_parameters"
+    outFileNameBase = outDir + "/" + tag + "_correlation_parameters"
     csvOutFile = open(outFileNameBase + ".csv", 'w')
     csvOutFile.write("file_name,slope,slope_uncertainty,offset,offset_uncertainty,chi2,ndf\n")
 
@@ -124,14 +123,13 @@ def aggregateCorrelationParameters(inFileNames, tag):
     rootOutFile.Close()
 
 # Fits Gaussian to overall mean distribution (same way as Gaussian fits to residual distributions
-# in smaller regions of interest) and makes distribution of means per tracking combination to search for systematic patterns in global offset. Outputs distribution of means in global PDF and values of Gaussian means in csv
-# *** Need to edit so it takes in output directory name and treats it accordingly ***
-def aggregateOverallResidualDistributionMeans(inFileNames, tag):
+# in smaller regions of interest) and makes distribution of means per tracking combination to search for systematic patterns in global offset. Outputs distribution of means in PDF and values of Gaussian means in csv
+def aggregateOverallResidualDistributionMeans(inFileNames, tag, outDir):
 
     combos = GetComboList() 
 
     # Change to cmd line arg out file path
-    outFileNameBase = "out/" + tag + "_overall_residual_means_by_tracking_combination"
+    outFileNameBase = outDir + "/" + tag + "_overall_residual_means_by_tracking_combination"
 
     # Setup csv file
     csvOutFile = open(outFileNameBase + ".csv", 'w')
@@ -304,6 +302,9 @@ while pos < len(sys.argv):
         else:
             print("Warning: Output directory specified does not exist.\n")
         pos += 2
+    else: 
+        print("Usage: python aggregateAnalysis.py -l input_file_names_list.txt [-o outDir] [--tag output_file_name_prefix]")
+        exit(1)
 
 # If no tag has been assigned
 if theTag == "":
@@ -317,15 +318,6 @@ if len(inFileList)==0:
     print("List of input files is empty.\n")
     exit(1)
 
-aggregateResidualMeansByQuadrant(inFileList, theTag, theOutDir)
-
-
-    # Setup 4x4 canvas
-    # xSpace = 0.05
-    # ySpace = 0.05
-    # xPad = (1 - 3*xSpace)/2
-    # yPad = (1 - 3*ySpace)/2
-
-    # p1 = ROOT.TPad("q1", "q1", xSpace, 2*ySpace + yPad, 0.5-xSpace/2, ySpace, -1, 3, 1)
-    # p2 = ROOT.TPad("q2", "q2", 0.5 + xSpace/2, 2*ySpace + yPad, 1-xSpace, 1-ySpace, -1, 3, 1)
-    # p3 = ROOT.TPad("q3", "q3", 0.5 + xSpace/2, )
+aggregateCorrelationParameters(inFileList, theTag, theOutDir)
+aggregateOverallResidualDistributionMeans(inFileList, theTag, theOutDir)
+# aggregateResidualMeansByQuadrant(inFileList, theTag, theOutDir)

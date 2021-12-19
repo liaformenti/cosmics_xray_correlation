@@ -1,4 +1,4 @@
-# For creating correlation plots of mean cosmics residuals vs x-ray residuals for all quadruplets of a certain geometry grouped in different ways. E.g. by x-ray gun position or combination
+# For all analysis output local data csv files input to this script, plot the mean cosmics residuals vs x-ray residuals in scatter plots by tracking combination. This is to be able to examine the correlation over all quadruplets of a certain group (e.g. geometry, which wheel / x-ray gun mount type). Each function styles teh plots in a different way, as described by teh comment above the function. The input is a text file containing a list of the names of the csv files of quadruplets you would like to include in the plots.
 import ROOT
 import numpy as np
 import atlasplots as aplt
@@ -28,7 +28,8 @@ class Combination:
         self.string = "layer" + str(self.layer) + "_fixedlayers" + str(self.la) + str(self.lb)
         self.prettyString = "Layer: " + str(self.layer) + ", fixed layers: " + str(self.la) + ", " + str(self.lb)
 
-# Defines all tracking combinations
+# Defines a list of tracking combinations
+# Useful for looping over all combinations
 def GetComboList():
     combos = []
     combos.append(Combination(3,1,2))
@@ -46,7 +47,8 @@ def GetComboList():
     return combos
 
 
-# Recreates the all-combination correlation plots but colours the x-ray residuals from gun position 8B
+# For each quadruplet's data input (in inFileNames, the list of csv files to analyze), create the all-combination correlation plots per quadruplet that are usually output from cosmics_xray_correlation, but those calculated at gun position 8B. 
+# Gun position 8B is of particular interest because it was found to often yield very large x-ray residuals in tracking combinations including layer 3.
 def colorGunPositions(inFileNames, tag, outDir):
     c = ROOT.TCanvas("c","c",800,600)
     outFileNameBase = outDir + "/" + tag + "_colour_by_gun_position"
@@ -118,7 +120,8 @@ def colorGunPositions(inFileNames, tag, outDir):
     c.Print(outFileNameBase + ".pdf]")
 
 # Make correlation plots by combination for data in all input csvs
-# allData is a pandas dataframe where the data from all input csvs have been concatenated
+# Outputs them to pdf.
+# allData is a pandas dataframe where the data from all input csvs have been concatenated in the global body of this script
 def correlationPlotsByCombination(allData, tag, outDir):
     outFileNameBase = outDir + "/" + tag + "_correlation_plots_by_combination"
     c = ROOT.TCanvas("c", "c", 800, 600)
@@ -159,8 +162,12 @@ def correlationPlotsByCombinationColouredGunPositions(allData, colorTheseGunPosi
     c.SetFillStyle(4000)
     c.Print(outFileNameBase + ".pdf[")
     # ROOT color codes that you can cycle through that produce colours with enough contrast
+    # Assigned QL2 gun positions to a colour
     colorByGunPosition = {"9A":2, "11C":3, "5C":4, "8C":5, "8D2":6, "11B":7, "8B":8, "8A":9,
             "7C":13, "11A":28, "6A":30, "4C":38, "5A":40, "7D1":41, "4D1":42, "8D1":47}
+    # Same  for marker styles
+    markByGunPosition = {"9A":20, "11C":21, "5C":23, "8C":24, "8D2":25, "11B":26, "8B":27, "8A":28,
+            "7C":29, "11A":30, "6A":31, "4C":32, "5A":33, "7D1":34, "4D1":39, "8D1":40}
     # acceptableColors = [2,3,4,5,6,7,8,9,13,28,30,38,40,41,42,46,47]
     # colorPerGunPos = acceptableColors[:len(colorTheseGunPositions)]
     combos = GetComboList()
@@ -181,14 +188,14 @@ def correlationPlotsByCombinationColouredGunPositions(allData, colorTheseGunPosi
         labelTexts.append(labelText)
 
         # Make a graph for all residual pairs for given combination
-        x = allData.loc[ ( (allData.loc[:, 'Layer']==combo.layer) & (allData.loc[:, 'Fixed layer 1']==combo.la) & (allData.loc[:, 'Fixed layer 2']==combo.lb) ), 'x-ray residual' ].to_numpy()
-        ex = allData.loc[ ( (allData.loc[:, 'Layer']==combo.layer) & (allData.loc[:, 'Fixed layer 1']==combo.la) & (allData.loc[:, 'Fixed layer 2']==combo.lb) ), 'xray residual error' ].to_numpy()
-        y = allData.loc[ ( (allData.loc[:, 'Layer']==combo.layer) & (allData.loc[:, 'Fixed layer 1']==combo.la) & (allData.loc[:, 'Fixed layer 2']==combo.lb) ), 'Mean cosmics residual' ].to_numpy()
-        eyStat =  allData.loc[ ( (allData.loc[:, 'Layer']==combo.layer) & (allData.loc[:, 'Fixed layer 1']==combo.la) & (allData.loc[:, 'Fixed layer 2']==combo.lb) ), 'stat error' ].to_numpy()
-        eySys =  allData.loc[ ( (allData.loc[:, 'Layer']==combo.layer) & (allData.loc[:, 'Fixed layer 1']==combo.la) & (allData.loc[:, 'Fixed layer 2']==combo.lb) ), 'sys error' ].to_numpy()
-        ey = np.sqrt(np.power(eyStat,2) + np.power(eySys,2))
-        g = ROOT.TGraphErrors(len(x), x, y, ex, ey)
-        graphs.append(g)
+        # x = allData.loc[ ( (allData.loc[:, 'Layer']==combo.layer) & (allData.loc[:, 'Fixed layer 1']==combo.la) & (allData.loc[:, 'Fixed layer 2']==combo.lb) ), 'x-ray residual' ].to_numpy()
+        # ex = allData.loc[ ( (allData.loc[:, 'Layer']==combo.layer) & (allData.loc[:, 'Fixed layer 1']==combo.la) & (allData.loc[:, 'Fixed layer 2']==combo.lb) ), 'xray residual error' ].to_numpy()
+        # y = allData.loc[ ( (allData.loc[:, 'Layer']==combo.layer) & (allData.loc[:, 'Fixed layer 1']==combo.la) & (allData.loc[:, 'Fixed layer 2']==combo.lb) ), 'Mean cosmics residual' ].to_numpy()
+        # eyStat =  allData.loc[ ( (allData.loc[:, 'Layer']==combo.layer) & (allData.loc[:, 'Fixed layer 1']==combo.la) & (allData.loc[:, 'Fixed layer 2']==combo.lb) ), 'stat error' ].to_numpy()
+        # eySys =  allData.loc[ ( (allData.loc[:, 'Layer']==combo.layer) & (allData.loc[:, 'Fixed layer 1']==combo.la) & (allData.loc[:, 'Fixed layer 2']==combo.lb) ), 'sys error' ].to_numpy()
+        # ey = np.sqrt(np.power(eyStat,2) + np.power(eySys,2))
+        # g = ROOT.TGraphErrors(len(x), x, y, ex, ey)
+        # graphs.append(g)
 
         line = ROOT.TF1("line", "x", -2, 2)
         line.SetLineColor(16)
@@ -205,6 +212,7 @@ def correlationPlotsByCombinationColouredGunPositions(allData, colorTheseGunPosi
                 print("Warning: no entries found for gun position: ", gunPos) 
                 continue
             g = ROOT.TGraphErrors(len(xg), xg, yg, exg, eyg)
+            g.SetMarkerStyle(markByGunPosition[gunPos])
             g.SetMarkerColor(colorByGunPosition[gunPos])
             g.SetLineColor(colorByGunPosition[gunPos])
             graphs.append(g)
@@ -264,6 +272,9 @@ while pos < len(sys.argv):
         else:
             print("Warning: Output directory specified does not exist.\n")
         pos += 2
+    else:
+        print("Usage: python regroupingCorrelationPlots.py -l list_of_input_csv_files.txt [-o outputDirectoryName] [--tag outputFileNamePrefix]\n")
+        exit()
 
 # If no tag has been assigned
 if theTag == "":
@@ -277,12 +288,22 @@ if len(inFileList)==0:
     print("List of input files is empty.\n")
     exit(1)
 
-# colorGunPositions(inFileList, theTag, theOutDir)-
+# colorGunPositions(inFileList, theTag, theOutDir)
 
-allTheData = pd.read_csv(inFileList[0], index_col=False)
+# allTheData = pd.read_csv(inFileList[0], index_col=False)
+# For every input file, put all rows in csv in dataframe and add column listing input file name
+df = pd.read_csv(inFileList[0], index_col=False)
+# df['inFileName']= inFileList[0]
+df['quad'] = inFileList[0].split('/')[-1].split('_')[0]
+df['Mean cosmics residual error'] = (df['stat error'].pow(2) + df['sys error'].pow(2)).pow(1./2)
+allTheData = df
 for i in range(1, len(inFileList)):
-    # pd.concat([data, pd.read_csv(inFileList[i], index_col=False)])
-    allTheData= allTheData.append(pd.read_csv(inFileList[i], index_col=False), ignore_index=True)
+    df = pd.read_csv(inFileList[i], index_col=False)
+    # df['inFileName']= inFileList[i]
+    df['quad'] = inFileList[i].split('/')[-1].split('_')[0]
+    df['Mean cosmics residual error'] = (df['stat error'].pow(2) + df['sys error'].pow(2)).pow(1./2)
+    allTheData = allTheData.append(df, ignore_index=True)
+allTheData.to_csv(theOutDir + "/" + theTag + "_correlation_data.csv", columns=['quad', 'X-ray pt id', 'Layer', 'Fixed layer 1', 'Fixed layer 2', 'x-ray residual', 'xray residual error', 'Mean cosmics residual', 'Mean cosmics residual error'], header=['Quad', 'Gun position', 'Layer', 'Fixed layer 1', 'Fixed layer 2', 'X-ray residual', 'X-ray residual error', 'Mean cosmics residual', 'Mean cosmics residual error'], index=False)
 
 gunPositions = allTheData['X-ray pt id'].unique()
 # gunPositions=["9A","8D1","8D2","8A"]
