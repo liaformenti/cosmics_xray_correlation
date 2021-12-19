@@ -1,4 +1,4 @@
-# For creating correlation plots of mean cosmics residuals vs x-ray residuals for all quadruplets of a certain geometry grouped in different ways. E.g. by x-ray gun position or combination
+# For all analysis output local data csv files input to this script, plot the mean cosmics residuals vs x-ray residuals in scatter plots by tracking combination. This is to be able to examine the correlation over all quadruplets of a certain group (e.g. geometry, which wheel / x-ray gun mount type). Each function styles teh plots in a different way, as described by teh comment above the function. The input is a text file containing a list of the names of the csv files of quadruplets you would like to include in the plots.
 import ROOT
 import numpy as np
 import atlasplots as aplt
@@ -28,7 +28,8 @@ class Combination:
         self.string = "layer" + str(self.layer) + "_fixedlayers" + str(self.la) + str(self.lb)
         self.prettyString = "Layer: " + str(self.layer) + ", fixed layers: " + str(self.la) + ", " + str(self.lb)
 
-# Defines all tracking combinations
+# Defines a list of tracking combinations
+# Useful for looping over all combinations
 def GetComboList():
     combos = []
     combos.append(Combination(3,1,2))
@@ -46,7 +47,8 @@ def GetComboList():
     return combos
 
 
-# Recreates the all-combination correlation plots but colours the x-ray residuals from gun position 8B
+# For each quadruplet's data input (in inFileNames, the list of csv files to analyze), create the all-combination correlation plots per quadruplet that are usually output from cosmics_xray_correlation, but those calculated at gun position 8B. 
+# Gun position 8B is of particular interest because it was found to often yield very large x-ray residuals in tracking combinations including layer 3.
 def colorGunPositions(inFileNames, tag, outDir):
     c = ROOT.TCanvas("c","c",800,600)
     outFileNameBase = outDir + "/" + tag + "_colour_by_gun_position"
@@ -118,7 +120,8 @@ def colorGunPositions(inFileNames, tag, outDir):
     c.Print(outFileNameBase + ".pdf]")
 
 # Make correlation plots by combination for data in all input csvs
-# allData is a pandas dataframe where the data from all input csvs have been concatenated
+# Outputs them to pdf.
+# allData is a pandas dataframe where the data from all input csvs have been concatenated in the global body of this script
 def correlationPlotsByCombination(allData, tag, outDir):
     outFileNameBase = outDir + "/" + tag + "_correlation_plots_by_combination"
     c = ROOT.TCanvas("c", "c", 800, 600)
@@ -285,7 +288,7 @@ if len(inFileList)==0:
     print("List of input files is empty.\n")
     exit(1)
 
-# colorGunPositions(inFileList, theTag, theOutDir)-
+# colorGunPositions(inFileList, theTag, theOutDir)
 
 # allTheData = pd.read_csv(inFileList[0], index_col=False)
 # For every input file, put all rows in csv in dataframe and add column listing input file name
