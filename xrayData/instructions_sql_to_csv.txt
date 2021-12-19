@@ -1,0 +1,14 @@
+To output sql data to a csv file.
+Requirements: sqlite3
+
+> sqlite3 xray_results_2021-11-26.db
+> .headers on
+> .mode csv
+> .output output_file_name.csv
+> select * from results;
+> .q
+
+The above "select" statement will print all entries in
+xray_results_2021-11-26.db to output_file_name.csv. To select a subset of the
+data, see sqlite3 documentation on the "select" command.
+
