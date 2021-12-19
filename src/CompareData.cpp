@@ -1,3 +1,7 @@
+// Fits that fail are not drawn nor included in the correlation plots and are only indiciated in stdout.
+// Fits that are bad may be included in the correlation plot because there is no minimum number of entries required to fit the cosmics residual distribution in a region of interest. 
+// The user may wish to implement such a limit in DoCosmicsResidualFit, I suggest a minium of 50.
+// Example quadruplet where this feature would be useful: QS3.P.13
 #define CompareData_cxx
 #include "CompareData.h"
 
@@ -56,8 +60,8 @@ void LocalData::GroupCosmicResiduals(const vector<Residual>& allCosmicResiduals)
 
 void LocalData::DoCosmicResidualsFit() {
     // Throw error if cosmicResidualsInROI is empty
-    if (cosmicResidualsInROI.size() == 0) 
-        throw logic_error("No cosmic residuals in ROI. Check that GroupCosmicResiduals was called in CompareData::DoComparison (LocalData::DoCosmicResidualsFit).\n\n");
+    //  if (cosmicResidualsInROI.size() == 0) 
+        // throw logic_error("No cosmic residuals in ROI. Check that GroupCosmicResiduals was called in CompareData::DoComparison (LocalData::DoCosmicResidualsFit).\n\n");
 
     // First, create histogram
     string name = "cosmic_residuals_around_xray_point_" + xRes.tag + "_" + xRes.GetCombo().String();
