@@ -139,7 +139,7 @@ def aggregateOverallResidualDistributionMeans(inFileNames, tag, outDir):
     resMeanDistsByCombo = {}
     for combo in combos:
         csvOutFile.write(combo.string + ',')
-        resMeanDistsByCombo[combo.string] = ROOT.TH1F(combo.string, "", 50, -5, 5)
+        resMeanDistsByCombo[combo.string] = ROOT.TH1F(combo.string, ";Mean of overall residual distribution [mm];No. instances""", 50, -5, 5)
     csvOutFile.write('\n')
 
     # Setup canvas
@@ -149,7 +149,7 @@ def aggregateOverallResidualDistributionMeans(inFileNames, tag, outDir):
     # For each input file,
     for fileName in inFileNames:
         # First column of row is filename
-        csvOutFile.write(fileName + ",\n")
+        csvOutFile.write(fileName + ",")
 
         inFile = ROOT.TFile(fileName)
         keyNames = [key.GetName() for key in inFile.GetListOfKeys()]
@@ -318,6 +318,6 @@ if len(inFileList)==0:
     print("List of input files is empty.\n")
     exit(1)
 
-aggregateCorrelationParameters(inFileList, theTag, theOutDir)
+# aggregateCorrelationParameters(inFileList, theTag, theOutDir)
 aggregateOverallResidualDistributionMeans(inFileList, theTag, theOutDir)
 # aggregateResidualMeansByQuadrant(inFileList, theTag, theOutDir)
